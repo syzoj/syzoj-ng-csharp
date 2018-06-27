@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Syzoj.Api.Data;
+using Syzoj.Api.Filters;
 
 namespace Syzoj.Api.Controllers
 {
@@ -36,6 +37,7 @@ namespace Syzoj.Api.Controllers
         }
 
         // POST /api/auth/register
+        [RecaptchaValidation]
         [HttpPost]
         public string Register()
         {

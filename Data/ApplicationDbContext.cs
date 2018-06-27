@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Syzoj.Api.Models;
 
 namespace Syzoj.Api.Data
 {
@@ -10,5 +11,7 @@ namespace Syzoj.Api.Data
             : base(dbOptions)
         {
         }
+
+        DbSet<User> Users { get; set; }
     }
 }
