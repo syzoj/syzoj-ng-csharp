@@ -27,6 +27,7 @@ namespace Syzoj.Api.Filters
             var paramaters = new Dictionary<string, string>();
             paramaters["secret"] = "SECRETKEY";
             paramaters["response"] = response;
+            // TODO: 怎样获取 remote IP ？
             // paramaters["remoteip"] = remoteIp;
             request.Content = new FormUrlEncodedContent(paramaters);
 
@@ -40,7 +41,8 @@ namespace Syzoj.Api.Filters
             if (!responseJson.Success)
             {
                 // TODO: 替换为真正的返回值
-                context.Result = new JsonResult("status: 1");
+                context.Result = new JsonResult(new { status = 1 });
+                return;
             }
 
             await next();
