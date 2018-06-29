@@ -1,16 +1,15 @@
 using System;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Syzoj.Api.Models
 {
     [Serializable]
-    public class User
+    public class RegisterApiModel
     {
         public string Name { get; set; }
 
-        [Key]
         public string Email { get; set; }
 
-        public string HashedPassword { get; set; }
+        public string Password { get; set; }
     }
 }

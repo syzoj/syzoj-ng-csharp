@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Syzoj.Api.Data;
 using Syzoj.Api.Filters;
+using Syzoj.Api.Models;
 
 namespace Syzoj.Api.Controllers
 {
@@ -39,9 +40,21 @@ namespace Syzoj.Api.Controllers
         // POST /api/auth/register
         [RecaptchaValidation]
         [HttpPost]
-        public string Register()
+        public JsonResult Register([FromForm]RegisterApiModel addUser)
         {
-            return "Register!";
+            User user = new User
+            {
+                Name = addUser.Name,
+                Email = addUser.Email,
+                // TODO: 添加 Hash
+                HashedPassword = addUser.Password,
+            };
+            dbContext.Users.Add(user);
+            dbContext.SaveChanges();
+            return new JsonResult(new {
+                status = 0,
+                user = new { name = user.Name, email = user.Email },
+            });
         }
 
     }
