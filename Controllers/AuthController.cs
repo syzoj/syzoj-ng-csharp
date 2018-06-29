@@ -26,7 +26,7 @@ namespace Syzoj.Api.Controllers
         [HttpPost]
         public string Login(string userName, string password)
         {
-            return $"$(userName) Login!";
+            return $"{userName} Login!";
         }
 
         // POST /api/auth/logout

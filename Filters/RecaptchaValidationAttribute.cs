@@ -21,7 +21,7 @@ namespace Syzoj.Api.Filters
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            const string recapchaValidationEndpoint = "";
+            const string recapchaValidationEndpoint = "https://www.google.com/recaptcha/api/siteverify";
             var response = context.HttpContext.Request.Form["g-recaptcha-response"];
             var request = new HttpRequestMessage(HttpMethod.Post, recapchaValidationEndpoint);
             var paramaters = new Dictionary<string, string>();
@@ -42,6 +42,8 @@ namespace Syzoj.Api.Filters
                 // TODO: 替换为真正的返回值
                 context.Result = new JsonResult("status: 1");
             }
+
+            await next();
         }
     }
 
