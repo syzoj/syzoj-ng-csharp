@@ -40,7 +40,7 @@ namespace Syzoj.Api.Controllers
         // POST /api/auth/register
         [RecaptchaValidation]
         [HttpPost]
-        public JsonResult Register([FromForm]RegisterApiModel addUser)
+        public async Task<JsonResult> Register([FromForm]RegisterApiModel addUser)
         {
             var (salt, hash) = Utils.HashUtils.GenerateHashedPassword(addUser.Password);
             User user = new User
@@ -51,7 +51,7 @@ namespace Syzoj.Api.Controllers
                 PasswordSalt = Convert.ToBase64String(salt)
             };
             dbContext.Users.Add(user);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
             return new JsonResult(new {
                 status = 0,
                 user = new { name = user.Name, email = user.Email },
