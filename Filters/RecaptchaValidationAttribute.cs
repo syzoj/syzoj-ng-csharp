@@ -4,8 +4,10 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Syzoj.Api.Filters
 {
@@ -21,6 +23,13 @@ namespace Syzoj.Api.Filters
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
+            // 如果在调试，就直接通过
+            if (context.HttpContext.RequestServices.GetService<IHostingEnvironment>().IsDevelopment())
+            {
+                await next();
+                return;
+            }
+
             const string recapchaValidationEndpoint = "https://www.google.com/recaptcha/api/siteverify";
             var response = context.HttpContext.Request.Form["g-recaptcha-response"];
             var request = new HttpRequestMessage(HttpMethod.Post, recapchaValidationEndpoint);
