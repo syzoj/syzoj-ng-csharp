@@ -42,12 +42,13 @@ namespace Syzoj.Api.Controllers
         [HttpPost]
         public JsonResult Register([FromForm]RegisterApiModel addUser)
         {
+            var (salt, hash) = Utils.HashUtils.GenerateHashedPassword(addUser.Password);
             User user = new User
             {
                 Name = addUser.Name,
                 Email = addUser.Email,
-                // TODO: 添加 Hash
-                HashedPassword = addUser.Password,
+                HashedPassword = Convert.ToBase64String(hash),
+                PasswordSalt = Convert.ToBase64String(salt)
             };
             dbContext.Users.Add(user);
             dbContext.SaveChanges();
