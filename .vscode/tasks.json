@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Syzoj.Api.csproj"
+                "${workspaceFolder}/Syzoj.Api/Syzoj.Api.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
