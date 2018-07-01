@@ -50,6 +50,13 @@ namespace Syzoj.Api.Utils
             return result == 0;
         }
 
+        /// <summary>
+        /// Check if a password matches the specified hash.
+        /// </summary>
+        /// <param name="salt">The salt to be used when hashing.</param>
+        /// <param name="hash">The hash to be checked against.</param>
+        /// <param name="password">The password to be checked.</param>
+        /// <returns>True if the password and the hash match.</returns>
         public static bool VerifyHash(byte[] salt, byte[] hash, string password)
         {
             byte[] newHash = GetHash(salt, password);
