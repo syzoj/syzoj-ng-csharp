@@ -15,15 +15,8 @@ namespace Syzoj.Api.Utils
         {
             // Code from https://docs.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/password-hashing?view=aspnetcore-2.1
 
-            // generate a 128-bit salt using a secure PRNG
-            byte[] salt = new byte[128 / 8];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(salt);
-            }
-
+            byte[] salt = MiscUtils.GetRandomBytes(128 / 8);
             byte[] hashed = GetHash(salt, password);
-
             return (salt, hashed);
         }
 
