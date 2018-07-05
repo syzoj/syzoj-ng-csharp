@@ -30,14 +30,8 @@ namespace Syzoj.Api
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
-            // 使用 Redis
-            services.AddDistributedRedisCache(options =>
-            {
-                // TODO: 究竟应该用什么配置？
-                options.Configuration = "localhost";
-                options.InstanceName = "Syzoj";
-            });
-
+            services.AddRedisClient(options => options.ConfigurationString = Configuration.GetSection("RedisConfig").Get<string>());
+            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
