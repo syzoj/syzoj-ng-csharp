@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
 using Syzoj.Api.Data;
 using Syzoj.Api.Filters;
 using Syzoj.Api.Models;
@@ -15,12 +14,10 @@ namespace Syzoj.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        private readonly IDistributedCache cache;
 
-        public AuthController(ApplicationDbContext dbContext, IDistributedCache cache)
+        public AuthController(ApplicationDbContext dbContext)
         {
             this.dbContext = dbContext;
-            this.cache = cache;
         }
 
         // POST /api/auth/login
