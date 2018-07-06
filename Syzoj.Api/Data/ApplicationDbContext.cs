@@ -13,5 +13,7 @@ namespace Syzoj.Api.Data
         }
 
         public DbSet<User> Users { get; set; }
+        
+        public DbSet<DiscussionEntry> Discussions { get; set; }
     }
 }
