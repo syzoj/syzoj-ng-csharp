@@ -15,5 +15,13 @@ namespace Syzoj.Api.Data
         public DbSet<User> Users { get; set; }
         
         public DbSet<DiscussionEntry> Discussions { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<DiscussionEntry>()
+                .Property(b => b.ShowInBoard)
+                .HasDefaultValue(false);
+        }
     }
 }

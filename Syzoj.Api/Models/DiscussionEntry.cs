@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Syzoj.Api.Models
@@ -12,7 +13,9 @@ namespace Syzoj.Api.Models
 
         public string Content { get; set; }
         
-        public ReplyEntry[] Reply { get; set; }
+        public ICollection<ReplyEntry> Reply { get; set; }
+        
+        public bool ShowInBoard { get; set; }
     }
 
     public class ReplyEntry
