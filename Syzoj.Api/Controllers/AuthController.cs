@@ -37,7 +37,7 @@ namespace Syzoj.Api.Controllers
         // POST /api/auth/register
         [RecaptchaValidation]
         [HttpPost]
-        public async Task<JsonResult> Register([FromForm]RegisterApiModel addUser)
+        public async Task<JsonResult> Register(RegisterApiModel addUser)
         {
             var (salt, hash) = Utils.HashUtils.GenerateHashedPassword(addUser.Password);
             User user = new User
