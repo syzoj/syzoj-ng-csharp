@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Models;
 
 namespace Syzoj.Api.Data
 {
-    public class ApplicationDbContext: DbContext
+    public class ApplicationDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbOptions)
@@ -12,9 +13,9 @@ namespace Syzoj.Api.Data
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        
         public DbSet<DiscussionEntry> Discussions { get; set; }
+        
+        public DbSet<LoginSession> LoginSessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,6 +23,12 @@ namespace Syzoj.Api.Data
             modelBuilder.Entity<DiscussionEntry>()
                 .Property(b => b.ShowInBoard)
                 .HasDefaultValue(false);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(u => u.Sessions)
+                .WithOne(s => s.User)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
