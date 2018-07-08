@@ -28,7 +28,7 @@ namespace Syzoj.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options => 
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddRedisClient(options => options.ConfigurationString = Configuration.GetSection("RedisConfig").Get<string>());
             

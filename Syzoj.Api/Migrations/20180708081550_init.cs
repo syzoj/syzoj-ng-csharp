@@ -1,17 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Syzoj.Api.Migrations
 {
-    public partial class Discussions : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Name = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: false),
+                    HashedPassword = table.Column<string>(nullable: true),
+                    PasswordSalt = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Email);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Discussions",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     AuthorEmail = table.Column<string>(nullable: true),
                     Content = table.Column<string>(nullable: true),
                     ShowInBoard = table.Column<bool>(nullable: false, defaultValue: false)
@@ -76,6 +91,9 @@ namespace Syzoj.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Discussions");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }
