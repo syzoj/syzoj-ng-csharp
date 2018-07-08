@@ -50,8 +50,9 @@ namespace Syzoj.Api.Controllers
         [HttpPut]
         public async Task<JsonResult> PutDiscussion(DiscussionEntry entry)
         {
-            var authorEmail = entry.Author.Email;
-            entry.Author = await dbContext.Users.FindAsync(authorEmail);
+            // var authorEmail = entry.Author;
+            // entry.Author = await dbContext.Users.FindAsync(authorEmail);
+            // TODO: Read author from authentication.
             await dbContext.Discussions.AddAsync(entry);
             await dbContext.SaveChangesAsync();
             
