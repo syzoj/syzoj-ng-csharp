@@ -30,8 +30,6 @@ namespace Syzoj.Api
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddRedisClient(options => options.ConfigurationString = Configuration.GetSection("RedisConfig").Get<string>());
-            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
