@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Data;
+using Syzoj.Api.Models;
+using Syzoj.Api.Utils;
 
 namespace Syzoj.Api
 {
@@ -30,6 +32,9 @@ namespace Syzoj.Api
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddIdentityWithoutCookie<ApplicationUser, ApplicationRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 

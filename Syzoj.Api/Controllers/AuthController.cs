@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Syzoj.Api.Data;
 using Syzoj.Api.Filters;
@@ -14,6 +15,7 @@ namespace Syzoj.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AuthController(ApplicationDbContext dbContext)
         {
@@ -39,21 +41,19 @@ namespace Syzoj.Api.Controllers
         [HttpPost]
         public async Task<JsonResult> Register(RegisterApiModel addUser)
         {
-            var (salt, hash) = Utils.HashUtils.GenerateHashedPassword(addUser.Password);
-            User user = new User
+            var user = new ApplicationUser()
             {
-                Name = addUser.Name,
-                Email = addUser.Email,
-                HashedPassword = Convert.ToBase64String(hash),
-                PasswordSalt = Convert.ToBase64String(salt)
+                RegisteredOn = DateTime.Now,
+                UserName = addUser.Name,
+                Email = addUser.Email
             };
-            dbContext.Users.Add(user);
-            await dbContext.SaveChangesAsync();
-            return new JsonResult(new {
+
+            await _userManager.CreateAsync(user);
+            return new JsonResult(new
+            {
                 status = 0,
-                user = new { name = user.Name, email = user.Email },
+                user = new {id = user.Id},
             });
         }
-
     }
 }
