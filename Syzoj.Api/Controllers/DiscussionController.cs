@@ -48,11 +48,16 @@ namespace Syzoj.Api.Controllers
         /// Create a new discussion
         /// </summary>
         [HttpPut]
-        public async Task<JsonResult> PutDiscussion(DiscussionEntry entry)
+        public async Task<JsonResult> PutDiscussion(DiscussionApiModel entryModel)
         {
-            // var authorEmail = entry.Author;
-            // entry.Author = await dbContext.Users.FindAsync(authorEmail);
+            var entry = new DiscussionEntry();
+
             // TODO: Read author from authentication.
+            // entry.Author = await dbContext.Users.FindAsync(...);
+            entry.Content = entryModel.Content;
+            if (entryModel.ShowInBoard is bool showInBoard)
+                entry.ShowInBoard = showInBoard;
+            
             await dbContext.Discussions.AddAsync(entry);
             await dbContext.SaveChangesAsync();
             
