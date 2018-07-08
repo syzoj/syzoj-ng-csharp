@@ -32,7 +32,7 @@ namespace Syzoj.Api.Controllers
         {
             var discussions = dbContext.Discussions
                 .Include(d => d.Author)
-                .Include(d => d.Reply);
+                .Include(d => d.Replies);
             var discussionEntry = await discussions.FirstOrDefaultAsync(d => d.Id == id);
             
             return new JsonResult(new
@@ -48,7 +48,7 @@ namespace Syzoj.Api.Controllers
         /// Create a new discussion
         /// </summary>
         [HttpPut]
-        public async Task<JsonResult> PutDiscussion(DiscussionApiModel entryModel)
+        public async Task<JsonResult> PutDiscussion(DiscussionCreateApiModel entryModel)
         {
             var entry = new DiscussionEntry();
 

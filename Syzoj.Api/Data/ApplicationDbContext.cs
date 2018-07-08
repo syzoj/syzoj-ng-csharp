@@ -15,6 +15,8 @@ namespace Syzoj.Api.Data
 
         public DbSet<DiscussionEntry> Discussions { get; set; }
         
+        public DbSet<ReplyEntry> Replies { get; set; }
+        
         public DbSet<LoginSession> LoginSessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

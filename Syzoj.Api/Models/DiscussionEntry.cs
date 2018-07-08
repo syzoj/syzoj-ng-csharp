@@ -9,11 +9,11 @@ namespace Syzoj.Api.Models
         [Key]
         public int Id { get; set; }
 
-        public virtual ICollection<ApplicationUser> Author { get; set; }
+        public virtual ApplicationUser Author { get; set; }
 
         public string Content { get; set; }
         
-        public virtual ICollection<ReplyEntry> Reply { get; set; }
+        public virtual ICollection<ReplyEntry> Replies { get; set; }
         
         public bool ShowInBoard { get; set; }
     }
@@ -21,10 +21,12 @@ namespace Syzoj.Api.Models
     public class ReplyEntry
     {
         [Key]
-        public string Id { get; set; }
+        public int Id { get; set; }
         
         public string Content { get; set; }
         
-        public virtual ICollection<ApplicationUser> Author { get; set; }
+        public virtual ApplicationUser Author { get; set; }
+        
+        public virtual ICollection<ReplyEntry> Replies { get; set; }
     }
 }

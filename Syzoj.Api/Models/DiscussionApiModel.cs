@@ -8,4 +8,11 @@
         
         public bool? ShowInBoard { get; set; }
     }
+
+    public class DiscussionCreateApiModel
+    {
+        public string Content { get; set; }
+        
+        public bool? ShowInBoard { get; set; }
+    }
 }
