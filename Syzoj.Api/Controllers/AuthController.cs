@@ -43,6 +43,7 @@ namespace Syzoj.Api.Controllers
         {
             var user = new ApplicationUser()
             {
+                Id = Guid.NewGuid().ToString(),
                 RegisteredOn = DateTime.Now,
                 UserName = addUser.Name,
                 Email = addUser.Email
