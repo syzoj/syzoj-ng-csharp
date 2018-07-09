@@ -30,6 +30,7 @@ namespace Syzoj.Api.Controllers
         [HttpGet("{id}")]
         public async Task<JsonResult> GetDiscussionReply(int id)
         {
+            // TODO: EF Core does not support recursive include. We should implement it ourselves.
             var reply = await dbContext.Replies.FindAsync(id);
             
             return new JsonResult(new
