@@ -47,7 +47,8 @@ namespace Syzoj.Api
             }
             else
             {
-                app.UseHsts();
+                // Application should not use HSTS
+                // app.UseHsts();
             }
 
             // 应用不应该使用 HTTPS
