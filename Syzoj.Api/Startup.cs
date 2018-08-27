@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,6 +36,13 @@ namespace Syzoj.Api
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddSingleton<IConnection>(s => {
+                var factory = new ConnectionFactory();
+                Configuration.GetSection("RabbitMQ").Bind(factory);
+                return factory.CreateConnection();
+            });
+
+            services.AddSingleton<ILegacyRunnerManager, LegacyRunnerManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
