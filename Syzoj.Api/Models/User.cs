@@ -6,11 +6,11 @@ namespace Syzoj.Api.Models
     public class User
     {
         [Key]
-        public int Id;
+        public int Id { get; set; }
         [EmailAddress]
-        public string Email;
-        public UserPasswordType PasswordType;
-        public string Password;
+        public string Email { get; set; }
+        public UserPasswordType PasswordType { get; set; }
+        public string Password { get; set; }
     }
 
     public enum UserPasswordType
