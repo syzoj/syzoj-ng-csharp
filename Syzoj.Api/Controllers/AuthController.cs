@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Syzoj.Api.Data;
 using Syzoj.Api.Filters;
 using Syzoj.Api.Models;
+using Syzoj.Api.Models.Requests;
 
 namespace Syzoj.Api.Controllers
 {
@@ -23,7 +24,7 @@ namespace Syzoj.Api.Controllers
 
         // POST /api/auth/login
         [HttpPost]
-        public string Login(string userName, string password)
+        public string Login([FromBody] LoginRequest req)
         {
             return $"{userName} Login!";
         }
@@ -36,7 +37,6 @@ namespace Syzoj.Api.Controllers
         }
 
         // POST /api/auth/register
-        [RecaptchaValidation]
         [HttpPost]
         public string Register(RegisterApiModel addUser)
         {

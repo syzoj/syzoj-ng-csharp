@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography;
+using System.Linq;
 
 namespace Syzoj.Api.Utils
 {
@@ -12,6 +13,11 @@ namespace Syzoj.Api.Utils
             var bytes = new byte[len];
             _rng.GetBytes(bytes);
             return bytes;
+        }
+
+        public static bool CheckUserName(string UserName)
+        {
+            return UserName.ToCharArray().All(c => char.IsLetterOrDigit(c));
         }
     }
 }

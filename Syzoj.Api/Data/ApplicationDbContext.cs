@@ -25,6 +25,12 @@ namespace Syzoj.Api.Data
             modelBuilder.Entity<DiscussionEntry>()
                 .Property(b => b.ShowInBoard)
                 .HasDefaultValue(false);
+            modelBuilder.Entity<User>()
+                .HasIndex(b => b.UserName)
+                .IsUnique();
+            modelBuilder.Entity<User>()
+                .HasIndex(b => b.Email)
+                .IsUnique();
         }
     }
 }
