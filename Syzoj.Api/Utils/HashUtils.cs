@@ -30,7 +30,7 @@ namespace Syzoj.Api.Utils
                 numBytesRequested: 256 / 8);
         }
 
-        private static bool ConstantTimeCompare(byte[] a, byte[] b)
+        public static bool ConstantTimeCompare(byte[] a, byte[] b)
         {
             // Code from https://codahale.com/a-lesson-in-timing-attacks/
             if (a.Length != b.Length)

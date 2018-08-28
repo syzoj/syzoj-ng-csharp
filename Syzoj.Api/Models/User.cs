@@ -1,4 +1,7 @@
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Models.Attributes;
 using Syzoj.Api.Utils;
@@ -27,14 +30,33 @@ namespace Syzoj.Api.Models
 
         public bool CheckPassword(string password)
         {
-            return HashUtils.VerifyHash(PasswordSalt, PasswordHash, password);
+            switch(PasswordType)
+            {
+                case UserPasswordType.Plain:
+                    return HashUtils.ConstantTimeCompare(System.Text.Encoding.ASCII.GetBytes(password), PasswordHash);
+                case UserPasswordType.OldSyzojStyle:
+                    using (var md5 = MD5.Create())
+                    {
+                        byte[] hashBytes = md5.ComputeHash(System.Text.Encoding.ASCII.GetBytes(password + "syzoj2_xxx"));
+                        StringBuilder s = new StringBuilder();
+                        for(int i = 0; i < hashBytes.Length; ++i)
+                        {
+                            s.Append(hashBytes[i].ToString("x2"));
+                        }
+                        return HashUtils.ConstantTimeCompare(System.Text.Encoding.ASCII.GetBytes(s.ToString()), PasswordHash);
+                    };
+                case UserPasswordType.SaltHashed:
+                    return HashUtils.VerifyHash(PasswordSalt, PasswordHash, password);
+                default:
+                    return false;
+            }
         }
     }
 
     public enum UserPasswordType
     {
         Plain = 0,
-        SaltHashed = 1,
-        OldSyzojStyle = 2,
+        OldSyzojStyle = 1,
+        SaltHashed = 100,
     }
 }

@@ -50,18 +50,41 @@ namespace Syzoj.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterRequest addUser)
         {
-            var (salt, pass) = HashUtils.GenerateHashedPassword(addUser.Password);
+            try {
+                var (salt, pass) = HashUtils.GenerateHashedPassword(addUser.Password);
 
-            var user = new User() {
-                UserName = addUser.UserName,
-                Email = addUser.Email,
-            };
-            user.SetPassword(addUser.Password);
-            dbContext.Users.Add(user);
-            await dbContext.SaveChangesAsync();
-            return Ok(new {
-                status = "success",
-            });
+                var user = new User() {
+                    UserName = addUser.UserName,
+                    Email = addUser.Email,
+                };
+                user.SetPassword(addUser.Password);
+                dbContext.Users.Add(user);
+                await dbContext.SaveChangesAsync();
+                return Ok(new {
+                    status = "success",
+                });
+            }
+            catch (DbUpdateException e)
+            {
+                if(e.InnerException is Npgsql.PostgresException ne)
+                {
+                    if(ne.SqlState.Equals("23505"))
+                    {
+                        switch(ne.ConstraintName)
+                        {
+                            case "IX_Users_UserName":
+                                return Ok(new {
+                                    status = "UserNameConflict"
+                                });
+                            case "IX_Users_Email":
+                                return Ok(new {
+                                    status = "EmailConflict"
+                                });
+                        }
+                    }
+                }
+                throw e;
+            }
         }
     }
 }
