@@ -48,6 +48,8 @@ namespace Syzoj.Api
             services.AddSingleton<IConnectionMultiplexer>(s => {
                 return ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Redis"));;
             });
+
+            services.AddSingleton<ISessionManager, SessionManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

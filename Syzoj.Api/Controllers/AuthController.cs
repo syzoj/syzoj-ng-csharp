@@ -10,6 +10,9 @@ using Syzoj.Api.Models;
 using Syzoj.Api.Models.Requests;
 using Syzoj.Api.Utils;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
+using MessagePack;
+using Syzoj.Api.Services;
 
 namespace Syzoj.Api.Controllers
 {
@@ -18,10 +21,13 @@ namespace Syzoj.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
+        private readonly ISessionManager sessionManager;
 
-        public AuthController(ApplicationDbContext dbContext)
+        public AuthController(ApplicationDbContext dbContext, ISessionManager sessionManager
+        )
         {
             this.dbContext = dbContext;
+            this.sessionManager = sessionManager;
         }
 
         // POST /api/auth/login
@@ -29,13 +35,29 @@ namespace Syzoj.Api.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
             var user = await dbContext.Users.FirstOrDefaultAsync((u) => u.UserName == req.UserName);
+            if(user == null) {
+                return Ok(new {
+                    Status = "Fail",
+                    Message = "User with specified UserName does not exist"
+                });
+            }
             if(user.CheckPassword(req.Password))
             {
-                return Ok("pass");
+                var sess = new Session() {
+                    UserId = user.Id,
+                };
+                string sessionId = await sessionManager.CreateSession(sess);
+                return Ok(new {
+                    Status = "Success",
+                    SessionID = sessionId,
+                });
             }
             else
             {
-                return Unauthorized();
+                return Ok(new {
+                    Status = "Fail",
+                    Message = "Password incorrect",
+                });
             }
         }
 

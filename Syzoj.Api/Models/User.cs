@@ -38,12 +38,7 @@ namespace Syzoj.Api.Models
                     using (var md5 = MD5.Create())
                     {
                         byte[] hashBytes = md5.ComputeHash(System.Text.Encoding.ASCII.GetBytes(password + "syzoj2_xxx"));
-                        StringBuilder s = new StringBuilder();
-                        for(int i = 0; i < hashBytes.Length; ++i)
-                        {
-                            s.Append(hashBytes[i].ToString("x2"));
-                        }
-                        return HashUtils.ConstantTimeCompare(System.Text.Encoding.ASCII.GetBytes(s.ToString()), PasswordHash);
+                        return HashUtils.ConstantTimeCompare(System.Text.Encoding.ASCII.GetBytes(MiscUtils.ConvertToHex(hashBytes)), PasswordHash);
                     };
                 case UserPasswordType.SaltHashed:
                     return HashUtils.VerifyHash(PasswordSalt, PasswordHash, password);
