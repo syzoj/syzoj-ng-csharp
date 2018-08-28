@@ -5,7 +5,7 @@ using Syzoj.Api.Models;
 
 namespace Syzoj.Api.Data
 {
-    public class ApplicationDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, string>
+    public class ApplicationDbContext: DbContext
     {
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbOptions)
@@ -16,8 +16,8 @@ namespace Syzoj.Api.Data
         public DbSet<DiscussionEntry> Discussions { get; set; }
         
         public DbSet<ReplyEntry> Replies { get; set; }
-        
-        public DbSet<LoginSession> LoginSessions { get; set; }
+
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,12 +25,6 @@ namespace Syzoj.Api.Data
             modelBuilder.Entity<DiscussionEntry>()
                 .Property(b => b.ShowInBoard)
                 .HasDefaultValue(false);
-
-            modelBuilder.Entity<ApplicationUser>()
-                .HasMany(u => u.Sessions)
-                .WithOne(s => s.User)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

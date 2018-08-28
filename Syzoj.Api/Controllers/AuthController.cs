@@ -15,7 +15,6 @@ namespace Syzoj.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        private readonly UserManager<ApplicationUser> _userManager;
 
         public AuthController(ApplicationDbContext dbContext)
         {
@@ -39,22 +38,9 @@ namespace Syzoj.Api.Controllers
         // POST /api/auth/register
         [RecaptchaValidation]
         [HttpPost]
-        public async Task<JsonResult> Register(RegisterApiModel addUser)
+        public string Register(RegisterApiModel addUser)
         {
-            var user = new ApplicationUser()
-            {
-                Id = Guid.NewGuid().ToString(),
-                RegisteredOn = DateTime.Now,
-                UserName = addUser.Name,
-                Email = addUser.Email
-            };
-
-            await _userManager.CreateAsync(user);
-            return new JsonResult(new
-            {
-                status = 0,
-                user = new {id = user.Id},
-            });
+            return "Register";
         }
     }
 }
