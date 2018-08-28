@@ -7,7 +7,7 @@ namespace Syzoj.Api.Models.Attributes
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            string UserName = (string) validationContext.ObjectInstance;
+            string UserName = (string) value;
             if (!MiscUtils.CheckUserName(UserName))
             {
                 return new ValidationResult("Invalid username.");

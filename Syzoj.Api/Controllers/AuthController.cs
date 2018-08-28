@@ -8,6 +8,8 @@ using Syzoj.Api.Data;
 using Syzoj.Api.Filters;
 using Syzoj.Api.Models;
 using Syzoj.Api.Models.Requests;
+using Syzoj.Api.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace Syzoj.Api.Controllers
 {
@@ -24,9 +26,17 @@ namespace Syzoj.Api.Controllers
 
         // POST /api/auth/login
         [HttpPost]
-        public string Login([FromBody] LoginRequest req)
+        public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
-            return $"{userName} Login!";
+            var user = await dbContext.Users.FirstOrDefaultAsync((u) => u.UserName == req.UserName);
+            if(user.CheckPassword(req.Password))
+            {
+                return Ok("pass");
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         // POST /api/auth/logout
@@ -38,9 +48,20 @@ namespace Syzoj.Api.Controllers
 
         // POST /api/auth/register
         [HttpPost]
-        public string Register(RegisterApiModel addUser)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest addUser)
         {
-            return "Register";
+            var (salt, pass) = HashUtils.GenerateHashedPassword(addUser.Password);
+
+            var user = new User() {
+                UserName = addUser.UserName,
+                Email = addUser.Email,
+            };
+            user.SetPassword(addUser.Password);
+            dbContext.Users.Add(user);
+            await dbContext.SaveChangesAsync();
+            return Ok(new {
+                status = "success",
+            });
         }
     }
 }

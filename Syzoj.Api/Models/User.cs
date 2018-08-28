@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Models.Attributes;
+using Syzoj.Api.Utils;
 
 namespace Syzoj.Api.Models
 {
@@ -13,13 +14,27 @@ namespace Syzoj.Api.Models
         [EmailAddress]
         public string Email { get; set; }
         public UserPasswordType PasswordType { get; set; }
-        public byte[] Password { get; set; }
+        public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
+
+        public void SetPassword(string password)
+        {
+            var (salt, hash) = HashUtils.GenerateHashedPassword(password);
+            this.PasswordHash = hash;
+            this.PasswordSalt = salt;
+            this.PasswordType = UserPasswordType.SaltHashed;
+        }
+
+        public bool CheckPassword(string password)
+        {
+            return HashUtils.VerifyHash(PasswordSalt, PasswordHash, password);
+        }
     }
 
     public enum UserPasswordType
     {
         Plain = 0,
-        OldSyzoj = 1,
+        SaltHashed = 1,
+        OldSyzojStyle = 2,
     }
 }
