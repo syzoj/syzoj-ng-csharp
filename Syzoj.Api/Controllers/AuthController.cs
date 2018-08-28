@@ -6,13 +6,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Syzoj.Api.Data;
 using Syzoj.Api.Filters;
-using Syzoj.Api.Models;
+using Syzoj.Api.Models.Data;
 using Syzoj.Api.Models.Requests;
 using Syzoj.Api.Utils;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using MessagePack;
 using Syzoj.Api.Services;
+using Syzoj.Api.Models;
 
 namespace Syzoj.Api.Controllers
 {
@@ -43,13 +44,12 @@ namespace Syzoj.Api.Controllers
             }
             if(user.CheckPassword(req.Password))
             {
-                var sess = new Session() {
-                    UserId = user.Id,
-                };
-                string sessionId = await sessionManager.CreateSession(sess);
+                var sess = new Session();
+                sess.SetUser(user);
+                await sessionManager.UpdateSession(sess);
                 return Ok(new {
                     Status = "Success",
-                    SessionID = sessionId,
+                    SessionID = sess.SessionID,
                 });
             }
             else

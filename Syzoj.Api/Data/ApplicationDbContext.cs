@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Syzoj.Api.Models;
+using Syzoj.Api.Models.Data;
 
 namespace Syzoj.Api.Data
 {
@@ -13,18 +13,14 @@ namespace Syzoj.Api.Data
         {
         }
 
-        public DbSet<DiscussionEntry> Discussions { get; set; }
-        
-        public DbSet<ReplyEntry> Replies { get; set; }
-
         public DbSet<User> Users { get; set; }
+        public DbSet<Forum> Forums { get; set; }
+        public DbSet<DiscussionEntry> Discussions { get; set; }
+        public DbSet<DiscussionReplyEntry> DiscussionReplies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<DiscussionEntry>()
-                .Property(b => b.ShowInBoard)
-                .HasDefaultValue(false);
             modelBuilder.Entity<User>()
                 .HasIndex(b => b.UserName)
                 .IsUnique();

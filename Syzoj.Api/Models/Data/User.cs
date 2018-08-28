@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Models.Attributes;
 using Syzoj.Api.Utils;
 
-namespace Syzoj.Api.Models
+namespace Syzoj.Api.Models.Data
 {
     public class User
     {

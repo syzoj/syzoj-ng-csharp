@@ -15,13 +15,14 @@ namespace Syzoj.Api.Services
             this.redisConnection = redisConnection;
         }
 
-        public Task<string> CreateSession(Session sess)
+        // Inserts/updates a new session into backend and populates SessionID attribute
+        public Task UpdateSession(Session sess)
         {
-            string sessionId = MiscUtils.ConvertToHex(MiscUtils.GetRandomBytes(16));
-            string keyName = String.Format("syzoj:session:{0}", sessionId);
+            if(sess.SessionID == null)
+                sess.SessionID = MiscUtils.ConvertToHex(MiscUtils.GetRandomBytes(16));
+            string keyName = String.Format("syzoj:session:{0}", sess.SessionID);
             IDatabase db = redisConnection.GetDatabase();
-            db.StringSet(keyName, MessagePackSerializer.Serialize(sess), TimeSpan.FromDays(30), flags: CommandFlags.FireAndForget);
-            return Task.FromResult(sessionId);
+            return db.StringSetAsync(keyName, MessagePackSerializer.Serialize(sess), TimeSpan.FromDays(30));
         }
 
         public async Task<Session> GetSession(string sessionID)
@@ -31,7 +32,9 @@ namespace Syzoj.Api.Services
             byte[] data = await db.StringGetAsync(keyName);
             if(data == null)
                 return null;
-            return MessagePackSerializer.Deserialize<Session>(data);
+            Session sess = MessagePackSerializer.Deserialize<Session>(data);
+            sess.SessionID = sessionID;
+            return sess;
         }
     }
 }

@@ -1,89 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Data;
-using Syzoj.Api.Filters;
 using Syzoj.Api.Models;
-using Syzoj.Api.Utils;
+using Syzoj.Api.Models.Data;
+using Syzoj.Api.Models.Requests;
+using Syzoj.Api.Services;
 
 namespace Syzoj.Api.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    [Route("api/discuss")]
     public class DiscussionController : ControllerBase
     {
+        private readonly ISessionManager sessionManager;
         private readonly ApplicationDbContext dbContext;
-
-        public DiscussionController(ApplicationDbContext dbContext)
+        public DiscussionController(ISessionManager sessionManager, ApplicationDbContext dbContext)
         {
+            this.sessionManager = sessionManager;
             this.dbContext = dbContext;
         }
 
-        // GET /api/discussion/5
-        
-        /// <summary>
-        /// Get discussion by id
-        /// </summary>
-        [HttpGet("{id}")]
-        public async Task<JsonResult> GetDiscussion(int id)
+        [HttpPost("forum")]
+        public async Task<IActionResult> CreateForum()
         {
-            // TODO: EF Core does not support recursive include. We should implement it ourselves.
-            var discussions = dbContext.Discussions
-                .Include(d => d.Author)
-                .Include(d => d.Replies);
-            var discussionEntry = await discussions.FirstOrDefaultAsync(d => d.Id == id);
-            
-            return new JsonResult(new
-            {
-                status = JsonStatusCode.Success,
-                result = discussionEntry,
+            Forum f = new Forum();
+            dbContext.Forums.Add(f);
+            await dbContext.SaveChangesAsync();
+            return Ok(new {
+                Status = "Success",
+                Id = f.Id,
             });
         }
-
-        // PUT /api/discussion
-        
-        /// <summary>
-        /// Create a new discussion
-        /// </summary>
-        [HttpPut]
-        public async Task<JsonResult> PutDiscussion(DiscussionCreateApiModel entryModel)
+        // TODO: Check for permission to post in forum
+        [HttpPost("discussion")]
+        public async Task<IActionResult> CreateDiscuss([FromBody]CreateDiscussionRequest req)
         {
-            var entry = new DiscussionEntry();
-
-            // TODO: Read author from authentication.
-            // entry.Author = await dbContext.Users.FindAsync(...);
-            entry.Content = entryModel.Content;
-            if (entryModel.ShowInBoard is bool showInBoard)
-                entry.ShowInBoard = showInBoard;
-            
-            await dbContext.Discussions.AddAsync(entry);
-            await dbContext.SaveChangesAsync();
-            
-            return new JsonResult(new { status = JsonStatusCode.Success });
+            Session sess = await sessionManager.GetSession(req.SessionID);
+            if(sess == null || sess.UserId == null)
+            {
+                return Unauthorized();
+            }
+            var entry = new DiscussionEntry() {
+                Title = req.Title,
+                Content = req.Content,
+                AuthorId = (int) sess.UserId,
+                ForumId = req.ForumId,
+                TimeCreated = DateTime.Now,
+                TimeModified = DateTime.Now,
+                TimeLastReply = DateTime.Now,
+            };
+            dbContext.Discussions.Add(entry);
+            await Task.WhenAll(new[] {
+                sessionManager.UpdateSession(sess),
+                dbContext.SaveChangesAsync(),
+            });
+            return Ok(new {
+                Status = "Success",
+                DiscussionEntryId = entry.Id,
+            });
         }
-
-        // PATCH /api/discussion
-        
-        /// <summary>
-        /// Change a discussion
-        /// </summary>
-        [HttpPatch]
-        public async Task<JsonResult> PatchContent(DiscussionApiModel changes)
+        [HttpPost("reply")]
+        public async Task<IActionResult> CreateReply([FromBody]CreateReplyRequest req)
         {
-            var original = await dbContext.Discussions.FindAsync(changes.Id);
-            
-            if (changes.Content != null)
-                original.Content = changes.Content;
-            
-            if (changes.ShowInBoard is bool nonNullOption)
-                original.ShowInBoard = nonNullOption;
-            
-            await dbContext.SaveChangesAsync();
-            
-            return new JsonResult(new { status = JsonStatusCode.Success });
+            Session sess = await sessionManager.GetSession(req.SessionId);
+            if(sess == null || sess.UserId == null)
+            {
+                return Unauthorized();
+            }
+            var entry = new DiscussionReplyEntry() {
+                DiscussionEntryId = req.DiscussionEntryId,
+                AuthorId = (int) sess.UserId,
+                Content = req.Content,
+                TimeCreated = DateTime.Now,
+            };
+            dbContext.DiscussionReplies.Add(entry);
+            await Task.WhenAll(new[] {
+                sessionManager.UpdateSession(sess),
+                dbContext.SaveChangesAsync(),
+            });
+            return Ok(new {
+                Status = "Success"
+            });
         }
     }
 }
