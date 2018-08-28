@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
+using StackExchange.Redis;
 using Syzoj.Api.Data;
 using Syzoj.Api.Models;
 using Syzoj.Api.Utils;
@@ -43,6 +44,10 @@ namespace Syzoj.Api
             });
 
             services.AddSingleton<ILegacyRunnerManager, LegacyRunnerManager>();
+
+            services.AddSingleton<IConnectionMultiplexer>(s => {
+                return ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Redis"));;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
