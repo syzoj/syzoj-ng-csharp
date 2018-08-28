@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,9 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
 using Syzoj.Api.Data;
 using Syzoj.Api.Models;
 using Syzoj.Api.Utils;
+using Syzoj.Api.Services;
 
 namespace Syzoj.Api
 {
@@ -36,6 +38,7 @@ namespace Syzoj.Api
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
                 Configuration.GetSection("RabbitMQ").Bind(factory);
@@ -62,6 +65,9 @@ namespace Syzoj.Api
             // app.UseHttpsRedirection();
 
             app.UseMvc();
+
+            // Warm it up so it can receive task results
+            app.ApplicationServices.GetService<ILegacyRunnerManager>();
         }
     }
 }
