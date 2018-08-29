@@ -58,6 +58,10 @@ namespace Syzoj.Api
             services.AddHttpContextAccessor();
 
             services.AddScoped<ISessionManager, SessionManager>();
+
+            services.AddHttpClient();
+
+            services.AddScoped<ILegacySyzojImporter, LegacySyzojImporter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

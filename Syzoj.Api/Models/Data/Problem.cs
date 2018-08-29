@@ -15,30 +15,24 @@ namespace Syzoj.Api.Models.Data
         public int Submissions { get; set; }
         // Number of Accepted submissions.
         public int Accepts { get; set; }
+        public ProblemDataType DataType { get; set; }
         [Column("Data")]
         public byte[] _Data { get; set; }
-        [NotMapped]
-        public ProblemData Data
+        public T GetData<T>()
         {
-            get { return MessagePackSerializer.Deserialize<ProblemData>(_Data); }
-            set { _Data = MessagePackSerializer.Serialize(_Data); }
+            return MessagePackSerializer.Deserialize<T>(_Data);
         }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class ProblemData
-    {
-        public ProblemDataType Type { get; set; }
-        public SyzojLegacyStandardProblemData SyzojLegacyStandardProblemData { get; set; }
-        public SyzojLegacyAnswerSubmissionProblemData SyzojLegacyAnswerSubmissionProblemData { get; set; }
-        public SyzojLegacyInteractiveProblemData SyzojLegacyInteractiveProblemData { get; set; }
+        public void SetData<T>(T Data)
+        {
+            _Data = MessagePackSerializer.Serialize(Data);
+        }
     }
 
     public enum ProblemDataType
     {
-        SyzojLegacyStandard = 1,
-        SyzojLegacyAnswerSubmission = 2,
-        SyzojLegacyInteractive = 3,
+        SyzojLegacyTraditional = 1,
+        SyzojLegacySubmitAnswer = 2,
+        SyzojLegacyInteraction = 3,
     }
 
     [MessagePackObject(keyAsPropertyName: true)]
@@ -48,11 +42,11 @@ namespace Syzoj.Api.Models.Data
         public string InputFormat { get; set; }
         public string OutputFormat { get; set; }
         public string Example { get; set; }
-        public string HintAndLimit { get; set; }
+        public string LimitAndHint { get; set; }
     }
 
     [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyStandardProblemData : SyzojLegacyProblemData
+    public class SyzojLegacyTraditionalProblemData : SyzojLegacyProblemData
     {
         public int TimeLimit { get; set; }
         public int MemoryLimit { get; set; }
@@ -62,13 +56,13 @@ namespace Syzoj.Api.Models.Data
     }
 
     [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyAnswerSubmissionProblemData : SyzojLegacyProblemData
+    public class SyzojLegacySubmitAnswerProblemData : SyzojLegacyProblemData
     {
         
     }
 
     [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyInteractiveProblemData : SyzojLegacyProblemData
+    public class SyzojLegacyInteractionProblemData : SyzojLegacyProblemData
     {
         public int TimeLimit { get; set; }
         public int MemoryLimit { get; set; }

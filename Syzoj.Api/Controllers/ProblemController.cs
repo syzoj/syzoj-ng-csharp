@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Syzoj.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Syzoj.Api.Models.Requests;
+using System.Net.Http;
+using Syzoj.Api.Services;
+using Syzoj.Api.Models.Data;
 
 namespace Syzoj.Api.Controllers
 {
@@ -10,9 +14,11 @@ namespace Syzoj.Api.Controllers
     public class ProblemController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        public ProblemController(ApplicationDbContext dbContext)
+        private readonly ILegacySyzojImporter legacySyzojImporter;
+        public ProblemController(ApplicationDbContext dbContext, ILegacySyzojImporter legacySyzojImporter)
         {
             this.dbContext = dbContext;
+            this.legacySyzojImporter = legacySyzojImporter;
         }
 
         [HttpGet("")]
@@ -45,7 +51,8 @@ namespace Syzoj.Api.Controllers
                     Title = p.Problem.Title,
                     Submissions = p.Problem.Submissions,
                     Accepts = p.Problem.Accepts,
-                    Data = p.Problem.Data,
+                    DataType = p.Problem.DataType,
+                    Data = p.Problem.GetData<object>(),
                 })
                 .SingleOrDefaultAsync();
             if(problem == null)
@@ -62,6 +69,31 @@ namespace Syzoj.Api.Controllers
                     Problem = problem
                 });
             }
+        }
+
+        [HttpPost("{id}/import/legacy-syzoj")]
+        public async Task<IActionResult> ImportProblemFromLegacySyzoj(string id, [FromBody] ImportProblemFromLegacySyzojRequest req)
+        {
+            var problem = await legacySyzojImporter.ImportFromLegacySyzoj(req.ProblemURL);
+            if(problem == null)
+            {
+                return Ok(new {
+                    Status = "Fail",
+                    Message = "Import failed"
+                });
+            }
+            dbContext.Problems.Add(problem);
+            var problemSetRelation = new ProblemSetProblem() {
+                Problem = problem,
+                ProblemSetId = 1,
+                ProblemSetProblemId = id,
+            };
+            dbContext.ProblemSetProblems.Add(problemSetRelation);
+            // TODO: Handle uniqueness violation
+            await dbContext.SaveChangesAsync();
+            return Ok(new {
+                Status = "Success",
+            });
         }
     }
 }
