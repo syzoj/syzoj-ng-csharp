@@ -22,21 +22,28 @@ namespace Syzoj.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        private readonly ISessionManager sessionManager;
+        private readonly ISessionManager sess;
 
-        public AuthController(ApplicationDbContext dbContext, ISessionManager sessionManager
-        )
+        public AuthController(ApplicationDbContext dbContext, ISessionManager sess)
         {
             this.dbContext = dbContext;
-            this.sessionManager = sessionManager;
+            this.sess = sess;
         }
 
         // POST /api/auth/login
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
+            if(sess.IsAuthenticated())
+            {
+                return Ok(new {
+                    Status = "Fail",
+                    Message = "Already logged in"
+                });
+            }
             var user = await dbContext.Users.FirstOrDefaultAsync((u) => u.UserName == req.UserName);
-            if(user == null) {
+            if(user == null)
+            {
                 return Ok(new {
                     Status = "Fail",
                     Message = "User with specified UserName does not exist"
@@ -44,12 +51,9 @@ namespace Syzoj.Api.Controllers
             }
             if(user.CheckPassword(req.Password))
             {
-                var sess = new Session();
-                sess.SetUser(user);
-                await sessionManager.UpdateSession(sess);
+                await sess.AuthenticateUser(user);
                 return Ok(new {
                     Status = "Success",
-                    SessionID = sess.SessionID,
                 });
             }
             else
@@ -63,9 +67,17 @@ namespace Syzoj.Api.Controllers
 
         // POST /api/auth/logout
         [HttpPost]
-        public string Logout()
+        public async Task<IActionResult> Logout()
         {
-            return "Logout!";
+            if(sess.IsAuthenticated())
+            {
+                await sess.UnauthenticateUser();
+                return Ok("Logout");
+            }
+            else
+            {
+                return Ok("Not logged in");
+            }
         }
 
         // POST /api/auth/register

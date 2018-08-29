@@ -1,40 +1,43 @@
 using System;
 using System.Threading.Tasks;
-using MessagePack;
-using StackExchange.Redis;
+using Microsoft.AspNetCore.Http;
 using Syzoj.Api.Models;
-using Syzoj.Api.Utils;
+using Syzoj.Api.Models.Data;
 
 namespace Syzoj.Api.Services
 {
     public class SessionManager : ISessionManager
     {
-        private readonly IConnectionMultiplexer redisConnection;
-        public SessionManager(IConnectionMultiplexer redisConnection)
+        private readonly IHttpContextAccessor httpContextAccessor;
+        public SessionManager(IHttpContextAccessor httpContextAccessor)
         {
-            this.redisConnection = redisConnection;
+            this.httpContextAccessor = httpContextAccessor;
         }
-
-        // Inserts/updates a new session into backend and populates SessionID attribute
-        public Task UpdateSession(Session sess)
+        public bool IsAuthenticated()
         {
-            if(sess.SessionID == null)
-                sess.SessionID = MiscUtils.ConvertToHex(MiscUtils.GetRandomBytes(16));
-            string keyName = String.Format("syzoj:session:{0}", sess.SessionID);
-            IDatabase db = redisConnection.GetDatabase();
-            return db.StringSetAsync(keyName, MessagePackSerializer.Serialize(sess), TimeSpan.FromDays(30));
+            Session sess = (Session) httpContextAccessor.HttpContext.Items["Session"];
+            return sess.UserId != null;
         }
-
-        public async Task<Session> GetSession(string sessionID)
+        public int GetAuthenticatedUserId()
         {
-            string keyName = string.Format("syzoj:session:{0}", sessionID);
-            IDatabase db = redisConnection.GetDatabase();
-            byte[] data = await db.StringGetAsync(keyName);
-            if(data == null)
-                return null;
-            Session sess = MessagePackSerializer.Deserialize<Session>(data);
-            sess.SessionID = sessionID;
-            return sess;
+            Session sess = (Session) httpContextAccessor.HttpContext.Items["Session"];
+            return (int) sess.UserId;
+        }
+        public Task AuthenticateUser(User user)
+        {
+            Session sess = (Session) httpContextAccessor.HttpContext.Items["Session"];
+            sess.UserId = user.Id;
+            sess.UserName = user.UserName;
+            sess.Expiration = TimeSpan.FromDays(30);
+            return Task.CompletedTask;
+        }
+        public Task UnauthenticateUser()
+        {
+            Session sess = (Session) httpContextAccessor.HttpContext.Items["Session"];
+            sess.UserId = null;
+            sess.UserName = null;
+            sess.Expiration = TimeSpan.FromMinutes(20);
+            return Task.CompletedTask;
         }
     }
 }

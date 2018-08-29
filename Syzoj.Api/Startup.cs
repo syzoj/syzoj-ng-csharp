@@ -35,7 +35,7 @@ namespace Syzoj.Api
         {
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            
+
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(opt => opt.SerializerSettings.ContractResolver
@@ -53,7 +53,11 @@ namespace Syzoj.Api
                 return ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Redis"));;
             });
 
-            services.AddSingleton<ISessionManager, SessionManager>();
+            services.AddTransient<SessionMiddleware>();
+
+            services.AddHttpContextAccessor();
+
+            services.AddScoped<ISessionManager, SessionManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,6 +75,8 @@ namespace Syzoj.Api
 
             // 应用不应该使用 HTTPS
             // app.UseHttpsRedirection();
+
+            app.UseMiddleware<SessionMiddleware>();
 
             app.UseMvc();
 

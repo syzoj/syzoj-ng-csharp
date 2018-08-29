@@ -12,12 +12,12 @@ namespace Syzoj.Api.Controllers
     [Route("api/discuss")]
     public class DiscussionController : ControllerBase
     {
-        private readonly ISessionManager sessionManager;
         private readonly ApplicationDbContext dbContext;
-        public DiscussionController(ISessionManager sessionManager, ApplicationDbContext dbContext)
+        private readonly ISessionManager sess;
+        public DiscussionController(ApplicationDbContext dbContext, ISessionManager sess)
         {
-            this.sessionManager = sessionManager;
             this.dbContext = dbContext;
+            this.sess = sess;
         }
 
         [HttpPost("forum")]
@@ -35,25 +35,21 @@ namespace Syzoj.Api.Controllers
         [HttpPost("discussion")]
         public async Task<IActionResult> CreateDiscuss([FromBody]CreateDiscussionRequest req)
         {
-            Session sess = await sessionManager.GetSession(req.SessionID);
-            if(sess == null || sess.UserId == null)
+            if(!sess.IsAuthenticated())
             {
                 return Unauthorized();
             }
             var entry = new DiscussionEntry() {
                 Title = req.Title,
                 Content = req.Content,
-                AuthorId = (int) sess.UserId,
+                AuthorId = (int) sess.GetAuthenticatedUserId(),
                 ForumId = req.ForumId,
                 TimeCreated = DateTime.Now,
                 TimeModified = DateTime.Now,
                 TimeLastReply = DateTime.Now,
             };
             dbContext.Discussions.Add(entry);
-            await Task.WhenAll(new[] {
-                sessionManager.UpdateSession(sess),
-                dbContext.SaveChangesAsync(),
-            });
+            await dbContext.SaveChangesAsync();
             return Ok(new {
                 Status = "Success",
                 DiscussionEntryId = entry.Id,
@@ -62,22 +58,18 @@ namespace Syzoj.Api.Controllers
         [HttpPost("reply")]
         public async Task<IActionResult> CreateReply([FromBody]CreateReplyRequest req)
         {
-            Session sess = await sessionManager.GetSession(req.SessionId);
-            if(sess == null || sess.UserId == null)
+            if(!sess.IsAuthenticated())
             {
                 return Unauthorized();
             }
             var entry = new DiscussionReplyEntry() {
                 DiscussionEntryId = req.DiscussionEntryId,
-                AuthorId = (int) sess.UserId,
+                AuthorId = (int) sess.GetAuthenticatedUserId(),
                 Content = req.Content,
                 TimeCreated = DateTime.Now,
             };
             dbContext.DiscussionReplies.Add(entry);
-            await Task.WhenAll(new[] {
-                sessionManager.UpdateSession(sess),
-                dbContext.SaveChangesAsync(),
-            });
+            await dbContext.SaveChangesAsync();
             return Ok(new {
                 Status = "Success"
             });

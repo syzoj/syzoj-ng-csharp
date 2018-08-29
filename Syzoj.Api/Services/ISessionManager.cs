@@ -1,11 +1,14 @@
 using System.Threading.Tasks;
-using Syzoj.Api.Models;
+using Syzoj.Api.Models.Data;
 
 namespace Syzoj.Api.Services
 {
     public interface ISessionManager
     {
-        Task<Session> GetSession(string SessionID);
-        Task UpdateSession(Session sess);
+        bool IsAuthenticated();
+        // Call after checking IsAuthenticated()
+        int GetAuthenticatedUserId();
+        Task AuthenticateUser(User user);
+        Task UnauthenticateUser();
     }
 }
