@@ -30,7 +30,7 @@ namespace Syzoj.Api.Models.Data
         public ProblemDataType Type { get; set; }
         public SyzojLegacyStandardProblemData SyzojLegacyStandardProblemData { get; set; }
         public SyzojLegacyAnswerSubmissionProblemData SyzojLegacyAnswerSubmissionProblemData { get; set; }
-        public SyzojLegacyInteractiveProblemData SyzojLegacyInteractiveProblemData { get; set;}
+        public SyzojLegacyInteractiveProblemData SyzojLegacyInteractiveProblemData { get; set; }
     }
 
     public enum ProblemDataType
@@ -50,6 +50,7 @@ namespace Syzoj.Api.Models.Data
         public string HintAndLimit { get; set; }
     }
 
+    [MessagePackObject(keyAsPropertyName: true)]
     public class SyzojLegacyStandardProblemData : SyzojLegacyProblemData
     {
         public int TimeLimit { get; set; }
@@ -59,11 +60,13 @@ namespace Syzoj.Api.Models.Data
         public string FileIoOutputName { get; set; }
     }
 
+    [MessagePackObject(keyAsPropertyName: true)]
     public class SyzojLegacyAnswerSubmissionProblemData : SyzojLegacyProblemData
     {
         
     }
 
+    [MessagePackObject(keyAsPropertyName: true)]
     public class SyzojLegacyInteractiveProblemData : SyzojLegacyProblemData
     {
         public int TimeLimit { get; set; }
