@@ -1,8 +1,10 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Syzoj.Api.Data;
 using Syzoj.Api.Models;
 using Syzoj.Api.Models.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Syzoj.Api.Services
 {
@@ -23,7 +25,12 @@ namespace Syzoj.Api.Services
             Session sess = (Session) httpContextAccessor.HttpContext.Items["Session"];
             return (int) sess.UserId;
         }
-        public Task AuthenticateUser(User user)
+        public string GetAuthenticatedUserName()
+        {
+            Session sess = (Session) httpContextAccessor.HttpContext.Items["Session"];
+            return sess.UserName;
+        }
+        public Task AuthenticateUserAsync(User user)
         {
             Session sess = (Session) httpContextAccessor.HttpContext.Items["Session"];
             sess.UserId = user.Id;
@@ -31,7 +38,7 @@ namespace Syzoj.Api.Services
             sess.Expiration = TimeSpan.FromDays(30);
             return Task.CompletedTask;
         }
-        public Task UnauthenticateUser()
+        public Task UnauthenticateUserAsync()
         {
             Session sess = (Session) httpContextAccessor.HttpContext.Items["Session"];
             sess.UserId = null;

@@ -51,7 +51,7 @@ namespace Syzoj.Api.Controllers
             }
             if(user.CheckPassword(req.Password))
             {
-                await sess.AuthenticateUser(user);
+                await sess.AuthenticateUserAsync(user);
                 return Ok(new {
                     Status = "Success",
                 });
@@ -71,7 +71,7 @@ namespace Syzoj.Api.Controllers
         {
             if(sess.IsAuthenticated())
             {
-                await sess.UnauthenticateUser();
+                await sess.UnauthenticateUserAsync();
                 return Ok("Logout");
             }
             else
