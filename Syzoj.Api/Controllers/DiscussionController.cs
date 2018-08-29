@@ -7,6 +7,8 @@ using Syzoj.Api.Models.Data;
 using Syzoj.Api.Models.Requests;
 using Syzoj.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Syzoj.Api.Controllers
 {
@@ -74,6 +76,69 @@ namespace Syzoj.Api.Controllers
             return Ok(new {
                 Status = "Success"
             });
+        }
+        [HttpGet("discussion")]
+        public async Task<IActionResult> GetForum()
+        {
+            var discussions = await dbContext.ForumDiscussions
+                .Where(fd => fd.ForumId == 2)
+                .Include(fd => fd.DiscussionEntry)
+                .Select(fd => fd.DiscussionEntry)
+                .Include(d => d.Author)
+                .Select(d => new {
+                    Id = d.Id,
+                    Title = d.Title,
+                    AuthorId = d.AuthorId,
+                    AuthorName = d.Author.UserName,
+                    TimeCreated = d.TimeCreated,
+                    TimeLastReply = d.TimeLastReply,
+                    TimeModified = d.TimeModified,
+                })
+                .ToListAsync();
+            return Ok(new {
+                Status = "Success",
+                DiscussionEntries = discussions,
+            });
+        }
+        [HttpGet("discussion/{id}")]
+        public async Task<IActionResult> GetDiscussionEntry(int id)
+        {
+            var discussionEntry = await dbContext.ForumDiscussions
+                .Where(fd => fd.ForumId == 2 && fd.DiscussionEntryId == id)
+                .Include(fd => fd.DiscussionEntry)
+                .Select(fd => fd.DiscussionEntry)
+                .Include(d => d.Author)
+                .Include(d => d.Replies)
+                .ThenInclude(r => r.Author)
+                .Select(d => new {
+                    Id = d.Id,
+                    Title = d.Title,
+                    AuthorId = d.AuthorId,
+                    AuthorName = d.Author.UserName,
+                    TimeCreated = d.TimeCreated,
+                    TimeLastReply = d.TimeLastReply,
+                    TimeModified = d.TimeModified,
+                    Replies = d.Replies.Select(r => new {
+                        AuthorName = r.Author.UserName,
+                        TimeCreated = r.TimeCreated,
+                        Content = r.Content,
+                    })
+                })
+                .FirstOrDefaultAsync();
+            if(discussionEntry == null)
+            {
+                return Ok(new {
+                    Status = "Fail",
+                    Message = "Discussion entry does not exist in default forum",
+                });
+            }
+            else
+            {
+                return Ok(new {
+                    Status = "Success",
+                    DiscussionEntry = discussionEntry
+                });
+            }
         }
     }
 }
