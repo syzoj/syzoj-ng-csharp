@@ -45,7 +45,7 @@ namespace Syzoj.Api.Data
                 .HasForeignKey(fd => fd.DiscussionEntryId)
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<ForumDiscussion>()
-                .HasIndex(fd => fd.TimeLastReply);
+                .HasIndex(fd => new { fd.ForumId, fd.TimeLastReply });
             
             modelBuilder.Entity<ProblemSetProblem>()
                 .HasKey(psp => new { psp.ProblemSetId, psp.ProblemSetProblemId });
