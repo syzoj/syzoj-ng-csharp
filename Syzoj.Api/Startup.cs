@@ -17,6 +17,7 @@ using Syzoj.Api.Data;
 using Syzoj.Api.Models;
 using Syzoj.Api.Utils;
 using Syzoj.Api.Services;
+using Newtonsoft.Json.Serialization;
 
 namespace Syzoj.Api
 {
@@ -35,7 +36,10 @@ namespace Syzoj.Api
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(opt => opt.SerializerSettings.ContractResolver
+                    = new DefaultContractResolver());;
 
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
