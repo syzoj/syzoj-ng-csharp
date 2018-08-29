@@ -9,7 +9,6 @@ namespace Syzoj.Api.Services
         // Call after checking IsAuthenticated()
         int GetAuthenticatedUserId();
         string GetAuthenticatedUserName();
-        Task<User> GetAuthenticatedUserAsync();
         Task AuthenticateUserAsync(User user);
         Task UnauthenticateUserAsync();
     }

@@ -7,6 +7,8 @@ namespace Syzoj.Api.Models.Data
     {
         [Key]
         public int Id { get; set; }
-        public virtual ICollection<DiscussionEntry> DiscussionEntries { get; set; }
+        // For debugging purposes only
+        public string Info { get; set; }
+        public virtual ICollection<ForumDiscussion> DiscussionEntries { get; set; }
     }
 }

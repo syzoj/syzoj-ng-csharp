@@ -9,8 +9,6 @@ namespace Syzoj.Api.Models.Data
     {
         [Key]
         public int Id { get; set; }
-        public virtual Forum Forum { get; set; }
-        public int ForumId { get; set; }
         [Required]
         public string Title { get; set; }
         [Required]
@@ -25,5 +23,6 @@ namespace Syzoj.Api.Models.Data
         [Required]
         public DateTime? TimeLastReply { get; set; }
         public virtual ICollection<DiscussionReplyEntry> Replies { get; set; }
+        public virtual ICollection<ForumDiscussion> Forums { get; set; }
     }
 }

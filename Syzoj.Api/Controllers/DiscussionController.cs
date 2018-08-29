@@ -6,6 +6,7 @@ using Syzoj.Api.Models;
 using Syzoj.Api.Models.Data;
 using Syzoj.Api.Models.Requests;
 using Syzoj.Api.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Syzoj.Api.Controllers
 {
@@ -19,18 +20,6 @@ namespace Syzoj.Api.Controllers
             this.dbContext = dbContext;
             this.sess = sess;
         }
-
-        [HttpPost("forum")]
-        public async Task<IActionResult> CreateForum()
-        {
-            Forum f = new Forum();
-            dbContext.Forums.Add(f);
-            await dbContext.SaveChangesAsync();
-            return Ok(new {
-                Status = "Success",
-                Id = f.Id,
-            });
-        }
         // TODO: Check for permission to post in forum
         [HttpPost("discussion")]
         public async Task<IActionResult> CreateDiscuss([FromBody]CreateDiscussionRequest req)
@@ -43,12 +32,16 @@ namespace Syzoj.Api.Controllers
                 Title = req.Title,
                 Content = req.Content,
                 AuthorId = (int) sess.GetAuthenticatedUserId(),
-                ForumId = req.ForumId,
                 TimeCreated = DateTime.Now,
                 TimeModified = DateTime.Now,
                 TimeLastReply = DateTime.Now,
             };
             dbContext.Discussions.Add(entry);
+            var fd = new ForumDiscussion() {
+                ForumId = 2,
+                DiscussionEntryId = entry.Id,
+            };
+            dbContext.ForumDiscussions.Add(fd);
             await dbContext.SaveChangesAsync();
             return Ok(new {
                 Status = "Success",
@@ -61,6 +54,14 @@ namespace Syzoj.Api.Controllers
             if(!sess.IsAuthenticated())
             {
                 return Unauthorized();
+            }
+            bool canReply = await dbContext.ForumDiscussions.AnyAsync(fd => fd.ForumId == 2 && fd.DiscussionEntryId == req.DiscussionEntryId);
+            if(!canReply)
+            {
+                return Ok(new {
+                    Status = "Fail",
+                    Message = "Discussion entry does not exist in default forum"
+                });
             }
             var entry = new DiscussionReplyEntry() {
                 DiscussionEntryId = req.DiscussionEntryId,
