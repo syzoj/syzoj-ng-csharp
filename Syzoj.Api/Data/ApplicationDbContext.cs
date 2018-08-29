@@ -41,6 +41,8 @@ namespace Syzoj.Api.Data
                 .WithMany(d => d.Forums)
                 .HasForeignKey(fd => fd.DiscussionEntryId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ForumDiscussion>()
+                .HasIndex(fd => fd.TimeLastReply);
             
             modelBuilder.Entity<Forum>().HasData(
                 new Forum() {Id = 1, Info = "Announcements"},
