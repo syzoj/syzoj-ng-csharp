@@ -56,6 +56,7 @@ namespace Syzoj.Api.Services
                 problemData.OutputFormat = syzojProblem.Obj.OutputFormat;
                 problemData.Example = syzojProblem.Obj.Example;
                 problemData.LimitAndHint = syzojProblem.Obj.LimitAndHint;
+                problemData.Tags = syzojProblem.Obj.Tags;
                 problem.SetData<object>(problemData);
                 return problem;
             }

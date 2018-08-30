@@ -40,6 +40,7 @@ namespace Syzoj.Api.Models.Data
         public string OutputFormat { get; set; }
         public string Example { get; set; }
         public string LimitAndHint { get; set; }
+        public string[] Tags { get; set; }
     }
 
     [MessagePackObject(keyAsPropertyName: true)]
