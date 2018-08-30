@@ -74,7 +74,7 @@ namespace Syzoj.Api.Controllers
         [HttpPost("{id}/import/legacy-syzoj")]
         public async Task<IActionResult> ImportProblemFromLegacySyzoj(string id, [FromBody] ImportProblemFromLegacySyzojRequest req)
         {
-            var problem = await legacySyzojImporter.ImportFromLegacySyzoj(req.ProblemURL);
+            var problem = await legacySyzojImporter.ImportFromLegacySyzojAsync(req.ProblemURL);
             if(problem == null)
             {
                 return Ok(new {

@@ -13,7 +13,7 @@ namespace Syzoj.Api.Services
         {
             this.httpClientFactory = httpClientFactory;
         }
-        public async Task<Problem> ImportFromLegacySyzoj(string URL)
+        public async Task<Problem> ImportFromLegacySyzojAsync(string URL)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, URL + "/export");
             var client = httpClientFactory.CreateClient();

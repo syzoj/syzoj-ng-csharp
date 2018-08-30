@@ -5,6 +5,6 @@ namespace Syzoj.Api.Services
 {
     public interface IProblemManager
     {
-        Task<Problem> ImportFromLegacySyzoj(string URL);
+        Task<Problem> ImportFromLegacySyzojAsync(string URL);
     }
 }
