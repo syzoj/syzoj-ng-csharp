@@ -107,12 +107,12 @@ namespace Syzoj.Api.Controllers
                         switch(ne.ConstraintName)
                         {
                             case "IX_Users_UserName":
-                                return Ok(new {
+                                return Conflict(new {
                                     Status = "Fail",
                                     Message = "UserNameConflict"
                                 });
                             case "IX_Users_Email":
-                                return Ok(new {
+                                return Conflict(new {
                                     Status = "Fail",
                                     Message = "EmailConflict"
                                 });
