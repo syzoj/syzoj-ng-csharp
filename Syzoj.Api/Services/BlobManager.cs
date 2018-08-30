@@ -27,12 +27,5 @@ namespace Syzoj.Api.Services
             data.ReferenceCount -= 1;
             data.TimeAccess = DateTime.Now;
         }
-
-        public IQueryable<BlobMetadata> QueryGarbageList(TimeSpan Expiration)
-        {
-            return dbContext.BlobMetadata
-                .Where(bm => bm.ReferenceCount == 0 && bm.TimeAccess <= DateTime.Now - Expiration)
-                .OrderBy(bm => bm.TimeAccess);
-        }
     }
 }
