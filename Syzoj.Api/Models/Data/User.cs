@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,6 +20,7 @@ namespace Syzoj.Api.Models.Data
         public UserPasswordType PasswordType { get; set; }
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
+        public virtual ICollection<ProblemSubmission> ProblemSubmissions { get; set; }
 
         public void SetPassword(string password)
         {

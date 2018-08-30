@@ -83,6 +83,11 @@ namespace Syzoj.Api.Data
                 .WithMany(psp => psp.ProblemSubmissions)
                 .HasForeignKey(ps => new { ps.ProblemSetId, ps.ProblemId })
                 .HasPrincipalKey(psp => new { psp.ProblemSetId, psp.ProblemId });
+            modelBuilder.Entity<ProblemSubmission>()
+                .HasOne(ps => ps.User)
+                .WithMany(u => u.ProblemSubmissions)
+                .HasForeignKey(ps => ps.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Forum>().HasData(
                 new Forum() { Id = 1, Info = "Announcements" },
