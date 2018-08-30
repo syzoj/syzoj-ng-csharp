@@ -9,5 +9,6 @@ namespace Syzoj.Api.Models.Data
         public int Id { get; set; }
         public string Info { get; set; }
         public virtual ICollection<ProblemSetProblem> ProblemSetProblem { get; set; }
+        public virtual ICollection<ProblemSubmission> ProblemSubmissions { get; set; }
     }
 }

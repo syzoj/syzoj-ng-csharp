@@ -21,6 +21,7 @@ namespace Syzoj.Api.Data
         public DbSet<ProblemSet> ProblemSets { get; set; }
         public DbSet<ProblemSetProblem> ProblemSetProblems { get; set; }
         public DbSet<Problem> Problems { get; set; }
+        public DbSet<ProblemSubmission> ProblemSubmissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -66,6 +67,22 @@ namespace Syzoj.Api.Data
                 .WithMany(p => p.ProblemSets)
                 .HasForeignKey(psp => psp.ProblemId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<ProblemSubmission>()
+                .HasOne(ps => ps.Problem)
+                .WithMany(p => p.ProblemSubmissions)
+                .HasForeignKey(ps => ps.ProblemId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ProblemSubmission>()
+                .HasOne(ps => ps.ProblemSet)
+                .WithMany(ps => ps.ProblemSubmissions)
+                .HasForeignKey(ps => ps.ProblemSetId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ProblemSubmission>()
+                .HasOne(ps => ps.ProblemSetProblem)
+                .WithMany(psp => psp.ProblemSubmissions)
+                .HasForeignKey(ps => new { ps.ProblemSetId, ps.ProblemId })
+                .HasPrincipalKey(psp => new { psp.ProblemSetId, psp.ProblemId });
 
             modelBuilder.Entity<Forum>().HasData(
                 new Forum() { Id = 1, Info = "Announcements" },

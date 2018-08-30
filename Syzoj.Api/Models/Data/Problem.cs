@@ -14,6 +14,7 @@ namespace Syzoj.Api.Models.Data
         public ProblemDataType DataType { get; set; }
         [Column("Data")]
         public byte[] _Data { get; set; }
+        public virtual ICollection<ProblemSubmission> ProblemSubmissions { get; set; }
         public T GetData<T>()
         {
             return MessagePackSerializer.Deserialize<T>(_Data);

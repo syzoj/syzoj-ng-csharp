@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Syzoj.Api.Models.Data
 {
     public class ProblemSetProblem
@@ -11,5 +13,6 @@ namespace Syzoj.Api.Models.Data
         public int Submissions { get; set; }
         // Number of Accepted submissions.
         public int Accepts { get; set; }
+        public ICollection<ProblemSubmission> ProblemSubmissions { get; set; }
     }
 }
