@@ -95,7 +95,7 @@ namespace Syzoj.Api.Controllers
                 dbContext.Users.Add(user);
                 await dbContext.SaveChangesAsync();
                 return Ok(new {
-                    status = "success",
+                    Status = "Success",
                 });
             }
             catch (DbUpdateException e)
@@ -108,11 +108,13 @@ namespace Syzoj.Api.Controllers
                         {
                             case "IX_Users_UserName":
                                 return Ok(new {
-                                    status = "UserNameConflict"
+                                    Status = "Fail",
+                                    Message = "UserNameConflict"
                                 });
                             case "IX_Users_Email":
                                 return Ok(new {
-                                    status = "EmailConflict"
+                                    Status = "Fail",
+                                    Message = "EmailConflict"
                                 });
                         }
                     }

@@ -92,7 +92,29 @@ namespace Syzoj.Api.Controllers
             };
             dbContext.ProblemSetProblems.Add(problemSetRelation);
             // TODO: Handle uniqueness violation
-            await dbContext.SaveChangesAsync();
+            try
+            {
+                await dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                if(e.InnerException is Npgsql.PostgresException ne && ne.SqlState.Equals("23505"))
+                {
+                    switch(ne.ConstraintName)
+                    {
+                        case "PK_ProblemSetProblems":
+                            return Conflict(new {
+                                Status = "Fail",
+                                Message = "Problem with the same ID already exists",
+                            });
+                        case "IX_ProblemSetProblems_ProblemSetId_ProblemId":
+                            return Conflict(new {
+                                Status = "Fail",
+                                Message = "The same problem already exists in the problemset"
+                            });
+                    }
+                }
+            }
             return Ok(new {
                 Status = "Success",
             });

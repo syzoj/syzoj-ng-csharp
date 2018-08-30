@@ -27,10 +27,12 @@ namespace Syzoj.Api.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<User>()
                 .HasIndex(b => b.UserName)
-                .IsUnique();
+                .IsUnique()
+                .HasName("IX_Users_UserNAme");
             modelBuilder.Entity<User>()
                 .HasIndex(b => b.Email)
-                .IsUnique();
+                .IsUnique()
+                .HasName("IX_Users_Email");
             
             modelBuilder.Entity<ForumDiscussion>()
                 .HasKey(fd => new { fd.ForumId, fd.DiscussionEntryId });
@@ -48,10 +50,12 @@ namespace Syzoj.Api.Data
                 .HasIndex(fd => new { fd.ForumId, fd.TimeLastReply });
             
             modelBuilder.Entity<ProblemSetProblem>()
-                .HasKey(psp => new { psp.ProblemSetId, psp.ProblemSetProblemId });
+                .HasKey(psp => new { psp.ProblemSetId, psp.ProblemSetProblemId })
+                .HasName("PK_ProblemSetProblems");
             modelBuilder.Entity<ProblemSetProblem>()
                 .HasIndex(psp => new{ psp.ProblemSetId, psp.ProblemId })
-                .IsUnique(); // TODO: Is this necessary?
+                .IsUnique()
+                .HasName("IX_ProblemSetProblems_ProblemSetId_ProblemId"); // TODO: Is this necessary?
             modelBuilder.Entity<ProblemSetProblem>()
                 .HasOne(psp => psp.ProblemSet)
                 .WithMany(ps => ps.ProblemSetProblem)
