@@ -11,10 +11,6 @@ namespace Syzoj.Api.Models.Data
         public int Id { get; set; }
         public virtual ICollection<ProblemSetProblem> ProblemSets { get; set; }
         public string Title { get; set; }
-        // Number of submissions.
-        public int Submissions { get; set; }
-        // Number of Accepted submissions.
-        public int Accepts { get; set; }
         public ProblemDataType DataType { get; set; }
         [Column("Data")]
         public byte[] _Data { get; set; }

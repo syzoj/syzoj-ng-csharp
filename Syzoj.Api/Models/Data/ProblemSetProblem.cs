@@ -7,5 +7,9 @@ namespace Syzoj.Api.Models.Data
         public virtual Problem Problem { get; set; }
         public int ProblemId { get; set; }
         public string ProblemSetProblemId { get; set; }
+        // Number of submissions.
+        public int Submissions { get; set; }
+        // Number of Accepted submissions.
+        public int Accepts { get; set; }
     }
 }

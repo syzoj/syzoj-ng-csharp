@@ -14,8 +14,8 @@ namespace Syzoj.Api.Controllers
     public class ProblemController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        private readonly ILegacySyzojImporter legacySyzojImporter;
-        public ProblemController(ApplicationDbContext dbContext, ILegacySyzojImporter legacySyzojImporter)
+        private readonly IProblemManager legacySyzojImporter;
+        public ProblemController(ApplicationDbContext dbContext, IProblemManager legacySyzojImporter)
         {
             this.dbContext = dbContext;
             this.legacySyzojImporter = legacySyzojImporter;
@@ -30,8 +30,8 @@ namespace Syzoj.Api.Controllers
                 .Select(p => new {
                     Id = p.ProblemSetProblemId,
                     Title = p.Problem.Title,
-                    Submissions = p.Problem.Submissions,
-                    Accepts = p.Problem.Accepts,
+                    Submissions = p.Submissions,
+                    Accepts = p.Accepts,
                 });
             return Ok(new {
                 Status = "Success",
@@ -49,8 +49,8 @@ namespace Syzoj.Api.Controllers
                 .Select(p => new {
                     Id = p.ProblemSetProblemId,
                     Title = p.Problem.Title,
-                    Submissions = p.Problem.Submissions,
-                    Accepts = p.Problem.Accepts,
+                    Submissions = p.Submissions,
+                    Accepts = p.Accepts,
                     DataType = p.Problem.DataType,
                     Data = p.Problem.GetData<object>(),
                 })
@@ -87,6 +87,8 @@ namespace Syzoj.Api.Controllers
                 Problem = problem,
                 ProblemSetId = 1,
                 ProblemSetProblemId = id,
+                Submissions = 0,
+                Accepts = 0,
             };
             dbContext.ProblemSetProblems.Add(problemSetRelation);
             // TODO: Handle uniqueness violation

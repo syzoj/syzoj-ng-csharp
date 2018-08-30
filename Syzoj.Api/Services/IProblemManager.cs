@@ -3,7 +3,7 @@ using Syzoj.Api.Models.Data;
 
 namespace Syzoj.Api.Services
 {
-    public interface ILegacySyzojImporter
+    public interface IProblemManager
     {
         Task<Problem> ImportFromLegacySyzoj(string URL);
     }

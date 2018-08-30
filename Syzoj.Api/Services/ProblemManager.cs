@@ -6,10 +6,10 @@ using System.IO;
 
 namespace Syzoj.Api.Services
 {
-    public class LegacySyzojImporter : ILegacySyzojImporter
+    public class ProblemManager : IProblemManager
     {
         public IHttpClientFactory httpClientFactory;
-        public LegacySyzojImporter(IHttpClientFactory httpClientFactory)
+        public ProblemManager(IHttpClientFactory httpClientFactory)
         {
             this.httpClientFactory = httpClientFactory;
         }
