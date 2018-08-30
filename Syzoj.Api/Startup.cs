@@ -62,6 +62,8 @@ namespace Syzoj.Api
             services.AddHttpClient();
 
             services.AddScoped<IProblemManager, ProblemManager>();
+
+            services.AddScoped<IBlobManager, BlobManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

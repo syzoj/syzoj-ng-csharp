@@ -22,6 +22,7 @@ namespace Syzoj.Api.Data
         public DbSet<ProblemSetProblem> ProblemSetProblems { get; set; }
         public DbSet<Problem> Problems { get; set; }
         public DbSet<ProblemSubmission> ProblemSubmissions { get; set; }
+        public DbSet<BlobMetadata> BlobMetadata { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,6 +95,9 @@ namespace Syzoj.Api.Data
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<ProblemSubmission>()
                 .ForNpgsqlUseXminAsConcurrencyToken();
+            
+            modelBuilder.Entity<BlobMetadata>()
+                .HasIndex(bm => new { bm.ReferenceCount, bm.TimeAccess });
 
             modelBuilder.Entity<Forum>().HasData(
                 new Forum() { Id = 1, Info = "Announcements" },
