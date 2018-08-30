@@ -18,30 +18,12 @@ namespace Syzoj.Api.Models.Data
         public int ProblemId { get; set; }
         public virtual ProblemSetProblem ProblemSetProblem { get; set; }
         public ProblemSubmissionStatus Status { get; set; }
-        public ProblemSubmissionType Type { get; set; }
         [Required]
         public DateTime? SubmissionTime { get; set; }
         [Column("SubmissionSummary")]
         public byte[] _SubmissionSummary { get; set; }
         [Column("SubmissionData")]
         public byte[] _SubmissionData { get; set; }
-
-        public T GetSubmissionSummary<T>()
-        {
-            return MessagePackSerializer.Deserialize<T>(_SubmissionSummary);
-        }
-        public void SetSubmissionSummary<T>(T SubmissionSummary)
-        {
-            _SubmissionSummary = MessagePackSerializer.Serialize<T>(SubmissionSummary);
-        }
-        public T GetSubmissionData<T>()
-        {
-            return MessagePackSerializer.Deserialize<T>(_SubmissionData);
-        }
-        public void SetSubmissionData<T>(T SubmissionData)
-        {
-            _SubmissionData = MessagePackSerializer.Serialize<T>(SubmissionData);
-        }
     }
 
     public enum ProblemSubmissionStatus
@@ -66,47 +48,5 @@ namespace Syzoj.Api.Models.Data
         // Failure status
         JudgementDenied = 20001,
         SpecialJudgeRuntimeError = 20002,
-    }
-
-    public enum ProblemSubmissionType
-    {
-        SyzojLegacyCode = 1,
-        SyzojLegacySubmitAnswer = 2,
-    }
-
-    public class SubmissionData<T1, T2>
-    {
-        public T1 Summary { get; set; }
-        public T2 Data { get; set; }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyCodeSummary
-    {
-        public int CodeSize { get; set; }
-        public string Language { get; set; }
-        public decimal Score { get; set; }
-        public int TotalTime { get; set; }
-        public int MaxMemory { get; set; }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyCodeData
-    {
-        public string Code { get; set; }
-        public LegacyOverallResult Result { get; set; }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyAnswerSubmissionSummary
-    {
-        public decimal Score { get; set; }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyAnswerSubmissionData
-    {
-        public byte[] AnswerHash { get; set; }
-        public LegacyOverallResult Result { get; set; }
     }
 }

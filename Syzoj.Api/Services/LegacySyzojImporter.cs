@@ -3,16 +3,26 @@ using System.Threading.Tasks;
 using Syzoj.Api.Models.Data;
 using Syzoj.Api.Models;
 using System.IO;
+using Syzoj.Api.Models.Requests;
+using Syzoj.Api.Data;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Syzoj.Api.Services
 {
-    public class ProblemManager : IProblemManager
+    public class LegacySyzojImporter : ILegacySyzojImporter
     {
-        public IHttpClientFactory httpClientFactory;
-        public ProblemManager(IHttpClientFactory httpClientFactory)
+        private readonly IHttpClientFactory httpClientFactory;
+        private readonly ISessionManager sessionManager;
+        private readonly ApplicationDbContext dbContext;
+        public LegacySyzojImporter(IHttpClientFactory httpClientFactory, ISessionManager sessionManager, ApplicationDbContext dbContext)
         {
             this.httpClientFactory = httpClientFactory;
+            this.sessionManager = sessionManager;
+            this.dbContext = dbContext;
         }
+
         public async Task<Problem> ImportFromLegacySyzojAsync(string URL)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, URL + "/export");
@@ -33,19 +43,19 @@ namespace Syzoj.Api.Services
                         traditionalProblemData.FileIoOutputName = syzojProblem.Obj.FileIoOutputName;
                         traditionalProblemData.TimeLimit = syzojProblem.Obj.TimeLimit;
                         traditionalProblemData.MemoryLimit = syzojProblem.Obj.MemoryLimit;
-                        problem.DataType = ProblemDataType.SyzojLegacyTraditional;
+                        problem.Type = ProblemType.SyzojLegacyTraditional;
                         problemData = traditionalProblemData;
                         break;
                     case "submit-answer":
                         var submitAnswerProblemData = new SyzojLegacySubmitAnswerProblemData();
-                        problem.DataType = ProblemDataType.SyzojLegacySubmitAnswer;
+                        problem.Type = ProblemType.SyzojLegacySubmitAnswer;
                         problemData = submitAnswerProblemData;
                         break;
                     case "interaction":
                         var interactionProblemData = new SyzojLegacyInteractionProblemData();
                         interactionProblemData.TimeLimit = syzojProblem.Obj.TimeLimit;
                         interactionProblemData.MemoryLimit = syzojProblem.Obj.MemoryLimit;
-                        problem.DataType = ProblemDataType.SyzojLegacyInteraction;
+                        problem.Type = ProblemType.SyzojLegacyInteraction;
                         problemData = interactionProblemData;
                         break;
                     default:

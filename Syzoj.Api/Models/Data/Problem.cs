@@ -11,58 +11,16 @@ namespace Syzoj.Api.Models.Data
         public int Id { get; set; }
         public virtual ICollection<ProblemSetProblem> ProblemSets { get; set; }
         public string Title { get; set; }
-        public ProblemDataType DataType { get; set; }
+        public ProblemType Type { get; set; }
         [Column("Data")]
         public byte[] _Data { get; set; }
         public virtual ICollection<ProblemSubmission> ProblemSubmissions { get; set; }
-        public T GetData<T>()
-        {
-            return MessagePackSerializer.Deserialize<T>(_Data);
-        }
-        public void SetData<T>(T Data)
-        {
-            _Data = MessagePackSerializer.Serialize(Data);
-        }
     }
 
-    public enum ProblemDataType
+    public enum ProblemType
     {
         SyzojLegacyTraditional = 1,
         SyzojLegacySubmitAnswer = 2,
         SyzojLegacyInteraction = 3,
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyProblemData
-    {
-        public string Description { get; set; }
-        public string InputFormat { get; set; }
-        public string OutputFormat { get; set; }
-        public string Example { get; set; }
-        public string LimitAndHint { get; set; }
-        public string[] Tags { get; set; }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyTraditionalProblemData : SyzojLegacyProblemData
-    {
-        public int TimeLimit { get; set; }
-        public int MemoryLimit { get; set; }
-        public bool FileIo { get; set; }
-        public string FileIoInputName { get; set; }
-        public string FileIoOutputName { get; set; }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacySubmitAnswerProblemData : SyzojLegacyProblemData
-    {
-        
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyInteractionProblemData : SyzojLegacyProblemData
-    {
-        public int TimeLimit { get; set; }
-        public int MemoryLimit { get; set; }
     }
 }

@@ -14,8 +14,8 @@ namespace Syzoj.Api.Controllers
     public class ProblemController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        private readonly IProblemManager legacySyzojImporter;
-        public ProblemController(ApplicationDbContext dbContext, IProblemManager legacySyzojImporter)
+        private readonly ILegacySyzojImporter legacySyzojImporter;
+        public ProblemController(ApplicationDbContext dbContext, ILegacySyzojImporter legacySyzojImporter)
         {
             this.dbContext = dbContext;
             this.legacySyzojImporter = legacySyzojImporter;
@@ -51,7 +51,7 @@ namespace Syzoj.Api.Controllers
                     Title = p.Problem.Title,
                     Submissions = p.Submissions,
                     Accepts = p.Accepts,
-                    DataType = p.Problem.DataType,
+                    DataType = p.Problem.Type,
                     Data = p.Problem.GetData<object>(),
                 })
                 .SingleOrDefaultAsync();
