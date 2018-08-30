@@ -38,27 +38,9 @@ namespace Syzoj.Api.Services
             };
             channel.BasicConsume(queue: "result", autoAck: false, consumer: consumer);
         }
-        public void SubmitTask()
+        public void SubmitTask(LegacyJudgeRequest req)
         {
-            LegacyJudgeRequest req = new LegacyJudgeRequest() {
-                content = new LegacyJudgeRequest.Content() {
-                    taskId = "CmzO2JUHMb",
-                    testData = "2",
-                    type = LegacyProblemType.Standard,
-                    priority = 2,
-                    param = new LegacyJudgeRequest.StandardParam {
-                        language = "cpp",
-                        code = "#include <bits/stdc++.h>\nint main(){printf(\"Hello World\");}",
-                        timeLimit = 1000,
-                        memoryLimit = 256,
-                        fileIOInput = null,
-                        fileIOOutput = null,
-                    }
-                },
-                extraData = null,
-            };
-            byte[] body = MessagePackSerializer.Serialize(req, MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-            var req2 = MessagePackSerializer.Deserialize<LegacyJudgeRequest>(body);
+            byte[] body = MessagePackSerializer.Serialize(req);
             channel.BasicPublish(
                 exchange: "",
                 routingKey: "judge",

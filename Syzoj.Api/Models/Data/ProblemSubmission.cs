@@ -29,8 +29,6 @@ namespace Syzoj.Api.Models.Data
         // in bytes
         public long? Memory { get; set; }
         public string Language { get; set; }
-
-        [Column("SubmissionData")]
         public byte[] _SubmissionData { get; set; }
         [Column("SubmissionResult")]
         public byte[] _SubmissionResult { get; set; }
