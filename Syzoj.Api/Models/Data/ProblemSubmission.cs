@@ -21,9 +21,19 @@ namespace Syzoj.Api.Models.Data
         [Required]
         public DateTime? SubmissionTime { get; set; }
         [Column("SubmissionSummary")]
-        public byte[] _SubmissionSummary { get; set; }
+
+        // Submission result
+        public decimal? Score { get; set; }
+        // in seconds
+        public decimal? Time { get; set; }
+        // in bytes
+        public long? Memory { get; set; }
+        public string Language { get; set; }
+
         [Column("SubmissionData")]
         public byte[] _SubmissionData { get; set; }
+        [Column("SubmissionResult")]
+        public byte[] _SubmissionResult { get; set; }
     }
 
     public enum ProblemSubmissionStatus

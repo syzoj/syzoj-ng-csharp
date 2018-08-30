@@ -8,6 +8,7 @@ using Syzoj.Api.Data;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System;
+using MessagePack;
 
 namespace Syzoj.Api.Services
 {
@@ -33,41 +34,40 @@ namespace Syzoj.Api.Services
                 var syzojProblem = await response.Content.ReadAsAsync<LegacySyzojExport>();
                 var problem = new Problem();
                 problem.Title = syzojProblem.Obj.Title;
-                var problemData = new SyzojLegacyProblemData();
                 switch(syzojProblem.Obj.Type)
                 {
                     case "traditional":
-                        var traditionalProblemData = new SyzojLegacyTraditionalProblemData();
-                        traditionalProblemData.FileIo = syzojProblem.Obj.FileIo;
-                        traditionalProblemData.FileIoInputName = syzojProblem.Obj.FileIoInputName;
-                        traditionalProblemData.FileIoOutputName = syzojProblem.Obj.FileIoOutputName;
-                        traditionalProblemData.TimeLimit = syzojProblem.Obj.TimeLimit;
-                        traditionalProblemData.MemoryLimit = syzojProblem.Obj.MemoryLimit;
                         problem.Type = ProblemType.SyzojLegacyTraditional;
-                        problemData = traditionalProblemData;
+                        problem._Data = MessagePackSerializer.Serialize(new SyzojLegacyTraditionalProblemData() {
+                            FileIo = syzojProblem.Obj.FileIo,
+                            FileIoInputName = syzojProblem.Obj.FileIoInputName,
+                            FileIoOutputName = syzojProblem.Obj.FileIoOutputName,
+                            TimeLimit = syzojProblem.Obj.TimeLimit,
+                            MemoryLimit = syzojProblem.Obj.MemoryLimit,
+                        });
                         break;
                     case "submit-answer":
-                        var submitAnswerProblemData = new SyzojLegacySubmitAnswerProblemData();
                         problem.Type = ProblemType.SyzojLegacySubmitAnswer;
-                        problemData = submitAnswerProblemData;
+                        problem._Data = MessagePackSerializer.Serialize(new SyzojLegacySubmitAnswerProblemData());
                         break;
                     case "interaction":
-                        var interactionProblemData = new SyzojLegacyInteractionProblemData();
-                        interactionProblemData.TimeLimit = syzojProblem.Obj.TimeLimit;
-                        interactionProblemData.MemoryLimit = syzojProblem.Obj.MemoryLimit;
                         problem.Type = ProblemType.SyzojLegacyInteraction;
-                        problemData = interactionProblemData;
+                        problem._Data = MessagePackSerializer.Serialize(new SyzojLegacyInteractionProblemData() {
+                            TimeLimit = syzojProblem.Obj.TimeLimit,
+                            MemoryLimit = syzojProblem.Obj.MemoryLimit,
+                        });
                         break;
                     default:
                         return null;
                 }
-                problemData.Description = syzojProblem.Obj.Description;
-                problemData.InputFormat = syzojProblem.Obj.InputFormat;
-                problemData.OutputFormat = syzojProblem.Obj.OutputFormat;
-                problemData.Example = syzojProblem.Obj.Example;
-                problemData.LimitAndHint = syzojProblem.Obj.LimitAndHint;
-                problemData.Tags = syzojProblem.Obj.Tags;
-                problem.SetData<object>(problemData);
+                var statement = new ProblemStatement();
+                statement.Description = syzojProblem.Obj.Description;
+                statement.InputFormat = syzojProblem.Obj.InputFormat;
+                statement.OutputFormat = syzojProblem.Obj.OutputFormat;
+                statement.Example = syzojProblem.Obj.Example;
+                statement.LimitAndHint = syzojProblem.Obj.LimitAndHint;
+                statement.Tags = syzojProblem.Obj.Tags;
+                problem.Statement = statement;
                 return problem;
             }
             else

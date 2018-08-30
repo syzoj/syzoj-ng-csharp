@@ -61,7 +61,7 @@ namespace Syzoj.Api
 
             services.AddHttpClient();
 
-            services.AddScoped<IProblemManager, ProblemManager>();
+            services.AddScoped<ILegacySyzojImporter, LegacySyzojImporter>();
 
             services.AddScoped<IBlobManager, BlobManager>();
         }

@@ -7,6 +7,7 @@ using Syzoj.Api.Models.Requests;
 using System.Net.Http;
 using Syzoj.Api.Services;
 using Syzoj.Api.Models.Data;
+using MessagePack;
 
 namespace Syzoj.Api.Controllers
 {
@@ -30,6 +31,7 @@ namespace Syzoj.Api.Controllers
                 .Select(p => new {
                     Id = p.ProblemSetProblemId,
                     Title = p.Problem.Title,
+                    Type = p.Problem.Type,
                     Submissions = p.Submissions,
                     Accepts = p.Accepts,
                 });
@@ -52,7 +54,7 @@ namespace Syzoj.Api.Controllers
                     Submissions = p.Submissions,
                     Accepts = p.Accepts,
                     DataType = p.Problem.Type,
-                    Data = p.Problem.GetData<object>(),
+                    Statement = p.Problem.Statement,
                 })
                 .SingleOrDefaultAsync();
             if(problem == null)

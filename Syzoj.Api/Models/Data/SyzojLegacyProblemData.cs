@@ -3,18 +3,7 @@ using MessagePack;
 namespace Syzoj.Api.Models.Data
 {
     [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyProblemData
-    {
-        public string Description { get; set; }
-        public string InputFormat { get; set; }
-        public string OutputFormat { get; set; }
-        public string Example { get; set; }
-        public string LimitAndHint { get; set; }
-        public string[] Tags { get; set; }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyTraditionalProblemData : SyzojLegacyProblemData
+    public class SyzojLegacyTraditionalProblemData
     {
         public int TimeLimit { get; set; }
         public int MemoryLimit { get; set; }
@@ -24,13 +13,13 @@ namespace Syzoj.Api.Models.Data
     }
 
     [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacySubmitAnswerProblemData : SyzojLegacyProblemData
+    public class SyzojLegacySubmitAnswerProblemData
     {
         
     }
 
     [MessagePackObject(keyAsPropertyName: true)]
-    public class SyzojLegacyInteractionProblemData : SyzojLegacyProblemData
+    public class SyzojLegacyInteractionProblemData
     {
         public int TimeLimit { get; set; }
         public int MemoryLimit { get; set; }
