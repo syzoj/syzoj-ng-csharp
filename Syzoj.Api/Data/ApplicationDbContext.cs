@@ -67,6 +67,10 @@ namespace Syzoj.Api.Data
                 .WithMany(p => p.ProblemSets)
                 .HasForeignKey(psp => psp.ProblemId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ProblemSetProblem>()
+                .HasIndex(psp => psp.AcceptsToSubmissions);
+            modelBuilder.Entity<ProblemSetProblem>()
+                .ForNpgsqlUseXminAsConcurrencyToken();
             
             modelBuilder.Entity<ProblemSubmission>()
                 .HasOne(ps => ps.Problem)
@@ -88,6 +92,8 @@ namespace Syzoj.Api.Data
                 .WithMany(u => u.ProblemSubmissions)
                 .HasForeignKey(ps => ps.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ProblemSubmission>()
+                .ForNpgsqlUseXminAsConcurrencyToken();
 
             modelBuilder.Entity<Forum>().HasData(
                 new Forum() { Id = 1, Info = "Announcements" },
