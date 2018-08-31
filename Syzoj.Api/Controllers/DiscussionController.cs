@@ -14,6 +14,7 @@ using Z.EntityFramework.Plus;
 namespace Syzoj.Api.Controllers
 {
     [Route("api/discuss")]
+    [ApiController]
     public class DiscussionController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;

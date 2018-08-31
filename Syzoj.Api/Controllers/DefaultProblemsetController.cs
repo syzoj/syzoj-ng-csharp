@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 namespace Syzoj.Api.Controllers
 {
     [Route("api")]
+    [ApiController]
     public class DefaultProblemsetController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
