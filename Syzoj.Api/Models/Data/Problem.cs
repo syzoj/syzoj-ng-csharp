@@ -17,27 +17,6 @@ namespace Syzoj.Api.Models.Data
         [Column("Data")]
         public byte[] _Data { get; set; }
         public virtual ICollection<ProblemSubmission> ProblemSubmissions { get; set; }
-
-        [NotMapped]
-        public ProblemStatement Statement {
-            get {
-                return MessagePackSerializer.Deserialize<ProblemStatement>(_Statement);
-            }
-            set {
-                _Statement = MessagePackSerializer.Serialize<ProblemStatement>(value);
-            }
-        }
-    }
-
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class ProblemStatement
-    {
-        public string Description { get; set; }
-        public string InputFormat { get; set; }
-        public string OutputFormat { get; set; }
-        public string Example { get; set; }
-        public string LimitAndHint { get; set; }
-        public string[] Tags { get; set; }
     }
 
     public enum ProblemType

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using Syzoj.Api.Models.Attributes;
+using Syzoj.Api.Filters;
 using Syzoj.Api.Utils;
 
 namespace Syzoj.Api.Models.Data

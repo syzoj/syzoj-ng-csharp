@@ -39,7 +39,7 @@ namespace Syzoj.Api
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(opt => opt.SerializerSettings.ContractResolver
-                    = new DefaultContractResolver());;
+                    = new DefaultContractResolver());
 
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
@@ -61,9 +61,9 @@ namespace Syzoj.Api
 
             services.AddHttpClient();
 
-            services.AddScoped<ILegacySyzojImporter, LegacySyzojImporter>();
-
             services.AddScoped<IBlobManager, BlobManager>();
+
+            services.AddScoped<IProblemResolverProvider, ProblemResolverHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

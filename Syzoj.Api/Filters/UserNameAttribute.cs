@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Syzoj.Api.Utils;
 
-namespace Syzoj.Api.Models.Attributes
+namespace Syzoj.Api.Filters
 {
     public class UserNameAttribute : ValidationAttribute
     {
