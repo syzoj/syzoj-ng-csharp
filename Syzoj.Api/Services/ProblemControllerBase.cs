@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Syzoj.Api.Models.Data;
 
-namespace Syzoj.Api.Controllers
+namespace Syzoj.Api.Services
 {
     [NonController]
     public abstract class ProblemControllerBase : ControllerBase, IProblemController
