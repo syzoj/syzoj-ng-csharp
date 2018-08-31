@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +15,16 @@ namespace Syzoj.Api.Models.Data
         [Key]
         public int Id { get; set; }
         [UserName]
+        [Column(TypeName = "CITEXT")]
         public string UserName { get; set; }
+        /// <remark>
+        /// Email address are difficult to handle; they indeed ARE case sensitive
+        /// in the local part but not in the domain name part. However most email
+        /// providers don't distinguish cases. So we just don't distinguish cases
+        /// at all here.
+        /// </remark>
         [EmailAddress]
+        [Column(TypeName = "CITEXT")]
         public string Email { get; set; }
         public UserPasswordType PasswordType { get; set; }
         public byte[] PasswordHash { get; set; }

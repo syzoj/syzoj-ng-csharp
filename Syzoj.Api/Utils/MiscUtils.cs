@@ -16,9 +16,13 @@ namespace Syzoj.Api.Utils
             return bytes;
         }
 
+        /// <summary>
+        /// Checks if username consist of only lowercase letters, digits,
+        /// underscore and hyphen, and is between 3 and 32 characters.
+        /// </summary>
         public static bool CheckUserName(string UserName)
         {
-            return UserName.ToCharArray().All(c => char.IsLetterOrDigit(c));
+            return UserName.Length >= 3 && UserName.Length <= 32 && UserName.ToCharArray().All(c => char.IsLetterOrDigit(c) || c == '-' || c == '_');
         }
 
         public static string ConvertToHex(byte[] bytes)
