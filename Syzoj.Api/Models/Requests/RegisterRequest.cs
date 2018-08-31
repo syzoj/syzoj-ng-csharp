@@ -8,6 +8,7 @@ namespace Syzoj.Api.Models.Requests
         [UserName]
         public string UserName { get; set; }
         [EmailAddress]
+        [StringLength(256)]
         public string Email { get; set; }
         [MinLength(6)]
         public string Password { get; set; }

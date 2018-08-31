@@ -16,6 +16,7 @@ namespace Syzoj.Api.Models.Data
         public int Id { get; set; }
         [UserName]
         [Column(TypeName = "CITEXT")]
+        [MaxLength(32)]
         public string UserName { get; set; }
         /// <remark>
         /// Email address are difficult to handle; they indeed ARE case sensitive
@@ -28,7 +29,9 @@ namespace Syzoj.Api.Models.Data
         [Column(TypeName = "CITEXT")]
         public string Email { get; set; }
         public UserPasswordType PasswordType { get; set; }
+        [MaxLength(32)]
         public byte[] PasswordHash { get; set; }
+        [MaxLength(16)]
         public byte[] PasswordSalt { get; set; }
         public virtual ICollection<ProblemSubmission> ProblemSubmissions { get; set; }
 
