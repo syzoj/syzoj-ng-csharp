@@ -9,6 +9,7 @@ using Syzoj.Api.Services;
 using Syzoj.Api.Models.Data;
 using MessagePack;
 using Syzoj.Api.Models.Runner;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Syzoj.Api.Controllers
 {
@@ -60,6 +61,8 @@ namespace Syzoj.Api.Controllers
             else
             {
                 var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetReadonlyController();
+                if(problemController is ControllerBase controllerBase)
+                    controllerBase.ControllerContext = ControllerContext;
                 return await problemController.GetProblem(problem, act);
             }
         }
@@ -81,6 +84,8 @@ namespace Syzoj.Api.Controllers
             else
             {
                 var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetReadonlyController();
+                if(problemController is ControllerBase controllerBase)
+                    controllerBase.ControllerContext = ControllerContext;
                 return await problemController.PostProblem(problem, act);
             }
         }

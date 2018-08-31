@@ -4,6 +4,7 @@ using Syzoj.Api.Models.Data;
 
 namespace Syzoj.Api.Controllers
 {
+    [NonController]
     public abstract class ProblemControllerBase : ControllerBase, IProblemController
     {
         public abstract Task<IActionResult> GetProblem(ProblemSetProblem psp, string action);
