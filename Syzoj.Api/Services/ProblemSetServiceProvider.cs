@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Syzoj.Api.Models.Data;
 
 namespace Syzoj.Api.Services
@@ -18,7 +19,7 @@ namespace Syzoj.Api.Services
         }
         public IProblemSetService GetProblemSetService(ProblemSet problemSet)
         {
-            return (IProblemSetService) serviceProvider.GetService(ProblemSetServices[problemSet.Type]);
+            return (IProblemSetService) serviceProvider.GetRequiredService(ProblemSetServices[problemSet.Type]);
         }
     }
 }

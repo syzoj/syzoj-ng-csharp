@@ -4,7 +4,9 @@ namespace Syzoj.Api.Services
 {
     public interface IProblemResolver
     {
-        IProblemController GetController();
-        IProblemController GetReadonlyController();
+        IProblemController GetProblemFullController();
+        IProblemController GetProblemSubmitonlyController();
+        IProblemController GetProblemViewonlyController();
+        IProblemSubmissionController GetSubmissionController();
     }
 }

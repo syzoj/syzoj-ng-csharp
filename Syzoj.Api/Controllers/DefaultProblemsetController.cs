@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Syzoj.Api.Controllers
 {
-    [Route("api/problem")]
+    [Route("api")]
     public class DefaultProblemsetController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
@@ -24,7 +24,7 @@ namespace Syzoj.Api.Controllers
             this.controllerProvider = controllerProvider;
         }
 
-        [HttpGet("")]
+        [HttpGet("problems")]
         public async Task<IActionResult> GetProblemList()
         {
             var problemSet = dbContext.ProblemSetProblems
@@ -44,8 +44,8 @@ namespace Syzoj.Api.Controllers
         }
 
         // TODO: Server side rendering
-        [HttpGet("{id}/{act?}")]
-        public async Task<IActionResult> GetProblem([FromRoute]string id, [FromRoute]string act)
+        [HttpGet("problem/{id}/{act?}")]
+        public async Task<IActionResult> GetProblem([FromRoute] string id, [FromRoute] string act)
         {
             var problem = await dbContext.ProblemSetProblems
                 .Where(psp => psp.ProblemSetId == 1 && psp.ProblemSetProblemId == id)
@@ -60,15 +60,15 @@ namespace Syzoj.Api.Controllers
             }
             else
             {
-                var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetReadonlyController();
+                var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetProblemSubmitonlyController();
                 if(problemController is ControllerBase controllerBase)
                     controllerBase.ControllerContext = ControllerContext;
                 return await problemController.GetProblem(problem, act);
             }
         }
 
-        [HttpPost("{id}/{act?}")]
-        public async Task<IActionResult> PostProblem([FromRoute]string id, [FromRoute]string act)
+        [HttpPost("problem/{id}/{act?}")]
+        public async Task<IActionResult> PostProblem([FromRoute] string id, [FromRoute] string act)
         {
             var problem = await dbContext.ProblemSetProblems
                 .Where(psp => psp.ProblemSetId == 1 && psp.ProblemSetProblemId == id)
@@ -83,10 +83,58 @@ namespace Syzoj.Api.Controllers
             }
             else
             {
-                var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetReadonlyController();
+                var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetProblemSubmitonlyController();
                 if(problemController is ControllerBase controllerBase)
                     controllerBase.ControllerContext = ControllerContext;
                 return await problemController.PostProblem(problem, act);
+            }
+        }
+
+        [HttpGet("submission/{id}/{act?}")]
+        public async Task<IActionResult> GetProblemSubmission([FromRoute] int id, [FromRoute] string act)
+        {
+            var submission = await dbContext.ProblemSubmissions
+                .Where(ps => ps.ProblemSetId == 1 && ps.Id == id)
+                .Include(ps => ps.Problem)
+                .Include(ps => ps.ProblemSet)
+                .SingleOrDefaultAsync();
+            if(submission == null)
+            {
+                return NotFound(new {
+                    Status = "Fail",
+                    Message = "Submission not found"
+                });
+            }
+            else
+            {
+                var problemController = controllerProvider.GetProblemResolver(submission.Problem).GetSubmissionController();
+                if(problemController is ControllerBase controllerBase)
+                    controllerBase.ControllerContext = ControllerContext;
+                return await problemController.GetSubmission(submission, act);
+            }
+        }
+
+        [HttpPost("submission/{id}/{act?}")]
+        public async Task<IActionResult> PostProblemSubmission([FromRoute] int id, [FromRoute] string act)
+        {
+            var submission = await dbContext.ProblemSubmissions
+                .Where(ps => ps.ProblemSetId == 1 && ps.Id == id)
+                .Include(ps => ps.Problem)
+                .Include(ps => ps.ProblemSet)
+                .SingleOrDefaultAsync();
+            if(submission == null)
+            {
+                return NotFound(new {
+                    Status = "Fail",
+                    Message = "Submission not found"
+                });
+            }
+            else
+            {
+                var problemController = controllerProvider.GetProblemResolver(submission.Problem).GetSubmissionController();
+                if(problemController is ControllerBase controllerBase)
+                    controllerBase.ControllerContext = ControllerContext;
+                return await problemController.PostSubmission(submission, act);
             }
         }
     }
