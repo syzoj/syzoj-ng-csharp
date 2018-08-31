@@ -8,7 +8,5 @@ namespace Syzoj.Api.Services
     {
         Task<IActionResult> GetProblem(ProblemSetProblem psp, string action);
         Task<IActionResult> PostProblem(ProblemSetProblem psp, string action);
-        Task<IActionResult> GetSubmission(ProblemSubmission submission, string action);
-        Task<IActionResult> PostSubmission(ProblemSubmission submission, string action);
     }
 }

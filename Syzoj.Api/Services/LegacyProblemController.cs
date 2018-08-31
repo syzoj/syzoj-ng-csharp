@@ -3,23 +3,49 @@ using Microsoft.AspNetCore.Mvc;
 using Syzoj.Api.Models.Data;
 using MessagePack;
 using Syzoj.Api.Models;
+using Syzoj.Api.Requests;
+using Syzoj.Api.Data;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace Syzoj.Api.Services
 {
     [NonController]
     public class LegacyProblemController : ControllerBase, IProblemController, IProblemSubmissionController
     {
-        private int controllerLevel = 0;
+        private readonly ApplicationDbContext dbContext;
+        public LegacyProblemController(ApplicationDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+        private int controllerLevel = 100;
         public void SetFullController()
         {
+            if(HttpContext.RequestServices.GetService<IHostingEnvironment>().IsDevelopment())
+            {
+                controllerLevel = 0;
+                return;
+            }
             controllerLevel = 0;
         }
         public void SetSubmitonlyController()
         {
+            if(HttpContext.RequestServices.GetService<IHostingEnvironment>().IsDevelopment())
+            {
+                controllerLevel = 0;
+                return;
+            }
             controllerLevel = 1;
         }
         public void SetViewonlyController()
         {
+            if(HttpContext.RequestServices.GetService<IHostingEnvironment>().IsDevelopment())
+            {
+                controllerLevel = 0;
+                return;
+            }
             controllerLevel = 2;
         }
         public async Task<IActionResult> GetProblem(ProblemSetProblem psp, string action)
@@ -31,6 +57,7 @@ namespace Syzoj.Api.Services
                     {
                         return Ok(new {
                             Status = "Success",
+                            Type = ProblemType.SyzojLegacyTraditional,
                             ProblemStatement = MessagePackSerializer.Deserialize<LegacySyzojStatement>(psp.Problem._Statement)
                         });
                     }
@@ -48,9 +75,38 @@ namespace Syzoj.Api.Services
             throw new System.NotImplementedException();
         }
 
-        public Task<IActionResult> PostProblem(ProblemSetProblem psp, string action)
+        public async Task<IActionResult> PostProblem(ProblemSetProblem psp, string action)
         {
-            throw new System.NotImplementedException();
+            switch(action)
+            {
+                case "edit":
+                    if(controllerLevel <= 0)
+                    {
+                        var serializer = new JsonSerializer();
+                        LegacyPutProblemStatementRequest req;
+                        using(var sr = new StreamReader(HttpContext.Request.Body))
+                            using(var jsonTextReader = new JsonTextReader(sr))
+                                req = serializer.Deserialize<LegacyPutProblemStatementRequest>(jsonTextReader);
+                        LegacySyzojStatement st = MessagePackSerializer.Deserialize<LegacySyzojStatement>(psp.Problem._Statement);
+                        st.Description = req.Description;
+                        st.InputFormat = req.InputFormat;
+                        st.OutputFormat = req.OutputFormat;
+                        st.Example = req.Example;
+                        st.LimitAndHint = req.LimitAndHint;
+                        st.Tags = req.Tags;
+                        psp.Problem._Statement = MessagePackSerializer.Serialize<LegacySyzojStatement>(st);
+                        await dbContext.SaveChangesAsync();
+                        return Ok(new {
+                            Status = "Success",
+                        });
+                    }
+                    goto default;
+                default:
+                    return NotFound(new {
+                        Status = "Fail",
+                        Message = "Unsupported action",
+                    });
+            }
         }
 
         public Task<IActionResult> PostSubmission(ProblemSubmission submission, string action)

@@ -60,9 +60,7 @@ namespace Syzoj.Api.Controllers
             }
             else
             {
-                var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetProblemSubmitonlyController();
-                if(problemController is ControllerBase controllerBase)
-                    controllerBase.ControllerContext = ControllerContext;
+                var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetProblemSubmitonlyController(ControllerContext);
                 return await problemController.GetProblem(problem, act);
             }
         }
@@ -83,9 +81,7 @@ namespace Syzoj.Api.Controllers
             }
             else
             {
-                var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetProblemSubmitonlyController();
-                if(problemController is ControllerBase controllerBase)
-                    controllerBase.ControllerContext = ControllerContext;
+                var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetProblemSubmitonlyController(ControllerContext);
                 return await problemController.PostProblem(problem, act);
             }
         }
@@ -107,9 +103,7 @@ namespace Syzoj.Api.Controllers
             }
             else
             {
-                var problemController = controllerProvider.GetProblemResolver(submission.Problem).GetSubmissionController();
-                if(problemController is ControllerBase controllerBase)
-                    controllerBase.ControllerContext = ControllerContext;
+                var problemController = controllerProvider.GetProblemResolver(submission.Problem).GetSubmissionController(ControllerContext);
                 return await problemController.GetSubmission(submission, act);
             }
         }
@@ -131,9 +125,7 @@ namespace Syzoj.Api.Controllers
             }
             else
             {
-                var problemController = controllerProvider.GetProblemResolver(submission.Problem).GetSubmissionController();
-                if(problemController is ControllerBase controllerBase)
-                    controllerBase.ControllerContext = ControllerContext;
+                var problemController = controllerProvider.GetProblemResolver(submission.Problem).GetSubmissionController(ControllerContext);
                 return await problemController.PostSubmission(submission, act);
             }
         }

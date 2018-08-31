@@ -1,9 +1,8 @@
-using MessagePack;
+using Syzoj.Api.Models;
 
-namespace Syzoj.Api.Models
+namespace Syzoj.Api.Requests
 {
-    [MessagePackObject(keyAsPropertyName: true)]
-    public class LegacySyzojStatement
+    public class LegacyPutProblemStatementRequest
     {
         public string Description { get; set; }
         public string InputFormat { get; set; }

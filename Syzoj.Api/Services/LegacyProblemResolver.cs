@@ -1,6 +1,7 @@
 using Syzoj.Api.Controllers;
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Syzoj.Api.Services
 {
@@ -11,30 +12,34 @@ namespace Syzoj.Api.Services
         {
             this.serviceProvider = serviceProvider;
         }
-        public IProblemController GetProblemFullController()
+        public IProblemController GetProblemFullController(ControllerContext context)
         {
             var controller = (LegacyProblemController) serviceProvider.GetRequiredService(typeof(LegacyProblemController));
+            controller.ControllerContext = context;
             controller.SetFullController();
             return controller;
         }
 
-        public IProblemController GetProblemSubmitonlyController()
+        public IProblemController GetProblemSubmitonlyController(ControllerContext context)
         {
             var controller = (LegacyProblemController) serviceProvider.GetRequiredService(typeof(LegacyProblemController));
+            controller.ControllerContext = context;
             controller.SetSubmitonlyController();
             return controller;
         }
 
-        public IProblemController GetProblemViewonlyController()
+        public IProblemController GetProblemViewonlyController(ControllerContext context)
         {
             var controller = (LegacyProblemController) serviceProvider.GetRequiredService(typeof(LegacyProblemController));
+            controller.ControllerContext = context;
             controller.SetViewonlyController();
             return controller;
         }
 
-        public IProblemSubmissionController GetSubmissionController()
+        public IProblemSubmissionController GetSubmissionController(ControllerContext context)
         {
             var controller = (LegacyProblemController) serviceProvider.GetRequiredService(typeof(LegacyProblemController));
+            controller.ControllerContext = context;
             return controller;
         }
     }
