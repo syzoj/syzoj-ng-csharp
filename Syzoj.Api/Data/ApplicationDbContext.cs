@@ -30,7 +30,7 @@ namespace Syzoj.Api.Data
             modelBuilder.Entity<User>()
                 .HasIndex(b => b.UserName)
                 .IsUnique()
-                .HasName("IX_Users_UserNAme");
+                .HasName("IX_Users_UserName");
             modelBuilder.Entity<User>()
                 .HasIndex(b => b.Email)
                 .IsUnique()
