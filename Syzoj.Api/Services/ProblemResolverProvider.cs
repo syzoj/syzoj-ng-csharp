@@ -3,7 +3,7 @@ using Syzoj.Api.Models.Data;
 
 namespace Syzoj.Api.Services
 {
-    public class ProblemResolverHandler : IProblemResolverProvider
+    public class ProblemResolverProvider : IProblemResolverProvider
     {
         public IProblemResolver GetProblemResolver(Problem problem)
         {

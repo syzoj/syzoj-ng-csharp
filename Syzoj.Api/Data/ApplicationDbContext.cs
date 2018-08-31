@@ -104,7 +104,7 @@ namespace Syzoj.Api.Data
                 new Forum() { Id = 2, Info = "Default forum" },
                 new Forum() { Id = 3, Info = "Problem forum" });
             modelBuilder.Entity<ProblemSet>().HasData(
-                new ProblemSet() { Id = 1, Info = "Default problem set" });
+                new ProblemSet() { Id = 1, Info = "Default problem set", Type = ProblemSetType.Default });
         }
     }
 }

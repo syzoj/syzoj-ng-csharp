@@ -63,7 +63,9 @@ namespace Syzoj.Api
 
             services.AddScoped<IBlobManager, BlobManager>();
 
-            services.AddScoped<IProblemResolverProvider, ProblemResolverHandler>();
+            services.AddSingleton<IProblemResolverProvider, ProblemResolverProvider>();
+
+            services.AddSingleton<IProblemSetServiceProvider, ProblemSetServiceProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
