@@ -24,6 +24,7 @@ namespace Syzoj.Api.Models.Data
         /// at all here.
         /// </remark>
         [EmailAddress]
+        [MaxLength(256)]
         [Column(TypeName = "CITEXT")]
         public string Email { get; set; }
         public UserPasswordType PasswordType { get; set; }
