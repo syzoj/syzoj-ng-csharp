@@ -6,7 +6,10 @@ namespace Syzoj.Api.Services
 {
     public interface IProblemController
     {
-        Task<IActionResult> GetProblem(ProblemSetProblem psp, string action);
-        Task<IActionResult> PostProblem(ProblemSetProblem psp, string action);
+        /// <remark>
+        /// The <see cref="Models.Data.ProblemSetProblem" /> instance supplied here must
+        /// have <see cref="Models.Data.Problem" /> included.
+        /// </remark>
+        Task<IActionResult> Problem(ProblemSetProblem psp, string action);
     }
 }

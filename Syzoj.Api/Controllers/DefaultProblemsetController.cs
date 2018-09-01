@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Syzoj.Api.Controllers
 {
+    [Produces("application/json")]
     [Route("api")]
     [ApiController]
     public class DefaultProblemsetController : ControllerBase
@@ -62,7 +63,7 @@ namespace Syzoj.Api.Controllers
             else
             {
                 var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetProblemSubmitonlyController(ControllerContext);
-                return await problemController.GetProblem(problem, act);
+                return await problemController.Problem(problem, act);
             }
         }
 
@@ -83,7 +84,7 @@ namespace Syzoj.Api.Controllers
             else
             {
                 var problemController = controllerProvider.GetProblemResolver(problem.Problem).GetProblemSubmitonlyController(ControllerContext);
-                return await problemController.PostProblem(problem, act);
+                return await problemController.Problem(problem, act);
             }
         }
 
@@ -105,7 +106,7 @@ namespace Syzoj.Api.Controllers
             else
             {
                 var problemController = controllerProvider.GetProblemResolver(submission.Problem).GetSubmissionController(ControllerContext);
-                return await problemController.GetSubmission(submission, act);
+                return await problemController.Submission(submission, act);
             }
         }
 
@@ -127,7 +128,7 @@ namespace Syzoj.Api.Controllers
             else
             {
                 var problemController = controllerProvider.GetProblemResolver(submission.Problem).GetSubmissionController(ControllerContext);
-                return await problemController.PostSubmission(submission, act);
+                return await problemController.Submission(submission, act);
             }
         }
     }

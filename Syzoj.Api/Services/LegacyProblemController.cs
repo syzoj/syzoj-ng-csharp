@@ -48,68 +48,61 @@ namespace Syzoj.Api.Services
             }
             controllerLevel = 2;
         }
-        public async Task<IActionResult> GetProblem(ProblemSetProblem psp, string action)
+        public async Task<IActionResult> Problem(ProblemSetProblem psp, string action)
         {
-            switch(action)
+            switch(HttpContext.Request.Method)
             {
-                case null:
-                    if(controllerLevel <= 2)
+                case "GET":
+                    switch(action)
                     {
-                        return Ok(new {
-                            Status = "Success",
-                            Type = ProblemType.SyzojLegacyTraditional,
-                            ProblemStatement = MessagePackSerializer.Deserialize<LegacySyzojStatement>(psp.Problem._Statement)
-                        });
+                        case null:
+                            if(controllerLevel <= 2)
+                            {
+                                return Ok(new {
+                                    Status = "Success",
+                                    Type = ProblemType.SyzojLegacyTraditional,
+                                    ProblemStatement = MessagePackSerializer.Deserialize<LegacySyzojStatement>(psp.Problem._Statement)
+                                });
+                            }
+                            break;
                     }
-                    goto default;
-                default:
-                    return NotFound(new {
-                        Status = "Fail",
-                        Message = "Unsupported action"
-                    });
-            }
-        }
-
-        public Task<IActionResult> GetSubmission(ProblemSubmission submission, string action)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public async Task<IActionResult> PostProblem(ProblemSetProblem psp, string action)
-        {
-            switch(action)
-            {
-                case "edit":
-                    if(controllerLevel <= 0)
+                    break;
+                case "POST":
+                    switch(action)
                     {
-                        var serializer = new JsonSerializer();
-                        LegacyPutProblemStatementRequest req;
-                        using(var sr = new StreamReader(HttpContext.Request.Body))
-                            using(var jsonTextReader = new JsonTextReader(sr))
-                                req = serializer.Deserialize<LegacyPutProblemStatementRequest>(jsonTextReader);
-                        LegacySyzojStatement st = MessagePackSerializer.Deserialize<LegacySyzojStatement>(psp.Problem._Statement);
-                        st.Description = req.Description;
-                        st.InputFormat = req.InputFormat;
-                        st.OutputFormat = req.OutputFormat;
-                        st.Example = req.Example;
-                        st.LimitAndHint = req.LimitAndHint;
-                        st.Tags = req.Tags;
-                        psp.Problem._Statement = MessagePackSerializer.Serialize<LegacySyzojStatement>(st);
-                        await dbContext.SaveChangesAsync();
-                        return Ok(new {
-                            Status = "Success",
-                        });
+                        case "edit":
+                            if(controllerLevel <= 0)
+                            {
+                                var serializer = new JsonSerializer();
+                                LegacyPutProblemStatementRequest req;
+                                using(var sr = new StreamReader(HttpContext.Request.Body))
+                                    using(var jsonTextReader = new JsonTextReader(sr))
+                                        req = serializer.Deserialize<LegacyPutProblemStatementRequest>(jsonTextReader);
+                                LegacySyzojStatement st = MessagePackSerializer.Deserialize<LegacySyzojStatement>(psp.Problem._Statement);
+                                st.Description = req.Description;
+                                st.InputFormat = req.InputFormat;
+                                st.OutputFormat = req.OutputFormat;
+                                st.Example = req.Example;
+                                st.LimitAndHint = req.LimitAndHint;
+                                st.Tags = req.Tags;
+                                psp.Problem._Statement = MessagePackSerializer.Serialize<LegacySyzojStatement>(st);
+                                await dbContext.SaveChangesAsync();
+                                return Ok(new {
+                                    Status = "Success",
+                                });
+                            }
+                            break;
                     }
-                    goto default;
-                default:
-                    return NotFound(new {
-                        Status = "Fail",
-                        Message = "Unsupported action",
-                    });
+                    break;
+
             }
+            return NotFound(new {
+                Status = "Fail",
+                Message = "Unsupported action"
+            });
         }
 
-        public Task<IActionResult> PostSubmission(ProblemSubmission submission, string action)
+        public Task<IActionResult> Submission(ProblemSubmission submission, string action)
         {
             throw new System.NotImplementedException();
         }
