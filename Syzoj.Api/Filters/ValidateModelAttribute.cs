@@ -15,10 +15,6 @@ namespace Syzoj.Api.Filters
 {
     public class ValidateModelAttribute : ActionFilterAttribute
     {
-        public ValidateModelAttribute()
-        {
-        }
-
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             if (!context.ModelState.IsValid)
@@ -34,14 +30,6 @@ namespace Syzoj.Api.Filters
             {
                 await next();
             }
-        }
-    }
-
-    public class ValidationFailResult : ObjectResult
-    {
-        public ValidationFailResult(IActionResult res) : base(res)
-        {
-            StatusCode = 400;
         }
     }
 }

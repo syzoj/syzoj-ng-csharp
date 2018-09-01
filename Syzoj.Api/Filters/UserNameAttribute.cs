@@ -7,7 +7,7 @@ namespace Syzoj.Api.Filters
     /// Ensures that usernames consist of only lowercase letters, digits,
     /// underscore and hyphen, and is between 3 and 32 characters.
     /// </summary>
-    /// <see cref="MiscUtils.CheckUserName(string)" />
+    /// <seealso cref="MiscUtils.CheckUserName(string)" />
     public class UserNameAttribute : ValidationAttribute
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)

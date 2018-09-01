@@ -20,6 +20,7 @@ using Syzoj.Api.Services;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 using Syzoj.Api.Models.Responses;
+using Syzoj.Api.Filters;
 
 namespace Syzoj.Api
 {
@@ -94,6 +95,10 @@ namespace Syzoj.Api
                 var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
+
+                c.OperationFilter<RequiresLoginOperationFilter>();
+                c.OperationFilter<ValidateModelOperationFilter>();
+                c.OperationFilter<SessionHeaderOperationFilter>();
             });
         }
 

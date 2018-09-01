@@ -11,6 +11,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Z.EntityFramework.Plus;
 using Syzoj.Api.Filters;
+using Syzoj.Api.Models.Responses;
 
 namespace Syzoj.Api.Controllers
 {
@@ -26,15 +27,20 @@ namespace Syzoj.Api.Controllers
             this.dbContext = dbContext;
             this.sess = sess;
         }
-        // TODO: Check for permission to post in forum
+        /// <summary>
+        /// Creates a new discussion entry in public forum.
+        /// </summary>
+        /// <response code="200">
+        /// Possible error codes:
+        /// - 0: Success.
+        /// </response>
         [HttpPost("discussion")]
         [ValidateModel]
+        [RequiresLogin]
+        [ProducesResponseType(typeof(BaseResponse), 200)]
+        [ProducesResponseType(typeof(DiscussionEntryCreatedResponse), 200)]
         public async Task<IActionResult> CreateDiscuss([FromBody] CreateDiscussionRequest req)
         {
-            if(!sess.IsAuthenticated())
-            {
-                return Unauthorized();
-            }
             var entry = new DiscussionEntry() {
                 Title = req.Title,
                 Content = req.Content,
@@ -51,20 +57,26 @@ namespace Syzoj.Api.Controllers
             };
             dbContext.ForumDiscussions.Add(fd);
             await dbContext.SaveChangesAsync();
-            return Ok(new {
-                Status = "Success",
+            return Ok(new DiscussionEntryCreatedResponse() {
                 DiscussionEntryId = entry.Id,
             });
         }
 
+        /// <summary>
+        /// Creates a reply for the given discussion entry.
+        /// </summary>
+        /// <response code="200">
+        /// Possible error codes:
+        /// - 0: Success.
+        /// - 2001: Discussion entry does not exist in public forum.
+        /// </response>
         [HttpPost("reply")]
         [ValidateModel]
+        [RequiresLogin]
+        [ProducesResponseType(typeof(BaseResponse), 200)]
+        [ProducesResponseType(typeof(DiscussionReplyEntryCreatedResponse), 200)]
         public async Task<IActionResult> CreateReply([FromBody] CreateReplyRequest req)
         {
-            if(!sess.IsAuthenticated())
-            {
-                return Unauthorized();
-            }
             var discussion = await dbContext.ForumDiscussions
                 .Where(fd => fd.ForumId == 2 && fd.DiscussionEntryId == req.DiscussionEntryId)
                 .Include(fd => fd.DiscussionEntry)
@@ -72,8 +84,9 @@ namespace Syzoj.Api.Controllers
                 .SingleOrDefaultAsync();
             if(discussion == null)
             {
-                return Ok(new {
+                return Ok(new BaseResponse() {
                     Status = "Fail",
+                    Code = 2001,
                     Message = "Discussion entry does not exist in default forum"
                 });
             }
@@ -97,21 +110,31 @@ namespace Syzoj.Api.Controllers
                 await dbContext.SaveChangesAsync();
                 transaction.Commit();
             }
-            return Ok(new {
-                Status = "Success"
+            return Ok(new DiscussionReplyEntryCreatedResponse() {
+                Status = "Success",
+                Code = 0,
+                DiscussionReplyEntryId = entry.Id,
             });
         }
 
+        /// <summary>
+        /// Gets all discussion entries in public forum.
+        /// </summary>
+        /// <response code="200">
+        /// Possible error codes:
+        /// - 0: Success.
+        /// </response>
         [HttpGet("discussion")]
+        [ProducesResponseType(typeof(DiscussionEntryListResponse), 200)]
         public async Task<IActionResult> GetForum()
         {
-            var discussions = await dbContext.ForumDiscussions
+            var discussions = dbContext.ForumDiscussions
                 .Where(fd => fd.ForumId == 2)
                 .OrderByDescending(fd => fd.TimeLastReply)
                 .Include(fd => fd.DiscussionEntry)
                 .Select(fd => fd.DiscussionEntry)
                 .Include(d => d.Author)
-                .Select(d => new {
+                .Select(d => new DiscussionEntryResponse() {
                     Id = d.Id,
                     Title = d.Title,
                     AuthorId = d.AuthorId,
@@ -120,14 +143,25 @@ namespace Syzoj.Api.Controllers
                     TimeLastReply = d.TimeLastReply,
                     TimeModified = d.TimeModified,
                 })
-                .ToListAsync();
-            return Ok(new {
-                Status = "Success",
+                .AsEnumerable();
+            return Ok(new DiscussionEntryListResponse() {
                 DiscussionEntries = discussions,
             });
         }
-        
+
+        /// <summary>
+        /// Gets a discussion entry in public forum.
+        /// </summary>
+        /// <response code="200">
+        /// Possible error codes:
+        /// - 0: Success.
+        /// </response>
+        /// <response code="404">
+        /// The discussion entry with the specified ID does not exist in public forum.
+        /// </response>
         [HttpGet("discussion/{id}")]
+        [ProducesResponseType(typeof(DiscussionEntrySingleResponse), 200)]
+        [ProducesResponseType(typeof(BaseResponse), 404)]
         public async Task<IActionResult> GetDiscussionEntry(int id)
         {
             var discussionEntry = await dbContext.ForumDiscussions
@@ -138,7 +172,7 @@ namespace Syzoj.Api.Controllers
                 .Include(d => d.Author)
                 .Include(d => d.Replies)
                 .ThenInclude(r => r.Author)
-                .Select(d => new {
+                .Select(d => new DiscussionEntryResponse() {
                     Id = d.Id,
                     Title = d.Title,
                     AuthorId = d.AuthorId,
@@ -146,7 +180,8 @@ namespace Syzoj.Api.Controllers
                     TimeCreated = d.TimeCreated,
                     TimeLastReply = d.TimeLastReply,
                     TimeModified = d.TimeModified,
-                    Replies = d.Replies.OrderBy(r => r.TimeCreated).Select(r => new {
+                    Replies = d.Replies.OrderBy(r => r.TimeCreated).Select(r => new DiscussionReplyEntryResponse() {
+                        AuthorId = r.AuthorId,
                         AuthorName = r.Author.UserName,
                         TimeCreated = r.TimeCreated,
                         Content = r.Content,
@@ -155,14 +190,14 @@ namespace Syzoj.Api.Controllers
                 .FirstOrDefaultAsync();
             if(discussionEntry == null)
             {
-                return Ok(new {
+                return NotFound(new BaseResponse() {
                     Status = "Fail",
                     Message = "Discussion entry does not exist in default forum",
                 });
             }
             else
             {
-                return Ok(new {
+                return Ok(new DiscussionEntrySingleResponse() {
                     Status = "Success",
                     DiscussionEntry = discussionEntry
                 });
