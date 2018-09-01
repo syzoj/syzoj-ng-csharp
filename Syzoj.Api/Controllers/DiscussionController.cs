@@ -10,9 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Collections.Generic;
 using Z.EntityFramework.Plus;
+using Syzoj.Api.Filters;
 
 namespace Syzoj.Api.Controllers
 {
+    [Produces("application/json")]
     [Route("api/discuss")]
     [ApiController]
     public class DiscussionController : ControllerBase
@@ -26,7 +28,8 @@ namespace Syzoj.Api.Controllers
         }
         // TODO: Check for permission to post in forum
         [HttpPost("discussion")]
-        public async Task<IActionResult> CreateDiscuss([FromBody]CreateDiscussionRequest req)
+        [ValidateModel]
+        public async Task<IActionResult> CreateDiscuss([FromBody] CreateDiscussionRequest req)
         {
             if(!sess.IsAuthenticated())
             {
@@ -53,8 +56,10 @@ namespace Syzoj.Api.Controllers
                 DiscussionEntryId = entry.Id,
             });
         }
+
         [HttpPost("reply")]
-        public async Task<IActionResult> CreateReply([FromBody]CreateReplyRequest req)
+        [ValidateModel]
+        public async Task<IActionResult> CreateReply([FromBody] CreateReplyRequest req)
         {
             if(!sess.IsAuthenticated())
             {
@@ -96,6 +101,7 @@ namespace Syzoj.Api.Controllers
                 Status = "Success"
             });
         }
+
         [HttpGet("discussion")]
         public async Task<IActionResult> GetForum()
         {
@@ -120,6 +126,7 @@ namespace Syzoj.Api.Controllers
                 DiscussionEntries = discussions,
             });
         }
+        
         [HttpGet("discussion/{id}")]
         public async Task<IActionResult> GetDiscussionEntry(int id)
         {

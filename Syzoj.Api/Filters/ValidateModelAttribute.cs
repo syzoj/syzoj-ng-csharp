@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
+using Syzoj.Api.Models.Responses;
 
 namespace Syzoj.Api.Filters
 {
@@ -22,10 +23,17 @@ namespace Syzoj.Api.Filters
         {
             if (!context.ModelState.IsValid)
             {
-                context.Result = new JsonResult(new { status = 1, error = context.ModelState.ToList() });
+                context.Result = new BadRequestObjectResult(new InvalidModelStateResponse() {
+                    Errors = context.ModelState.SelectMany(ms => ms.Value.Errors.Select(me => new ModelStateError() {
+                        Name = ms.Key,
+                        ErrorMessage = me.ErrorMessage,
+                    })),
+                });
             }
-
-            await next();
+            else
+            {
+                await next();
+            }
         }
     }
 

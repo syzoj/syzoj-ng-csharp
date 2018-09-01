@@ -19,6 +19,7 @@ using Syzoj.Api.Utils;
 using Syzoj.Api.Services;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
+using Syzoj.Api.Models.Responses;
 
 namespace Syzoj.Api
 {
@@ -41,6 +42,13 @@ namespace Syzoj.Api
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(opt => opt.SerializerSettings.ContractResolver
                     = new DefaultContractResolver());
+            
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressConsumesConstraintForFormFileParameters = true;
+                options.SuppressInferBindingSourcesForParameters = true;
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
