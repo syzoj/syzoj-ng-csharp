@@ -8,6 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
+using SharpFileSystem;
+using System;
+using SharpFileSystem.FileSystems;
+using System.IO;
 
 namespace Syzoj.Api
 {
@@ -42,6 +46,21 @@ namespace Syzoj.Api
                 var factory = new ConnectionFactory();
                 Configuration.GetSection("RabbitMQ").Bind(factory);
                 return factory.CreateConnection();
+            });
+
+            services.AddSingleton<IFileSystem>(s => {
+                var section = Configuration.GetSection("FileSystem");
+                var type = section.GetValue<string>("Type");
+                switch(type)
+                {
+                    case "Memory":
+                        return new MemoryFileSystem();
+                    case "Local":
+                        var path = section.GetValue<string>("Path");
+                        return new PhysicalFileSystem(path);
+                    default:
+                        throw new ArgumentException("Invalid FileSystemType in configuration file.");
+                }
             });
         }
 
