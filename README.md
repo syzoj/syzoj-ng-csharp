@@ -8,3 +8,4 @@ The SYZOJ next generation api server, in ASP .NET Core
 * Redis
 * PostgreSQL
 * Node.js
+* RabbitMQ

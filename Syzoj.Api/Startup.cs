@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
+using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
 
 namespace Syzoj.Api
 {
@@ -26,6 +29,19 @@ namespace Syzoj.Api
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/build";
+            });
+
+            services.AddSingleton<IConnectionMultiplexer>(s => {
+                return ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Redis"));
+            });
+
+            services.AddDbContext<AppDbContext>(options => 
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            
+            services.AddSingleton<IConnection>(s => {
+                var factory = new ConnectionFactory();
+                Configuration.GetSection("RabbitMQ").Bind(factory);
+                return factory.CreateConnection();
             });
         }
 
