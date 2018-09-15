@@ -5,6 +5,7 @@ using Syzoj.Api.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Syzoj.Api.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace Syzoj.Api.Controllers
 {
@@ -19,6 +20,16 @@ namespace Syzoj.Api.Controllers
             this.dbContext = dbContext;
             this.problemParserProvider = problemParserProvider;
             this.problemsetManagerProvider = problemsetManagerProvider;
+        }
+
+        private Task<Problemset> GetProblemset(int id)
+        {
+            return dbContext.Problemsets.Where(psp => psp.Id == id).FirstOrDefaultAsync();
+        }
+
+        private Task<ProblemsetProblem> GetProblemsetProblem(int id, string pid)
+        {
+            return dbContext.ProblemsetProblems.Where(psp => psp.ProblemsetId == id && psp.ProblemsetProblemId == pid).Include(psp => psp.Problem).FirstOrDefaultAsync();
         }
 
         public class ProblemsetProblemListResponse
@@ -62,7 +73,7 @@ namespace Syzoj.Api.Controllers
         [HttpGet("{id}/problems")]
         public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] int id)
         {
-            Problemset ps = await dbContext.Problemsets.Where(psp => psp.Id == id).FirstOrDefaultAsync();
+            Problemset ps = await GetProblemset(id);
             if(ps == null)
             {
                 return new ProblemsetProblemListResponse() {
@@ -91,6 +102,67 @@ namespace Syzoj.Api.Controllers
                         ProblemsetProblemId = x.ProblemsetProblemId,
                         Title = x.Problem.Title,
                     }),
+            };
+        }
+
+        public class PatchProblemIdRequest
+        {
+            [Required]
+            public string NewId { get; set; }
+        }
+        public class PatchProblemIdResponse
+        {
+            /// <summary>
+            /// Whether the request was successful or not.
+            /// </summary>
+            public bool Success { get; set; }
+            /// <summary>
+            /// An integer describing the status of the query. Possible values are:
+            /// - 0: The request was successful.
+            /// - 1001: The problemset doesn't exist.
+            /// - 1002: The problemset is not editable.
+            /// - 1003: The problem with specified id doesn't exist.
+            /// </summary>
+            public int Code { get; set; }
+        }
+        /// <summary>
+        /// Changes problem id for a specified problem.
+        /// </summary>
+        // TODO: Handle problem id conflict
+        [HttpPatch("{id}/problem/{pid}/id")]
+        public async Task<ActionResult<PatchProblemIdResponse>> PatchProblemId(int id, string pid, [FromBody] PatchProblemIdRequest request)
+        {
+            Problemset ps = await GetProblemset(id);
+            if(ps == null)
+            {
+                return new PatchProblemIdResponse() {
+                    Success = false,
+                    Code = 1001,
+                };
+            }
+            IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
+            if(!await problemsetManager.IsProblemsetEditableAsync(ps))
+            {
+                return new PatchProblemIdResponse() {
+                    Success = false,
+                    Code = 1002,
+                };
+            }
+
+            ProblemsetProblem problem = await GetProblemsetProblem(id, pid);
+            if(problem == null)
+            {
+                return new PatchProblemIdResponse() {
+                    Success = false,
+                    Code = 1003,
+                };
+            }
+
+            problem.ProblemsetProblemId = request.NewId;
+            await dbContext.SaveChangesAsync();
+            return new PatchProblemIdResponse() {
+                Success = true,
+                Code = 0,
             };
         }
     }
