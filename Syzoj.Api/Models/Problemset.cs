@@ -7,6 +7,7 @@ namespace Syzoj.Api.Models
     {
         [Key]
         public int Id { get; set; }
+        public string Type { get; set; }
         public ICollection<ProblemsetProblem> ProblemsetProblems { get; set; }
     }
 }
