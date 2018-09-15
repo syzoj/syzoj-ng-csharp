@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Syzoj.Api.Models
 {
@@ -8,6 +9,9 @@ namespace Syzoj.Api.Models
         public Problemset Problemset { get; set; }
         public int ProblemId { get; set; }
         public Problem Problem { get; set; }
+        [MinLength(1)]
+        [MaxLength(128)]
+        [Required]
         public string ProblemsetProblemId { get; set; }
     }
 }
