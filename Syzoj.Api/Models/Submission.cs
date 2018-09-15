@@ -9,5 +9,6 @@ namespace Syzoj.Api.Models
         public int ProblemId { get; set; }
         public Problem Problem { get; set; }
         public string Path { get; set; }
+        public byte[] Content { get; set; }
     }
 }
