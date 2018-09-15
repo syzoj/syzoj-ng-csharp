@@ -56,14 +56,21 @@ namespace Syzoj.Api.Controllers
             /// The global problem ID for the problem.
             /// </summary>
             public int ProblemId { get; set; }
+
             /// <summary>
             /// The problem identifier in this problemset.
             /// </summary>
             public string ProblemsetProblemId { get; set; }
+
             /// <summary>
             /// The title of the problem.
             /// </summary>
             public string Title { get; set; }
+
+            /// <summary>
+            /// The type of the problem.
+            /// </summary>
+            public string ProblemType { get; set; }
         }
 
         /// <summary>
@@ -101,6 +108,7 @@ namespace Syzoj.Api.Controllers
                         ProblemId = x.Problem.Id,
                         ProblemsetProblemId = x.ProblemsetProblemId,
                         Title = x.Problem.Title,
+                        ProblemType = x.Problem.ProblemType,
                     }),
             };
         }
