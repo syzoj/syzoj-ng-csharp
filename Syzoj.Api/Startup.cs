@@ -14,6 +14,9 @@ using SharpFileSystem.FileSystems;
 using System.IO;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
+using Syzoj.Api.Data;
+using Syzoj.Api.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Syzoj.Api
 {
@@ -61,8 +64,21 @@ namespace Syzoj.Api
 
             services.AddSession();
 
-            services.AddDbContext<AppDbContext>(options => 
+            services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("Database")));
+            // services.AddIdentityCore<ApplicationUser>()
+            services.AddAuthentication(options => {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            })
+            .AddIdentityCookies(options => { });
+            services.ConfigureApplicationCookie(options => {
+                options.Cookie.Name = "SYZOJSESS";
+            });
+            services.AddIdentityCore<ApplicationUser>()
+                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                 .AddDefaultUI()
+                 .AddDefaultTokenProviders();
             
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
@@ -113,6 +129,7 @@ namespace Syzoj.Api
             });
 
             app.UseSession();
+            app.UseAuthentication();
             app.UseMvc();
 
             app.UseSpa(spa =>

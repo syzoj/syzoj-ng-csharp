@@ -4,16 +4,17 @@ using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Syzoj.Api.Data;
 
 namespace Syzoj.Api.Controllers
 {
     [Route("api/problemset")]
     public class ProblemsetController : ControllerBase
     {
-        private readonly AppDbContext dbContext;
+        private readonly ApplicationDbContext dbContext;
         private readonly ProblemParserProvider problemParserProvider;
         private readonly ProblemsetManagerProvider problemsetManagerProvider;
-        public ProblemsetController(AppDbContext dbContext, ProblemParserProvider problemParserProvider, ProblemsetManagerProvider problemsetManagerProvider)
+        public ProblemsetController(ApplicationDbContext dbContext, ProblemParserProvider problemParserProvider, ProblemsetManagerProvider problemsetManagerProvider)
         {
             this.dbContext = dbContext;
             this.problemParserProvider = problemParserProvider;
@@ -44,6 +45,10 @@ namespace Syzoj.Api.Controllers
             public string ProblemsetProblemId { get; set; }
             public string Title { get; set; }
         }
+        /// <summary>
+        /// Gets the list of all problems in the problemset.
+        /// </summary>
+        /// <param name="id">The ID of the problemset.</param>
         [HttpGet("{id}")]
         public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] int id)
         {
