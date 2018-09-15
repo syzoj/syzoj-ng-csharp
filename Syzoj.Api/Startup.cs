@@ -104,8 +104,10 @@ namespace Syzoj.Api
                 }
             });
 
-            services.AddSingleton<ProblemsetManagerProvider>();
-            services.AddSingleton<ProblemParserProvider>();
+            services.AddScoped<ProblemsetManagerProvider>();
+            services.AddScoped<DebugProblemsetManager>();
+
+            services.AddScoped<ProblemParserProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

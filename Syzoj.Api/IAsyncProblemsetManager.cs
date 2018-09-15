@@ -7,13 +7,17 @@ namespace Syzoj.Api
     /// This interface defines whether a given user is authorized to do
     /// specified action under certain circumstances.
     /// </summary>
-    public interface IProblemsetManager
+    public interface IAsyncProblemsetManager
     {
+        /// <summary>
+        /// Returns whether the user can edit the problemset.
+        /// </summary>
+        Task<bool> IsProblemsetEditableAsync(Problemset problemset);
         /// <summary>
         /// Returns whether the problem list should be visible to the
         /// current user.
         /// </summary>
-        Task<bool> IsProblemListVisible(Problemset problemset);
+        Task<bool> IsProblemListVisibleAsync(Problemset problemset);
 
         /// <summary>
         /// Returns whether the problem is visible in the problem list to
@@ -25,37 +29,37 @@ namespace Syzoj.Api
         /// is generated, so a page intending to show 10 problems may end up
         /// showing nothing. You should always return true.
         /// </remark>
-        Task<bool> IsProblemVisible(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemVisibleAsync(Problemset problemset, ProblemsetProblem problem);
 
         /// <summary>
         /// Returns whether the problem is viewable to the current user.
         /// </summary>
-        Task<bool> IsProblemViewable(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemViewableAsync(Problemset problemset, ProblemsetProblem problem);
 
         /// <summary>
         /// Returns whether the current user can submit to the problem.
         /// </summary>
-        Task<bool> IsProblemSubmittable(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemSubmittableAsync(Problemset problemset, ProblemsetProblem problem);
 
         /// <summary>
         /// Returns whether the current user can edit the problem data.
         /// </summary>
-        Task<bool> IsProblemEditable(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemEditableAsync(Problemset problemset, ProblemsetProblem problem);
 
         /// <summary>
         /// Returns whether the submission is visible in the submission history to
         /// the current user.
         /// </summary>
-        Task<bool> IsSubmissionVisible(Problemset problemset, Submission submission);
+        Task<bool> IsSubmissionVisibleAsync(Problemset problemset, Submission submission);
 
         /// <summary>
         /// Returns whether the current user can view the specified submission.
         /// </summary>
-        Task<bool> IsSubmissionViewable(Problemset problemset, Submission submission);
+        Task<bool> IsSubmissionViewableAsync(Problemset problemset, Submission submission);
 
         /// <summary>
         /// Returns whether the current user can interact with the specified submission.
         /// </summary>
-        Task<bool> IsSubmissionInteractable(Problemset problemset, Submission submission);
+        Task<bool> IsSubmissionInteractableAsync(Problemset problemset, Submission submission);
     }
 }

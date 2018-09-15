@@ -41,15 +41,25 @@ namespace Syzoj.Api.Controllers
         }
         public class ProblemsetProblemSummaryEntry
         {
+            /// <summary>
+            /// The global problem ID for the problem.
+            /// </summary>
             public int ProblemId { get; set; }
+            /// <summary>
+            /// The problem identifier in this problemset.
+            /// </summary>
             public string ProblemsetProblemId { get; set; }
+            /// <summary>
+            /// The title of the problem.
+            /// </summary>
             public string Title { get; set; }
         }
+
         /// <summary>
         /// Gets the list of all problems in the problemset.
         /// </summary>
         /// <param name="id">The ID of the problemset.</param>
-        [HttpGet("{id}")]
+        [HttpGet("{id}/problems")]
         public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] int id)
         {
             Problemset ps = await dbContext.Problemsets.Where(psp => psp.Id == id).FirstOrDefaultAsync();
@@ -61,8 +71,8 @@ namespace Syzoj.Api.Controllers
                 };
             }
 
-            IProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await problemsetManager.IsProblemListVisible(ps))
+            IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
+            if(!await problemsetManager.IsProblemListVisibleAsync(ps))
             {
                 return new ProblemsetProblemListResponse() {
                     Success = false,

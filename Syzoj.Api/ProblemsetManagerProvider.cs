@@ -1,17 +1,23 @@
+using System;
 using System.Collections.Generic;
 
 namespace Syzoj.Api
 {
     public class ProblemsetManagerProvider
     {
-        private static Dictionary<string, IProblemsetManager> providers = new Dictionary<string, IProblemsetManager>()
+        private static Dictionary<string, Type> providers = new Dictionary<string, Type>()
         {
-
+            { "debug", typeof(DebugProblemsetManager) }
         };
+        private readonly IServiceProvider serviceProvider;
 
-        public IProblemsetManager GetProblemsetManager(string Name)
+        public ProblemsetManagerProvider(IServiceProvider serviceProvider)
         {
-            return providers.GetValueOrDefault(Name);
+            this.serviceProvider = serviceProvider;
+        }
+        public IAsyncProblemsetManager GetProblemsetManager(string Name)
+        {
+            return (IAsyncProblemsetManager) serviceProvider.GetService(providers.GetValueOrDefault(Name));
         }
     }
 }
