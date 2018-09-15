@@ -20,18 +20,6 @@ namespace Syzoj.Api
         Task<bool> IsProblemListVisibleAsync(Problemset problemset);
 
         /// <summary>
-        /// Returns whether the problem is visible in the problem list to
-        /// the current user.
-        /// </summary>
-        /// <remark>
-        /// It is not recommended to hide problems from users in this way
-        /// because the problem behaves as if it was removed after the list
-        /// is generated, so a page intending to show 10 problems may end up
-        /// showing nothing. You should always return true.
-        /// </remark>
-        Task<bool> IsProblemVisibleAsync(Problemset problemset, ProblemsetProblem problem);
-
-        /// <summary>
         /// Returns whether the problem is viewable to the current user.
         /// </summary>
         Task<bool> IsProblemViewableAsync(Problemset problemset, ProblemsetProblem problem);
@@ -47,10 +35,9 @@ namespace Syzoj.Api
         Task<bool> IsProblemEditableAsync(Problemset problemset, ProblemsetProblem problem);
 
         /// <summary>
-        /// Returns whether the submission is visible in the submission history to
-        /// the current user.
+        /// Returns whether the current user can see the list of submissions.
         /// </summary>
-        Task<bool> IsSubmissionVisibleAsync(Problemset problemset, Submission submission);
+        Task<bool> IsSubmissionListVisibleAsync(Problemset problemset);
 
         /// <summary>
         /// Returns whether the current user can view the specified submission.

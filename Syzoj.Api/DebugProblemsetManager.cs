@@ -45,7 +45,7 @@ namespace Syzoj.Api
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsSubmissionVisibleAsync(Problemset problemset, Submission submission)
+        public Task<bool> IsSubmissionListVisibleAsync(Problemset problemset)
         {
             return Task.FromResult(true);
         }

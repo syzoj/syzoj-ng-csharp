@@ -90,8 +90,7 @@ namespace Syzoj.Api.Controllers
                         ProblemId = x.Problem.Id,
                         ProblemsetProblemId = x.ProblemsetProblemId,
                         Title = x.Problem.Title,
-                    })
-                    .AsEnumerable(),
+                    }),
             };
         }
     }
