@@ -50,15 +50,18 @@ namespace Syzoj.Api
             });
 
             services.AddSingleton<IConnectionMultiplexer>(s => {
-                return ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Redis"));
+                return ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis"));
             });
 
             services.AddDbContext<AppDbContext>(options => 
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(Configuration.GetConnectionString("Database")));
             
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
-                Configuration.GetSection("RabbitMQ").Bind(factory);
+                Uri uri;
+                if(!Uri.TryCreate(Configuration.GetConnectionString("RabbitMQ"), UriKind.Absolute, out uri))
+                    throw new ArgumentException("Invalid RabbitMQ connection string");
+                factory.Uri = uri;
                 return factory.CreateConnection();
             });
 
