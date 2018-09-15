@@ -53,6 +53,14 @@ namespace Syzoj.Api
                 return ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis"));
             });
 
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("RedisCache");
+                options.InstanceName = "syzoj:session:";
+            });
+
+            services.AddSession();
+
             services.AddDbContext<AppDbContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("Database")));
             
@@ -104,6 +112,7 @@ namespace Syzoj.Api
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "SYZOJ API");
             });
 
+            app.UseSession();
             app.UseMvc();
 
             app.UseSpa(spa =>
