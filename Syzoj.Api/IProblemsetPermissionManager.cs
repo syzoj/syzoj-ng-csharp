@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Syzoj.Api.Models;
 
 namespace Syzoj.Api
@@ -12,7 +13,7 @@ namespace Syzoj.Api
         /// Returns whether the problem list should be visible to the
         /// current user.
         /// </summary>
-        bool IsProblemListVisible(Problemset problemset);
+        Task<bool> IsProblemListVisible(Problemset problemset);
 
         /// <summary>
         /// Returns whether the problem is visible in the problem list to
@@ -24,26 +25,37 @@ namespace Syzoj.Api
         /// is generated, so a page intending to show 10 problems may end up
         /// showing nothing. You should always return true.
         /// </remark>
-        bool IsProblemVisible(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemVisible(Problemset problemset, ProblemsetProblem problem);
 
         /// <summary>
         /// Returns whether the problem is viewable to the current user.
         /// </summary>
-        bool IsProblemViewable(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemViewable(Problemset problemset, ProblemsetProblem problem);
 
         /// <summary>
         /// Returns whether the current user can submit to the problem.
         /// </summary>
-        bool IsProblemSubmittable(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemSubmittable(Problemset problemset, ProblemsetProblem problem);
+
+        /// <summary>
+        /// Returns whether the current user can edit the problem data.
+        /// </summary>
+        Task<bool> IsProblemEditable(Problemset problemset, ProblemsetProblem problem);
+
+        /// <summary>
+        /// Returns whether the submission is visible in the submission history to
+        /// the current user.
+        /// </summary>
+        Task<bool> IsSubmissionVisible(Problemset problemset, Submission submission);
 
         /// <summary>
         /// Returns whether the current user can view the specified submission.
         /// </summary>
-        bool IsSubmissionViewable(Problemset problemset, Submission submission);
+        Task<bool> IsSubmissionViewable(Problemset problemset, Submission submission);
 
         /// <summary>
         /// Returns whether the current user can interact with the specified submission.
         /// </summary>
-        bool IsSubmissionInteractable(Problemset problemset, Submission submission);
+        Task<bool> IsSubmissionInteractable(Problemset problemset, Submission submission);
     }
 }
