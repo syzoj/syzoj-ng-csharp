@@ -7,7 +7,7 @@ namespace Syzoj.Api
     /// This interface defines whether a given user is authorized to do
     /// specified action under certain circumstances.
     /// </summary>
-    public interface IProblemsetPermissionManager
+    public interface IProblemsetManager
     {
         /// <summary>
         /// Returns whether the problem list should be visible to the
