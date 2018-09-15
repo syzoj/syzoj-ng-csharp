@@ -1,0 +1,83 @@
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Syzoj.Api.Models;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+
+namespace Syzoj.Api.Controllers
+{
+    [Route("api/problemset")]
+    public class ProblemsetController : ControllerBase
+    {
+        private readonly AppDbContext dbContext;
+        private readonly ProblemParserProvider problemParserProvider;
+        private readonly ProblemsetManagerProvider problemsetManagerProvider;
+        public ProblemsetController(AppDbContext dbContext, ProblemParserProvider problemParserProvider, ProblemsetManagerProvider problemsetManagerProvider)
+        {
+            this.dbContext = dbContext;
+            this.problemParserProvider = problemParserProvider;
+            this.problemsetManagerProvider = problemsetManagerProvider;
+        }
+
+        public class ProblemsetProblemListResponse
+        {
+            /// <summary>
+            /// Whether the query was successful or not.
+            /// </summary>
+            public bool Success { get; set; }
+            /// <summary>
+            /// An integer describing the status of the query. Possible values are:
+            /// - 0: The request was successful.
+            /// - 1001: The problemset doesn't exist.
+            /// - 1002: The problemset is not accessible.
+            /// </summary>
+            public int Code { get; set; }
+            /// <summary>
+            /// The list of problems from the problemset.
+            /// </summary>
+            public IEnumerable<ProblemsetProblemSummaryEntry> Problems { get; set; }
+        }
+        public class ProblemsetProblemSummaryEntry
+        {
+            public int ProblemId { get; set; }
+            public string ProblemsetProblemId { get; set; }
+            public string Title { get; set; }
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] int id)
+        {
+            Problemset ps = await dbContext.Problemsets.Where(psp => psp.Id == id).FirstOrDefaultAsync();
+            if(ps == null)
+            {
+                return new ProblemsetProblemListResponse() {
+                    Success = false,
+                    Code = 1001,
+                };
+            }
+
+            IProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
+            if(!await problemsetManager.IsProblemListVisible(ps))
+            {
+                return new ProblemsetProblemListResponse() {
+                    Success = false,
+                    Code = 1002,
+                };
+            }
+
+            return new ProblemsetProblemListResponse() {
+                Success = true,
+                Code = 0,
+                Problems = dbContext.Entry(ps)
+                    .Collection(x => x.ProblemsetProblems)
+                    .Query()
+                    .Select(x => new ProblemsetProblemSummaryEntry() {
+                        ProblemId = x.Problem.Id,
+                        ProblemsetProblemId = x.ProblemsetProblemId,
+                        Title = x.Problem.Title,
+                    })
+                    .AsEnumerable(),
+            };
+        }
+    }
+}

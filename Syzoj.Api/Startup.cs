@@ -12,6 +12,8 @@ using SharpFileSystem;
 using System;
 using SharpFileSystem.FileSystems;
 using System.IO;
+using Swashbuckle.AspNetCore.Swagger;
+using System.Reflection;
 
 namespace Syzoj.Api
 {
@@ -33,6 +35,18 @@ namespace Syzoj.Api
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/build";
+            });
+
+            services.AddSwaggerGen(c => {
+                c.SwaggerDoc("v1", new Info {
+                    Title = "SYZOJ next generation API server",
+                    Version = "v1",
+                });
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             services.AddSingleton<IConnectionMultiplexer>(s => {
@@ -81,6 +95,11 @@ namespace Syzoj.Api
 
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "SYZOJ API");
+            });
 
             app.UseMvc();
 
