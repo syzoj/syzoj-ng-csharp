@@ -17,6 +17,7 @@ using System.Reflection;
 using Syzoj.Api.Data;
 using Syzoj.Api.Models;
 using Microsoft.AspNetCore.Identity;
+using Syzoj.Api.Services;
 
 namespace Syzoj.Api
 {
@@ -108,6 +109,7 @@ namespace Syzoj.Api
             services.AddScoped<DebugProblemsetManager>();
 
             services.AddScoped<ProblemParserProvider>();
+            services.AddScoped<LegacySyzojProblemParser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -48,7 +48,7 @@ namespace Syzoj.Api.Data
             var defaultProblemset = new Problemset() { Id = 1, Type = "debug" };
             modelBuilder.Entity<Problemset>()
                 .HasData(defaultProblemset);
-            var defaultProblem = new Problem() { Id = 1, ProblemType = null, Path = "/data/problem/1", Title = "Test problem", Statement = nilData };
+            var defaultProblem = new Problem() { Id = 1, ProblemType = null, Path = "/data/problem/1/", Title = "Test problem", Statement = nilData };
             modelBuilder.Entity<Problem>()
                 .HasData(defaultProblem);
             var defaultProblemsetProblem = new ProblemsetProblem() { ProblemsetId = defaultProblemset.Id, ProblemId = defaultProblem.Id, ProblemsetProblemId = "debug" };
