@@ -23,16 +23,6 @@ export class NavMenu extends Component {
                 <Glyphicon glyph='home' /> 首页
               </NavItem>
             </LinkContainer>
-            <LinkContainer to={'/counter'}>
-              <NavItem>
-                <Glyphicon glyph='education' /> Counter
-              </NavItem>
-            </LinkContainer>
-            <LinkContainer to={'/fetchdata'}>
-              <NavItem>
-                <Glyphicon glyph='th-list' /> Fetch data
-              </NavItem>
-            </LinkContainer>
             <LinkContainer to='/problems' isActive={(_, pathname ) => pathname.pathname.match(/^(\/problems$|\/problem\/)/)}>
               <NavItem>
                 <Glyphicon glyph='th-list' /> 题库
