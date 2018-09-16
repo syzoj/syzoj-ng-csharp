@@ -326,8 +326,9 @@ namespace Syzoj.Api.Controllers
             /// An integer describing the status of the query. Possible values are:
             /// - 0: The request was successful.
             /// - 1001: The problemset doesn't exist.
-            /// - 1002: The problem is not submitable.
+            /// - 1002: User is not allowed to submit to the problem.
             /// - 1003: The problem with specified id doesn't exist.
+            /// - 1004: The problem is not submittable.
             /// </summary>
             public int Code { get; set; }
 
@@ -364,6 +365,13 @@ namespace Syzoj.Api.Controllers
                 return new SubmitProblemResponse() {
                     Success = false,
                     Code = 1002,
+                };
+            }
+            if(!problem.Problem.IsSubmittable)
+            {
+                return new SubmitProblemResponse() {
+                    Success = false,
+                    Code = 1004,
                 };
             }
             var submission = new Submission() {
