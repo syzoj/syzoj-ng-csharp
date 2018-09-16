@@ -44,15 +44,19 @@ namespace Syzoj.Api.Data
                 .HasForeignKey(s => s.ProblemsetId)
                 .HasPrincipalKey(ps => ps.Id);
             
+            byte[] nilData = MessagePack.MessagePackSerializer.Serialize(new MessagePack.Nil());
             var defaultProblemset = new Problemset() { Id = 1, Type = "debug" };
             modelBuilder.Entity<Problemset>()
                 .HasData(defaultProblemset);
-            var defaultProblem = new Problem() { Id = 1, ProblemType = null, Path = "/data/problem/1", Title = "Test problem", Statement = null };
+            var defaultProblem = new Problem() { Id = 1, ProblemType = null, Path = "/data/problem/1", Title = "Test problem", Statement = nilData };
             modelBuilder.Entity<Problem>()
                 .HasData(defaultProblem);
             var defaultProblemsetProblem = new ProblemsetProblem() { ProblemsetId = defaultProblemset.Id, ProblemId = defaultProblem.Id, ProblemsetProblemId = "debug" };
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasData(defaultProblemsetProblem);
+            var defaultSubmission = new Submission() { Id = 1, ProblemId = 1, ProblemsetId = 1, Summary = nilData, Content = nilData };
+            modelBuilder.Entity<Submission>()
+                .HasData(defaultSubmission);
         }
     }
 }
