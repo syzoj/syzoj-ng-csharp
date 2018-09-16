@@ -210,6 +210,11 @@ namespace Syzoj.Api.Controllers
             /// The content of the problem. The exact model depends on the problem's type.
             /// </summary>
             public object Content { get; set; }
+
+            /// <summary>
+            /// Whether the current user can submit to the problem.
+            /// </summary>
+            public bool Submittable { get; set; }
         }
 
         /// <summary>
@@ -251,6 +256,7 @@ namespace Syzoj.Api.Controllers
                 Title = problem.Problem.Title,
                 Type = problem.Problem.ProblemType,
                 Content = content,
+                Submittable = problem.Problem.IsSubmittable && await problemsetManager.IsProblemSubmittableAsync(ps, problem)
             };
         }
 
