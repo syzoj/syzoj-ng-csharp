@@ -197,6 +197,11 @@ namespace Syzoj.Api.Controllers
             public int? ProblemId { get; set; }
 
             /// <summary>
+            /// The problem identifier in this problemset.
+            /// </summary>
+            public string ProblemsetProblemId { get; set; }
+
+            /// <summary>
             /// The problem's title.
             /// </summary>
             public string Title { get; set; }
@@ -253,6 +258,7 @@ namespace Syzoj.Api.Controllers
                 Success = true,
                 Code = 0,
                 ProblemId = problem.Problem.Id,
+                ProblemsetProblemId = problem.ProblemsetProblemId,
                 Title = problem.Problem.Title,
                 Type = problem.Problem.ProblemType,
                 Content = content,
