@@ -9,10 +9,10 @@ export class NavMenu extends Component {
 
   render() {
     return (
-      <Navbar inverse fixedTop fluid collapseOnSelect>
+      <Navbar fixedTop fluid collapseOnSelect>
         <Navbar.Header>
           <Navbar.Brand>
-            <Link to={'/'}>Syzoj.Api</Link>
+            <Link to={'/'}>Syzoj</Link>
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>
@@ -20,7 +20,7 @@ export class NavMenu extends Component {
           <Nav>
             <LinkContainer to={'/'} exact>
               <NavItem>
-                <Glyphicon glyph='home' /> Home
+                <Glyphicon glyph='home' /> 首页
               </NavItem>
             </LinkContainer>
             <LinkContainer to={'/counter'}>
@@ -31,6 +31,11 @@ export class NavMenu extends Component {
             <LinkContainer to={'/fetchdata'}>
               <NavItem>
                 <Glyphicon glyph='th-list' /> Fetch data
+              </NavItem>
+            </LinkContainer>
+            <LinkContainer to='/problems' isActive={(_, pathname ) => pathname.pathname.match(/^(\/problems$|\/problem\/)/)}>
+              <NavItem>
+                <Glyphicon glyph='th-list' /> 题库
               </NavItem>
             </LinkContainer>
           </Nav>
