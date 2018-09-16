@@ -12,7 +12,9 @@ namespace Syzoj.Api.Models
         public virtual Problem Problem { get; set; }
         public virtual ProblemsetProblem ProblemsetProblem { get; set; }
         public string Path { get; set; }
+        [Required]
         public byte[] Summary { get; set; }
+        [Required]
         public byte[] Content { get; set; }
     }
 }
