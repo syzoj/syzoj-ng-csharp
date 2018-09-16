@@ -6,9 +6,13 @@ namespace Syzoj.Api.Models
     {
         [Key]
         public int Id { get; set; }
+        public int ProblemsetId { get; set; }
+        public virtual Problemset Problemset { get; set; }
         public int ProblemId { get; set; }
-        public Problem Problem { get; set; }
+        public virtual Problem Problem { get; set; }
+        public virtual ProblemsetProblem ProblemsetProblem { get; set; }
         public string Path { get; set; }
+        public byte[] Summary { get; set; }
         public byte[] Content { get; set; }
     }
 }

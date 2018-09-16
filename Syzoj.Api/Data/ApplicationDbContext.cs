@@ -21,11 +21,10 @@ namespace Syzoj.Api.Data
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasKey(psp => new { psp.ProblemsetId, psp.ProblemId });
             modelBuilder.Entity<ProblemsetProblem>()
-                .HasIndex(psp => new { psp.ProblemsetId, psp.ProblemsetProblemId })
-                .IsUnique();
+                .HasAlternateKey(psp => new { psp.ProblemsetId, psp.ProblemsetProblemId });
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasOne(psp => psp.Problem)
-                .WithMany(p => p.ProblemsetProblems)
+                .WithMany()
                 .HasForeignKey(psp => psp.ProblemId)
                 .HasPrincipalKey(p => p.Id);
             modelBuilder.Entity<ProblemsetProblem>()
@@ -34,10 +33,21 @@ namespace Syzoj.Api.Data
                 .HasForeignKey(psp => psp.ProblemsetId)
                 .HasPrincipalKey(ps => ps.Id);
             
+            modelBuilder.Entity<Submission>()
+                .HasOne(s => s.ProblemsetProblem)
+                .WithMany(ps => ps.Submissions)
+                .HasForeignKey(s => new { s.ProblemsetId, s.ProblemId})
+                .HasPrincipalKey(ps => new { ps.ProblemsetId, ps.ProblemId });
+            modelBuilder.Entity<Submission>()
+                .HasOne(s => s.Problemset)
+                .WithMany(ps => ps.Submissions)
+                .HasForeignKey(s => s.ProblemsetId)
+                .HasPrincipalKey(ps => ps.Id);
+            
             var defaultProblemset = new Problemset() { Id = 1, Type = "debug" };
             modelBuilder.Entity<Problemset>()
                 .HasData(defaultProblemset);
-            var defaultProblem = new Problem() { Id = 1, ProblemType = null, Path = "/data/problem/1", Title = "Test problem", Content = null };
+            var defaultProblem = new Problem() { Id = 1, ProblemType = null, Path = "/data/problem/1", Title = "Test problem", Statement = null };
             modelBuilder.Entity<Problem>()
                 .HasData(defaultProblem);
             var defaultProblemsetProblem = new ProblemsetProblem() { ProblemsetId = defaultProblemset.Id, ProblemId = defaultProblem.Id, ProblemsetProblemId = "debug" };
