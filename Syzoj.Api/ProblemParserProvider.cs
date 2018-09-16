@@ -1,27 +1,35 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Syzoj.Api
 {
     public class ProblemParserProvider
     {
-        private static IEnumerable<ValueTuple<string, IProblemParser>> defaultParsers = new ValueTuple<string, IProblemParser>[]
+        private readonly IServiceProvider provider;
+        public ProblemParserProvider(IServiceProvider provider)
+        {
+            this.provider = provider;
+        }
+        private static IEnumerable<ValueTuple<string, Type>> defaultParsers = new ValueTuple<string, Type>[]
         {
             
         };
-        private static Dictionary<string, IProblemParser> parsers = new Dictionary<string, IProblemParser>()
+        private static Dictionary<string, Type> parsers = new Dictionary<string, Type>()
         {
 
         };
 
-        public IEnumerable<ValueTuple<string, IProblemParser>> GetDefaultParsers()
+        public IEnumerable<ValueTuple<string, IAsyncProblemParser>> GetDefaultParsers()
         {
-            return defaultParsers;
+            return defaultParsers.Select(parser => (parser.Item1, (IAsyncProblemParser) provider.GetService(parser.Item2))).AsEnumerable();
         }
 
-        public IProblemParser GetParser(string name)
+        public IAsyncProblemParser GetParser(string name)
         {
-            return parsers.GetValueOrDefault(name);
+            if(name == null)
+                throw new NotImplementedException();
+            return (IAsyncProblemParser) provider.GetService(parsers.GetValueOrDefault(name));
         }
     }
 }
