@@ -5,6 +5,11 @@ using SharpFileSystem;
 using Syzoj.Api.Data;
 using Syzoj.Api.Models;
 using MessagePack;
+using System.Collections;
+using System;
+using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client.Impl;
+using RabbitMQ.Client;
 
 namespace Syzoj.Api.Services
 {
@@ -25,15 +30,60 @@ namespace Syzoj.Api.Services
     {
         private readonly IFileSystem fileSystem;
         private readonly ApplicationDbContext dbContext;
-        public LegacySyzojProblemParser(IFileSystem fileSystem, ApplicationDbContext dbContext)
+        private readonly IServiceProvider provider;
+        private readonly ILegacySyzojJudger judger;
+        public LegacySyzojProblemParser(IFileSystem fileSystem, ApplicationDbContext dbContext, IServiceProvider provider, ILegacySyzojJudger judger)
         {
             this.fileSystem = fileSystem;
             this.dbContext = dbContext;
+            this.provider = provider;
+            this.judger = judger;
         }
 
-        public Task HandleSubmissionAsync(Problem problem, Submission submission, object data)
+        // TODO: Handle errors, especially model errors
+        public async Task HandleSubmissionAsync(Problem problem, Submission submission, dynamic data)
         {
-            throw new System.NotImplementedException();
+            var metadata = MessagePackSerializer.Deserialize<ProblemMetadata>(problem.Metadata);
+            object param;
+            object extraData = null;
+            switch(metadata.Type)
+            {
+                case "traditional":
+                    param = new LegacyJudgeRequestTraditional() {
+                        language = data["Language"],
+                        code = data["Code"],
+                        timeLimit = metadata.TimeLimit,
+                        memoryLimit = metadata.MemoryLimit,
+                        fileIOInput = metadata.FileIo ? metadata.FileIoInputName : null,
+                        fileIOOutput = metadata.FileIo ? metadata.FileIoOutputName : null,
+                    };
+                    break;
+                case "submit-answer":
+                    param = null;
+                    extraData = data["File"];
+                    break;
+                case "interactive":
+                    param = new LegacyJudgeRequestInteraction() {
+                        language = data["Language"],
+                        code = data["Code"],
+                        timeLimit = metadata.TimeLimit,
+                        memoryLimit = metadata.MemoryLimit,
+                    };
+                    break;
+                default:
+                    throw new ArgumentException("Invalid problem type");
+            }
+            LegacyJudgeRequest judgeRequest = new LegacyJudgeRequest() {
+                content = new LegacyJudgeRequestContent() {
+                    taskId = submission.Id.ToString(),
+                    testData = problem.Path + "data/",
+                    type = "traditional",
+                    priority = 2,
+                    param = param,
+                },
+                extraData = null,
+            };
+            await judger.SendJudgeRequestAsync(2, MessagePackSerializer.Serialize(judgeRequest));
         }
 
         public Task<bool> IsProblemValidAsync(Problem problem)
@@ -69,6 +119,14 @@ namespace Syzoj.Api.Services
                     Type = obj.obj.type,
                     Tags = obj.obj.tags,
                 });
+                problem.Metadata = MessagePackSerializer.Serialize(new ProblemMetadata() {
+                    TimeLimit = obj.obj.time_limit,
+                    MemoryLimit = obj.obj.memory_limit,
+                    FileIo = obj.obj.file_io,
+                    FileIoInputName = obj.obj.file_io_input_name,
+                    FileIoOutputName = obj.obj.file_io_output_name,
+                    Type = obj.obj.type,
+                });
                 problem.IsSubmittable = true;
             }
             await dbContext.SaveChangesAsync();
@@ -95,6 +153,54 @@ namespace Syzoj.Api.Services
             public string file_io_output_name { get; set; }
             public string type { get; set; }
             public string[] tags { get; set; }
+        }
+
+        [MessagePackObject(keyAsPropertyName: true)]
+        private class ProblemMetadata
+        {
+            public int TimeLimit { get; set; }
+            public int MemoryLimit { get; set; }
+            public bool FileIo { get; set; }
+            public string FileIoInputName { get; set; }
+            public string FileIoOutputName { get; set; }
+            public string Type { get; set; }
+        }
+
+        [MessagePackObject(keyAsPropertyName: true)]
+        private class LegacyJudgeRequest
+        {
+            public LegacyJudgeRequestContent content { get; set; }
+            public object extraData { get; set; }
+        }
+
+        [MessagePackObject(keyAsPropertyName: true)]
+        private class LegacyJudgeRequestContent
+        {
+            public string taskId { get; set; }
+            public string testData { get; set; }
+            public string type { get; set; }
+            public int priority { get; set; }
+            public object param { get; set; }
+        }
+        
+        [MessagePackObject(keyAsPropertyName: true)]
+        private class LegacyJudgeRequestTraditional
+        {
+            public string language { get; set; }
+            public string code { get; set; }
+            public int timeLimit { get; set; }
+            public int memoryLimit { get; set; }
+            public string fileIOInput { get; set; }
+            public string fileIOOutput { get; set; }
+        }
+
+        [MessagePackObject(keyAsPropertyName: true)]
+        private class LegacyJudgeRequestInteraction
+        {
+            public string language { get; set; }
+            public string code { get; set; }
+            public int timeLimit { get; set; }
+            public int memoryLimit { get; set; }
         }
     }
 }

@@ -12,6 +12,10 @@ namespace Syzoj.Api.Models
         public string Title { get; set; }
         [Required]
         public byte[] Statement { get; set; }
+        /// <summary>
+        /// Optional information used for judging problems.
+        /// </summary>
+        public byte[] Metadata { get; set; }
         public bool IsSubmittable { get; set; }
     }
 }
