@@ -91,6 +91,7 @@ namespace Syzoj.Api
                 factory.Uri = uri;
                 return factory.CreateConnection();
             });
+            services.AddSingleton<ILegacySyzojJudger, LegacySyzojJudger>();
 
             services.AddSingleton<IFileSystem>(s => {
                 var section = Configuration.GetSection("FileSystem");
