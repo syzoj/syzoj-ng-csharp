@@ -10,7 +10,7 @@ import 'brace/theme/tomorrow';
 export class CodeLanguageSelector extends Component {
     constructor(props) {
         super(props);
-        this.state = { language: props.defaultLanguage };
+        this.state = { language: props.language };
     }
 
     setLanguage(language) {
