@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,7 +8,7 @@ namespace Syzoj.Api.Models
     {
         public int ProblemsetId { get; set; }
         public virtual Problemset Problemset { get; set; }
-        public int ProblemId { get; set; }
+        public Guid ProblemId { get; set; }
         public virtual Problem Problem { get; set; }
         public virtual ICollection<Submission> Submissions { get; set; }
         [MinLength(1)]

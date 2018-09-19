@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Syzoj.Api.Models
@@ -8,7 +9,7 @@ namespace Syzoj.Api.Models
         public int Id { get; set; }
         public int ProblemsetId { get; set; }
         public virtual Problemset Problemset { get; set; }
-        public int ProblemId { get; set; }
+        public Guid ProblemId { get; set; }
         public virtual Problem Problem { get; set; }
         public virtual ProblemsetProblem ProblemsetProblem { get; set; }
         public string Path { get; set; }

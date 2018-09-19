@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Models;
@@ -48,13 +49,13 @@ namespace Syzoj.Api.Data
             var defaultProblemset = new Problemset() { Id = 1, Type = "debug" };
             modelBuilder.Entity<Problemset>()
                 .HasData(defaultProblemset);
-            var defaultProblem = new Problem() { Id = 1, ProblemType = null, Path = "/data/problem/1/", Title = "Test problem", Statement = nilData, IsSubmittable = false };
+            var defaultProblem = new Problem() { Id = Guid.NewGuid(), ProblemType = null, Path = "/data/problem/1/", Title = "Test problem", Statement = nilData, IsSubmittable = false };
             modelBuilder.Entity<Problem>()
                 .HasData(defaultProblem);
             var defaultProblemsetProblem = new ProblemsetProblem() { ProblemsetId = defaultProblemset.Id, ProblemId = defaultProblem.Id, ProblemsetProblemId = "debug" };
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasData(defaultProblemsetProblem);
-            var defaultSubmission = new Submission() { Id = 1, ProblemId = 1, ProblemsetId = 1, Summary = nilData, Content = nilData };
+            var defaultSubmission = new Submission() { Id = 1, ProblemId = defaultProblem.Id, ProblemsetId = 1, Summary = nilData, Content = nilData };
             modelBuilder.Entity<Submission>()
                 .HasData(defaultSubmission);
         }

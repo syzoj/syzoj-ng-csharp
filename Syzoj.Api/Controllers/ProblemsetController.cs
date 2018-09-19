@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Syzoj.Api.Data;
 using System.ComponentModel.DataAnnotations;
 using MessagePack;
+using System;
 
 namespace Syzoj.Api.Controllers
 {
@@ -56,7 +57,7 @@ namespace Syzoj.Api.Controllers
             /// <summary>
             /// The global problem ID for the problem.
             /// </summary>
-            public int ProblemId { get; set; }
+            public Guid ProblemId { get; set; }
 
             /// <summary>
             /// The problem identifier in this problemset.
@@ -78,8 +79,12 @@ namespace Syzoj.Api.Controllers
         /// Gets the list of all problems in the problemset.
         /// </summary>
         /// <param name="id">The ID of the problemset.</param>
+        /// <param name="sort">Can be either `asc` or `desc`, specifying how the list shoud be sorted.</param>
+        /// <param name="key">The sorting key.</param>
+        /// <param name="page">Page number.</param>
+        // TODO: Implement sorting and pagination
         [HttpGet("{id}/problems")]
-        public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] int id)
+        public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] int id, [FromQuery] string sort, [FromQuery] string key, [FromQuery] int page)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
@@ -194,7 +199,7 @@ namespace Syzoj.Api.Controllers
             /// <summary>
             /// The global problem ID for the problem.
             /// </summary>
-            public int? ProblemId { get; set; }
+            public Guid ProblemId { get; set; }
 
             /// <summary>
             /// The problem identifier in this problemset.
@@ -425,7 +430,7 @@ namespace Syzoj.Api.Controllers
         public class SubmissionSummaryEntry
         {
             /// <summary>The global id of the corresponding problem.</summary>
-            public int ProblemId { get; set; }
+            public Guid ProblemId { get; set; }
 
             /// <summary>The ID of the corresponding problem.</summary>
             public string ProblemsetProblemId { get; set; }
@@ -540,7 +545,7 @@ namespace Syzoj.Api.Controllers
             public int Code { get; set; }
 
             /// <summary>The global id of the corresponding problem.</summary>
-            public int ProblemId { get; set; }
+            public Guid ProblemId { get; set; }
 
             /// <summary>The ID of the corresponding problem.</summary>
             public string ProblemsetProblemId { get; set; }
