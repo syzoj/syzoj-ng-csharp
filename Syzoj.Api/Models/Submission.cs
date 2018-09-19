@@ -6,7 +6,7 @@ namespace Syzoj.Api.Models
     public class Submission
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public int ProblemsetId { get; set; }
         public virtual Problemset Problemset { get; set; }
         public Guid ProblemId { get; set; }

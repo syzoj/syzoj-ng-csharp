@@ -55,7 +55,7 @@ namespace Syzoj.Api.Data
             var defaultProblemsetProblem = new ProblemsetProblem() { ProblemsetId = defaultProblemset.Id, ProblemId = defaultProblem.Id, ProblemsetProblemId = "debug" };
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasData(defaultProblemsetProblem);
-            var defaultSubmission = new Submission() { Id = 1, ProblemId = defaultProblem.Id, ProblemsetId = 1, Summary = nilData, Content = nilData };
+            var defaultSubmission = new Submission() { Id = Guid.NewGuid(), ProblemId = defaultProblem.Id, ProblemsetId = 1, Summary = nilData, Content = nilData };
             modelBuilder.Entity<Submission>()
                 .HasData(defaultSubmission);
         }

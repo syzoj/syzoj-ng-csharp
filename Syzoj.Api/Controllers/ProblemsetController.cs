@@ -352,7 +352,7 @@ namespace Syzoj.Api.Controllers
             /// <summary>
             /// The id of the new submission.
             /// </summary>
-            public int SubmissionId { get; set; }
+            public Guid SubmissionId { get; set; }
         }
         /// <summary>
         /// Creates a new submission.
@@ -436,7 +436,7 @@ namespace Syzoj.Api.Controllers
             public string ProblemsetProblemId { get; set; }
 
             /// <summary>The ID of the submission.</summary>
-            public int SubmissionId { get; set; }
+            public Guid SubmissionId { get; set; }
 
             /// <summary>
             /// Problem Type specific object describing the submission.
@@ -551,7 +551,7 @@ namespace Syzoj.Api.Controllers
             public string ProblemsetProblemId { get; set; }
 
             /// <summary>The ID of the submission.</summary>
-            public int SubmissionId { get; set; }
+            public Guid SubmissionId { get; set; }
 
             /// <summary>
             /// Problem Type specific object describing the submission.
@@ -562,7 +562,7 @@ namespace Syzoj.Api.Controllers
         /// Gets a specified submission.
         /// </summary>
         [HttpGet("{id}/submission/{sid}")]
-        public async Task<ActionResult<GetSubmissionResponse>> GetSubmission(int id, int sid)
+        public async Task<ActionResult<GetSubmissionResponse>> GetSubmission(int id, Guid sid)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
