@@ -13,7 +13,7 @@ export class Problem extends Component {
 
   componentDidMount()
   {
-    fetch('api/problemset/1/problem/' + this.props.match.params.id)
+    fetch('api/problemset/cd6363d3-ca44-4c81-b660-15db225a91cc/problem/' + this.props.match.params.id)
       .then(response => response.json())
       .then(data => {
         this.setState({ statement: data, loading: false });
@@ -40,6 +40,12 @@ export class Problem extends Component {
     this.setState({language: language});
   }
 
+  do_submit()
+  {
+    alert(this.codeEditor.editor.getValue())
+    
+  }
+
   render() {
     return this.state.loading ?
         <p>Loading...</p>
@@ -62,6 +68,7 @@ export class Problem extends Component {
         </Col>
       </Row>
       <CodeEditor language="cpp" ref={(editor) => this.codeEditor = editor} />
+      <Button onClick={() => this.do_submit()}>提交</Button>
     </Grid>;
   }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Syzoj.Api.Models;
 
@@ -12,41 +13,41 @@ namespace Syzoj.Api
         /// <summary>
         /// Returns whether the user can edit the problemset.
         /// </summary>
-        Task<bool> IsProblemsetEditableAsync(Problemset problemset);
+        Task<bool> IsProblemsetEditableAsync(Guid problemsetId);
         /// <summary>
         /// Returns whether the problem list should be visible to the
         /// current user.
         /// </summary>
-        Task<bool> IsProblemListVisibleAsync(Problemset problemset);
+        Task<bool> IsProblemListVisibleAsync(Guid problemsetId);
 
         /// <summary>
         /// Returns whether the problem is viewable to the current user.
         /// </summary>
-        Task<bool> IsProblemViewableAsync(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemViewableAsync(Guid problemsetId, Guid problemId);
 
         /// <summary>
         /// Returns whether the current user can submit to the problem.
         /// </summary>
-        Task<bool> IsProblemSubmittableAsync(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemSubmittableAsync(Guid problemsetId, Guid problemId);
 
         /// <summary>
         /// Returns whether the current user can edit the problem data.
         /// </summary>
-        Task<bool> IsProblemEditableAsync(Problemset problemset, ProblemsetProblem problem);
+        Task<bool> IsProblemEditableAsync(Guid problemsetId, Guid problemId);
 
         /// <summary>
         /// Returns whether the current user can see the list of submissions.
         /// </summary>
-        Task<bool> IsSubmissionListVisibleAsync(Problemset problemset);
+        Task<bool> IsSubmissionListVisibleAsync(Guid problemsetId);
 
         /// <summary>
         /// Returns whether the current user can view the specified submission.
         /// </summary>
-        Task<bool> IsSubmissionViewableAsync(Problemset problemset, Submission submission);
+        Task<bool> IsSubmissionViewableAsync(Guid problemsetId, Guid submissionId);
 
         /// <summary>
         /// Returns whether the current user can interact with the specified submission.
         /// </summary>
-        Task<bool> IsSubmissionInteractableAsync(Problemset problemset, Submission submission);
+        Task<bool> IsSubmissionInteractableAsync(Guid problemsetId, Guid submissionId);
     }
 }

@@ -24,14 +24,14 @@ namespace Syzoj.Api.Controllers
             this.problemsetManagerProvider = problemsetManagerProvider;
         }
 
-        private Task<Problemset> GetProblemset(Guid id)
+        private Task<Problemset> GetProblemset(Guid Id)
         {
-            return dbContext.Problemsets.Where(psp => psp.Id == id).FirstOrDefaultAsync();
+            return dbContext.Problemsets.Where(psp => psp.Id == Id).FirstOrDefaultAsync();
         }
 
-        private Task<ProblemsetProblem> GetProblemsetProblem(Guid id, string pid)
+        private Task<ProblemsetProblem> GetProblemsetProblem(Guid Id, string pid)
         {
-            return dbContext.ProblemsetProblems.Where(psp => psp.ProblemsetId == id && psp.ProblemsetProblemId == pid).Include(psp => psp.Problem).FirstOrDefaultAsync();
+            return dbContext.ProblemsetProblems.Where(psp => psp.ProblemsetId == Id && psp.ProblemsetProblemId == pid).Include(psp => psp.Problem).FirstOrDefaultAsync();
         }
 
         public class ProblemsetProblemListResponse
@@ -78,15 +78,15 @@ namespace Syzoj.Api.Controllers
         /// <summary>
         /// Gets the list of all problems in the problemset.
         /// </summary>
-        /// <param name="id">The ID of the problemset.</param>
+        /// <param name="Id">The ID of the problemset.</param>
         /// <param name="sort">Can be either `asc` or `desc`, specifying how the list shoud be sorted.</param>
         /// <param name="key">The sorting key.</param>
         /// <param name="page">Page number.</param>
         // TODO: Implement sorting and pagination
-        [HttpGet("{id}/problems")]
-        public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] Guid id, [FromQuery] string sort, [FromQuery] string key, [FromQuery] int page)
+        [HttpGet("{Id}/problems")]
+        public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] Guid Id, [FromQuery] string sort, [FromQuery] string key, [FromQuery] int page)
         {
-            Problemset ps = await GetProblemset(id);
+            Problemset ps = await GetProblemset(Id);
             if(ps == null)
             {
                 return new ProblemsetProblemListResponse() {
@@ -96,7 +96,7 @@ namespace Syzoj.Api.Controllers
             }
 
             IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await problemsetManager.IsProblemListVisibleAsync(ps))
+            if(!await problemsetManager.IsProblemListVisibleAsync(ps.Id))
             {
                 return new ProblemsetProblemListResponse() {
                     Success = false,
@@ -143,10 +143,10 @@ namespace Syzoj.Api.Controllers
         /// Changes problem id for a specified problem.
         /// </summary>
         // TODO: Handle problem id conflict
-        [HttpPatch("{id}/problem/{pid}/id")]
-        public async Task<ActionResult<PatchProblemIdResponse>> PatchProblemId(Guid id, string pid, [FromBody] PatchProblemIdRequest request)
+        [HttpPatch("{Id}/problem/{pid}/id")]
+        public async Task<ActionResult<PatchProblemIdResponse>> PatchProblemId(Guid Id, string pid, [FromBody] PatchProblemIdRequest request)
         {
-            Problemset ps = await GetProblemset(id);
+            Problemset ps = await GetProblemset(Id);
             if(ps == null)
             {
                 return new PatchProblemIdResponse() {
@@ -155,7 +155,7 @@ namespace Syzoj.Api.Controllers
                 };
             }
             IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await problemsetManager.IsProblemsetEditableAsync(ps))
+            if(!await problemsetManager.IsProblemsetEditableAsync(ps.Id))
             {
                 return new PatchProblemIdResponse() {
                     Success = false,
@@ -163,7 +163,7 @@ namespace Syzoj.Api.Controllers
                 };
             }
 
-            ProblemsetProblem problem = await GetProblemsetProblem(id, pid);
+            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
             if(problem == null)
             {
                 return new PatchProblemIdResponse() {
@@ -230,10 +230,10 @@ namespace Syzoj.Api.Controllers
         /// <summary>
         /// Gets problem statement for a problem.
         /// </summary>
-        [HttpGet("{id}/problem/{pid}")]
-        public async Task<ActionResult<GetProblemResponse>> GetProblem(Guid id, string pid)
+        [HttpGet("{Id}/problem/{pid}")]
+        public async Task<ActionResult<GetProblemResponse>> GetProblem(Guid Id, string pid)
         {
-            Problemset ps = await GetProblemset(id);
+            Problemset ps = await GetProblemset(Id);
             if(ps == null)
             {
                 return new GetProblemResponse() {
@@ -242,7 +242,7 @@ namespace Syzoj.Api.Controllers
                 };
             }
             IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            ProblemsetProblem problem = await GetProblemsetProblem(id, pid);
+            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
             if(problem == null)
             {
                 return new GetProblemResponse() {
@@ -250,7 +250,7 @@ namespace Syzoj.Api.Controllers
                     Code = 1003,
                 };
             }
-            if(!await problemsetManager.IsProblemViewableAsync(ps, problem))
+            if(!await problemsetManager.IsProblemViewableAsync(ps.Id, problem.ProblemId))
             {
                 return new GetProblemResponse() {
                     Success = false,
@@ -267,7 +267,7 @@ namespace Syzoj.Api.Controllers
                 Title = problem.Problem.Title,
                 Type = problem.Problem.ProblemType,
                 Content = content,
-                Submittable = problem.Problem.IsSubmittable && await problemsetManager.IsProblemSubmittableAsync(ps, problem)
+                Submittable = problem.Problem.IsSubmittable && await problemsetManager.IsProblemSubmittableAsync(ps.Id, problem.ProblemId)
             };
         }
 
@@ -290,10 +290,10 @@ namespace Syzoj.Api.Controllers
         /// <summary>
         /// Loads the problem statement from data folder.
         /// </summary>
-        [HttpPost("{id}/problem/{pid}/load")]
-        public async Task<ActionResult<LoadProblemResponse>> LoadProblem(Guid id, string pid)
+        [HttpPost("{Id}/problem/{pid}/load")]
+        public async Task<ActionResult<LoadProblemResponse>> LoadProblem(Guid Id, string pid)
         {
-            Problemset ps = await GetProblemset(id);
+            Problemset ps = await GetProblemset(Id);
             if(ps == null)
             {
                 return new LoadProblemResponse() {
@@ -301,7 +301,7 @@ namespace Syzoj.Api.Controllers
                     Code = 1001,
                 };
             }
-            ProblemsetProblem problem = await GetProblemsetProblem(id, pid);
+            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
             if(problem == null)
             {
                 return new LoadProblemResponse() {
@@ -310,7 +310,7 @@ namespace Syzoj.Api.Controllers
                 };
             }
             IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsProblemEditableAsync(ps, problem))
+            if(!await manager.IsProblemEditableAsync(ps.Id, problem.ProblemId))
             {
                 return new LoadProblemResponse() {
                     Success = false,
@@ -318,7 +318,7 @@ namespace Syzoj.Api.Controllers
                 };
             }
             IAsyncProblemParser parser = problemParserProvider.GetParser(problem.Problem.ProblemType);
-            await parser.ParseProblemAsync(problem.Problem);
+            await parser.ParseProblemAsync(problem.Problem.Id);
             return new LoadProblemResponse() {
                 Success = true,
                 Code = 0,
@@ -357,10 +357,10 @@ namespace Syzoj.Api.Controllers
         /// <summary>
         /// Creates a new submission.
         /// </summary>
-        [HttpPost("{id}/problem/{pid}/submit")]
-        public async Task<ActionResult<SubmitProblemResponse>> SubmitProblem([FromRoute] Guid id, [FromRoute] string pid, [FromBody] SubmitProblemRequest request)
+        [HttpPost("{Id}/problem/{pid}/submit")]
+        public async Task<ActionResult<SubmitProblemResponse>> SubmitProblem([FromRoute] Guid Id, [FromRoute] string pid, [FromBody] SubmitProblemRequest request)
         {
-            Problemset ps = await GetProblemset(id);
+            Problemset ps = await GetProblemset(Id);
             if(ps == null)
             {
                 return new SubmitProblemResponse() {
@@ -368,7 +368,7 @@ namespace Syzoj.Api.Controllers
                     Code = 1001,
                 };
             }
-            ProblemsetProblem problem = await GetProblemsetProblem(id, pid);
+            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
             if(problem == null)
             {
                 return new SubmitProblemResponse() {
@@ -377,7 +377,7 @@ namespace Syzoj.Api.Controllers
                 };
             }
             IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsProblemSubmittableAsync(ps, problem))
+            if(!await manager.IsProblemSubmittableAsync(ps.Id, problem.ProblemId))
             {
                 return new SubmitProblemResponse() {
                     Success = false,
@@ -398,7 +398,7 @@ namespace Syzoj.Api.Controllers
             dbContext.Submissions.Add(submission);
             await dbContext.SaveChangesAsync();
             IAsyncProblemParser parser = problemParserProvider.GetParser(problem.Problem.ProblemType);
-            await parser.HandleSubmissionAsync(problem.Problem, submission, request.Content);
+            await parser.HandleSubmissionAsync(problem.Problem.Id, submission.Id, request.Content);
             return new SubmitProblemResponse() {
                 Success = true,
                 Code = 0,
@@ -446,10 +446,10 @@ namespace Syzoj.Api.Controllers
         /// <summary>
         /// Gets all submissions in the problemset.
         /// </summary>
-        [HttpGet("{id}/submissions")]
-        public async Task<ActionResult<GetSubmissionsResponse>> GetSubmissions(Guid id)
+        [HttpGet("{Id}/submissions")]
+        public async Task<ActionResult<GetSubmissionsResponse>> GetSubmissions(Guid Id)
         {
-            Problemset ps = await GetProblemset(id);
+            Problemset ps = await GetProblemset(Id);
             if(ps == null)
             {
                 return new GetSubmissionsResponse() {
@@ -458,7 +458,7 @@ namespace Syzoj.Api.Controllers
                 };
             }
             IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsSubmissionListVisibleAsync(ps))
+            if(!await manager.IsSubmissionListVisibleAsync(ps.Id))
             {
                 return new GetSubmissionsResponse() {
                     Success = false,
@@ -485,10 +485,10 @@ namespace Syzoj.Api.Controllers
         /// <summary>
         /// Gets all submissions for a specific problem in the problemset.
         /// </summary>
-        [HttpGet("{id}/problem/{pid}/submissions")]
-        public async Task<ActionResult<GetSubmissionsResponse>> GetProblemSubmissions(Guid id, string pid)
+        [HttpGet("{Id}/problem/{pid}/submissions")]
+        public async Task<ActionResult<GetSubmissionsResponse>> GetProblemSubmissions(Guid Id, string pid)
         {
-            Problemset ps = await GetProblemset(id);
+            Problemset ps = await GetProblemset(Id);
             if(ps == null)
             {
                 return new GetSubmissionsResponse() {
@@ -497,14 +497,14 @@ namespace Syzoj.Api.Controllers
                 };
             }
             IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsSubmissionListVisibleAsync(ps))
+            if(!await manager.IsSubmissionListVisibleAsync(ps.Id))
             {
                 return new GetSubmissionsResponse() {
                     Success = false,
                     Code = 1002,
                 };
             }
-            ProblemsetProblem problem = await GetProblemsetProblem(id ,pid);
+            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
             if(problem == null)
             {
                 return new GetSubmissionsResponse() {
@@ -561,10 +561,10 @@ namespace Syzoj.Api.Controllers
         /// <summary>
         /// Gets a specified submission.
         /// </summary>
-        [HttpGet("{id}/submission/{sid}")]
-        public async Task<ActionResult<GetSubmissionResponse>> GetSubmission(Guid id, Guid sid)
+        [HttpGet("{Id}/submission/{sid}")]
+        public async Task<ActionResult<GetSubmissionResponse>> GetSubmission(Guid Id, Guid sid)
         {
-            Problemset ps = await GetProblemset(id);
+            Problemset ps = await GetProblemset(Id);
             if(ps == null)
             {
                 return new GetSubmissionResponse() {
@@ -586,7 +586,7 @@ namespace Syzoj.Api.Controllers
                 };
             }
             IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsSubmissionViewableAsync(ps, submission.Submission))
+            if(!await manager.IsSubmissionViewableAsync(ps.Id, submission.Submission.Id))
             {
                 return new GetSubmissionResponse() {
                     Success = false,

@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Syzoj.Api.Models;
 
@@ -5,47 +6,42 @@ namespace Syzoj.Api
 {
     public class DebugProblemsetManager : IAsyncProblemsetManager
     {
-        public Task<bool> IsProblemEditableAsync(Problemset problemset, ProblemsetProblem problem)
+        public Task<bool> IsProblemEditableAsync(Guid problemsetId, Guid problemId)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsProblemListVisibleAsync(Problemset problemset)
+        public Task<bool> IsProblemListVisibleAsync(Guid problemsetId)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsProblemsetEditableAsync(Problemset problemset)
+        public Task<bool> IsProblemsetEditableAsync(Guid problemsetId)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsProblemSubmittableAsync(Problemset problemset, ProblemsetProblem problem)
+        public Task<bool> IsProblemSubmittableAsync(Guid problemsetId, Guid problemId)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsProblemViewableAsync(Problemset problemset, ProblemsetProblem problem)
+        public Task<bool> IsProblemViewableAsync(Guid problemsetId, Guid problemId)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsProblemVisibleAsync(Problemset problemset, ProblemsetProblem problem)
+        public Task<bool> IsSubmissionInteractableAsync(Guid problemsetId, Guid submissionId)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsSubmissionInteractableAsync(Problemset problemset, Submission submission)
+        public Task<bool> IsSubmissionListVisibleAsync(Guid problemsetId)
         {
             return Task.FromResult(true);
         }
 
-        public Task<bool> IsSubmissionViewableAsync(Problemset problemset, Submission submission)
-        {
-            return Task.FromResult(true);
-        }
-
-        public Task<bool> IsSubmissionListVisibleAsync(Problemset problemset)
+        public Task<bool> IsSubmissionViewableAsync(Guid problemsetId, Guid submissionId)
         {
             return Task.FromResult(true);
         }

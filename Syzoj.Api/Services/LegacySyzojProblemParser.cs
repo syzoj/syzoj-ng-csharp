@@ -10,6 +10,8 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Impl;
 using RabbitMQ.Client;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Syzoj.Api.Services
 {
@@ -41,9 +43,12 @@ namespace Syzoj.Api.Services
         }
 
         // TODO: Handle errors, especially model errors
-        public async Task HandleSubmissionAsync(Problem problem, Submission submission, dynamic data)
+        public async Task HandleSubmissionAsync(Guid problemId, Guid submissionId, dynamic data)
         {
-            var metadata = MessagePackSerializer.Deserialize<ProblemMetadata>(problem.Metadata);
+            var (metadata, path) = await dbContext.Problems
+                .Where(p => p.Id == problemId)
+                .Select(p => ValueTuple.Create(MessagePackSerializer.Deserialize<ProblemMetadata>(p.Metadata), p.Path))
+                .FirstOrDefaultAsync();
             object param;
             object extraData = null;
             switch(metadata.Type)
@@ -75,8 +80,8 @@ namespace Syzoj.Api.Services
             }
             LegacyJudgeRequest judgeRequest = new LegacyJudgeRequest() {
                 content = new LegacyJudgeRequestContent() {
-                    taskId = submission.Id.ToString(),
-                    testData = problem.Path + "data/",
+                    taskId = submissionId.ToString(),
+                    testData = path + "data/",
                     type = "traditional",
                     priority = 2,
                     param = param,
@@ -86,15 +91,17 @@ namespace Syzoj.Api.Services
             await judger.SendJudgeRequestAsync(2, MessagePackSerializer.Serialize(judgeRequest));
         }
 
-        public Task<bool> IsProblemValidAsync(Problem problem)
+        public async Task<bool> IsProblemValidAsync(Guid problemId)
         {
-            return Task.Run(() => fileSystem.Exists(FileSystemPath.Parse(problem.Path).AppendFile("syzoj-export.json")));
+            var problemPath = await dbContext.Problems.Where(p => p.Id == problemId).Select(p => p.Path).FirstOrDefaultAsync();
+            return await Task.Run(() => fileSystem.Exists(FileSystemPath.Parse(problemPath).AppendFile("syzoj-export.json")));
         }
 
-        public async Task ParseProblemAsync(Problem problem)
+        public async Task ParseProblemAsync(Guid problemId)
         {
+            var problemPath = await dbContext.Problems.Where(p => p.Id == problemId).Select(p => p.Path).FirstOrDefaultAsync();
             var obj = await Task.Run(() => {
-                var stream = fileSystem.OpenFile(FileSystemPath.Parse(problem.Path).AppendFile("syzoj-export.json"), FileAccess.Read);
+                var stream = fileSystem.OpenFile(FileSystemPath.Parse(problemPath).AppendFile("syzoj-export.json"), FileAccess.Read);
                 var serializer = new JsonSerializer();
                 using(var reader = new StreamReader(stream)) {
                     using(var jsonReader = new JsonTextReader(reader)) {
@@ -104,6 +111,8 @@ namespace Syzoj.Api.Services
             });
             if(obj.success)
             {
+                var problem = new Problem() { Id = problemId };
+                dbContext.Problems.Attach(problem);
                 problem.Title = obj.obj.title;
                 problem.Statement = MessagePackSerializer.Serialize(new {
                     Description = obj.obj.description,

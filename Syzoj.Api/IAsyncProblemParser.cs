@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Syzoj.Api.Models;
 
@@ -16,16 +17,16 @@ namespace Syzoj.Api
         /// Tells whether the contents of the folder is likely to be valid
         /// for this specific problem type.
         /// </summary>
-        Task<bool> IsProblemValidAsync(Problem problem);
+        Task<bool> IsProblemValidAsync(Guid problemId);
 
         /// <summary>
         /// Parses contents of the folder so the API server understands it.
         /// </summary>
-        Task ParseProblemAsync(Problem problem);
+        Task ParseProblemAsync(Guid problemId);
 
         /// <summary>
         /// Handles new submissions for the problem.
         /// </summary>
-        Task HandleSubmissionAsync(Problem problem, Submission submission, object data);
+        Task HandleSubmissionAsync(Guid problemId, Guid submissionId, object data);
     }
 }

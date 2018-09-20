@@ -8,7 +8,7 @@ export class Problemset extends Component {
     super(props);
     this.state = { problems: [], loading: true };
 
-    fetch('api/problemset/1/problems')
+    fetch('api/problemset/cd6363d3-ca44-4c81-b660-15db225a91cc/problems')
       .then(response => response.json())
       .then(data => {
         this.setState({ problems: data.Problems, loading: false });
