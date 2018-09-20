@@ -12,6 +12,7 @@ using RabbitMQ.Client.Impl;
 using RabbitMQ.Client;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Z.EntityFramework.Plus;
 
 namespace Syzoj.Api.Services
 {
@@ -111,43 +112,44 @@ namespace Syzoj.Api.Services
             });
             if(obj.success)
             {
-                var problem = new Problem() { Id = problemId };
-                dbContext.Problems.Attach(problem);
-                problem.Title = obj.obj.title;
-                problem.Statement = MessagePackSerializer.Serialize(new {
-                    Description = obj.obj.description,
-                    InputFormat = obj.obj.input_format,
-                    OutputFormat = obj.obj.output_format,
-                    Example = obj.obj.example,
-                    LimitAndHint = obj.obj.limit_and_hint,
-                    TimeLimit = obj.obj.time_limit,
-                    MemoryLimit = obj.obj.memory_limit,
-                    FileIo = obj.obj.file_io,
-                    FileIoInputName = obj.obj.file_io_input_name,
-                    FileIoOutputName = obj.obj.file_io_output_name,
-                    Type = obj.obj.type,
-                    Tags = obj.obj.tags,
-                });
-                problem.Metadata = MessagePackSerializer.Serialize(new ProblemMetadata() {
-                    TimeLimit = obj.obj.time_limit,
-                    MemoryLimit = obj.obj.memory_limit,
-                    FileIo = obj.obj.file_io,
-                    FileIoInputName = obj.obj.file_io_input_name,
-                    FileIoOutputName = obj.obj.file_io_output_name,
-                    Type = obj.obj.type,
-                });
-                problem.IsSubmittable = true;
+                await dbContext.Problems
+                    .Where(p => p.Id == problemId)
+                    .UpdateAsync(p => new Problem() {
+                        Title = obj.obj.title,
+                        Statement = MessagePackSerializer.Serialize(new {
+                            Description = obj.obj.description,
+                            InputFormat = obj.obj.input_format,
+                            OutputFormat = obj.obj.output_format,
+                            Example = obj.obj.example,
+                            LimitAndHint = obj.obj.limit_and_hint,
+                            TimeLimit = obj.obj.time_limit,
+                            MemoryLimit = obj.obj.memory_limit,
+                            FileIo = obj.obj.file_io,
+                            FileIoInputName = obj.obj.file_io_input_name,
+                            FileIoOutputName = obj.obj.file_io_output_name,
+                            Type = obj.obj.type,
+                            Tags = obj.obj.tags,
+                        }),
+                        Metadata = MessagePackSerializer.Serialize(new ProblemMetadata() {
+                            TimeLimit = obj.obj.time_limit,
+                            MemoryLimit = obj.obj.memory_limit,
+                            FileIo = obj.obj.file_io,
+                            FileIoInputName = obj.obj.file_io_input_name,
+                            FileIoOutputName = obj.obj.file_io_output_name,
+                            Type = obj.obj.type,
+                        }),
+                        IsSubmittable = true,
+                    });
             }
-            await dbContext.SaveChangesAsync();
         }
 
-        private class ExportJson
+        public class ExportJson
         {
             public bool success { get; set; }
             public ExportJsonObject obj { get; set; }
         }
 
-        private class ExportJsonObject
+        public class ExportJsonObject
         {
             public string title { get; set; }
             public string description { get; set; }
@@ -165,7 +167,7 @@ namespace Syzoj.Api.Services
         }
 
         [MessagePackObject(keyAsPropertyName: true)]
-        private class ProblemMetadata
+        public class ProblemMetadata
         {
             public int TimeLimit { get; set; }
             public int MemoryLimit { get; set; }
@@ -176,14 +178,14 @@ namespace Syzoj.Api.Services
         }
 
         [MessagePackObject(keyAsPropertyName: true)]
-        private class LegacyJudgeRequest
+        public class LegacyJudgeRequest
         {
             public LegacyJudgeRequestContent content { get; set; }
             public object extraData { get; set; }
         }
 
         [MessagePackObject(keyAsPropertyName: true)]
-        private class LegacyJudgeRequestContent
+        public class LegacyJudgeRequestContent
         {
             public string taskId { get; set; }
             public string testData { get; set; }
@@ -193,7 +195,7 @@ namespace Syzoj.Api.Services
         }
         
         [MessagePackObject(keyAsPropertyName: true)]
-        private class LegacyJudgeRequestTraditional
+        public class LegacyJudgeRequestTraditional
         {
             public string language { get; set; }
             public string code { get; set; }
@@ -204,7 +206,7 @@ namespace Syzoj.Api.Services
         }
 
         [MessagePackObject(keyAsPropertyName: true)]
-        private class LegacyJudgeRequestInteraction
+        public class LegacyJudgeRequestInteraction
         {
             public string language { get; set; }
             public string code { get; set; }

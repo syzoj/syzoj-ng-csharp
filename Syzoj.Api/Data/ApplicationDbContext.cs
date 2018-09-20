@@ -18,6 +18,7 @@ namespace Syzoj.Api.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            byte[] nilData = MessagePack.MessagePackSerializer.Serialize(new MessagePack.Nil());
 
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasKey(psp => new { psp.ProblemsetId, psp.ProblemId });
@@ -44,8 +45,13 @@ namespace Syzoj.Api.Data
                 .WithMany(ps => ps.Submissions)
                 .HasForeignKey(s => s.ProblemsetId)
                 .HasPrincipalKey(ps => ps.Id);
+            modelBuilder.Entity<Submission>()
+                .Property(s => s.Summary)
+                .HasDefaultValue(nilData);
+            modelBuilder.Entity<Submission>()
+                .Property(s => s.Content)
+                .HasDefaultValue(nilData);
             
-            byte[] nilData = MessagePack.MessagePackSerializer.Serialize(new MessagePack.Nil());
             var defaultProblemset = new Problemset() { Id = Guid.Parse("cd6363d3-ca44-4c81-b660-15db225a91cc"), Type = "debug" };
             modelBuilder.Entity<Problemset>()
                 .HasData(defaultProblemset);

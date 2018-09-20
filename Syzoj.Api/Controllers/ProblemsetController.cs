@@ -8,6 +8,7 @@ using Syzoj.Api.Data;
 using System.ComponentModel.DataAnnotations;
 using MessagePack;
 using System;
+using Z.EntityFramework.Plus;
 
 namespace Syzoj.Api.Controllers
 {
@@ -24,29 +25,8 @@ namespace Syzoj.Api.Controllers
             this.problemsetManagerProvider = problemsetManagerProvider;
         }
 
-        private Task<Problemset> GetProblemset(Guid Id)
+        public class ProblemsetProblemListResponse : BaseResponse
         {
-            return dbContext.Problemsets.Where(psp => psp.Id == Id).FirstOrDefaultAsync();
-        }
-
-        private Task<ProblemsetProblem> GetProblemsetProblem(Guid Id, string pid)
-        {
-            return dbContext.ProblemsetProblems.Where(psp => psp.ProblemsetId == Id && psp.ProblemsetProblemId == pid).Include(psp => psp.Problem).FirstOrDefaultAsync();
-        }
-
-        public class ProblemsetProblemListResponse
-        {
-            /// <summary>
-            /// Whether the query was successful or not.
-            /// </summary>
-            public bool Success { get; set; }
-            /// <summary>
-            /// An integer describing the status of the query. Possible values are:
-            /// - 0: The request was successful.
-            /// - 1001: The problemset doesn't exist.
-            /// - 1002: The problemset is not accessible.
-            /// </summary>
-            public int Code { get; set; }
             /// <summary>
             /// The list of problems from the problemset.
             /// </summary>
@@ -86,30 +66,28 @@ namespace Syzoj.Api.Controllers
         [HttpGet("{Id}/problems")]
         public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] Guid Id, [FromQuery] string sort, [FromQuery] string key, [FromQuery] int page)
         {
-            Problemset ps = await GetProblemset(Id);
-            if(ps == null)
+            var type = await dbContext.Problemsets.Where(ps => ps.Id == Id).Select(ps => ps.Type).FirstOrDefaultAsync();
+            if(type == null)
             {
                 return new ProblemsetProblemListResponse() {
                     Success = false,
-                    Code = 1001,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
                 };
             }
 
-            IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await problemsetManager.IsProblemListVisibleAsync(ps.Id))
+            IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(type);
+            if(!await problemsetManager.IsProblemListVisibleAsync(Id))
             {
                 return new ProblemsetProblemListResponse() {
                     Success = false,
-                    Code = 1002,
+                    ErrorMessage = "syzoj.error.problemsetNotViewable",
                 };
             }
 
             return new ProblemsetProblemListResponse() {
                 Success = true,
-                Code = 0,
-                Problems = dbContext.Entry(ps)
-                    .Collection(x => x.ProblemsetProblems)
-                    .Query()
+                Problems = dbContext.ProblemsetProblems
+                    .Where(psp => psp.ProblemsetId == Id)
                     .Select(x => new ProblemsetProblemSummaryEntry() {
                         ProblemId = x.Problem.Id,
                         ProblemsetProblemId = x.ProblemsetProblemId,
@@ -124,20 +102,8 @@ namespace Syzoj.Api.Controllers
             [Required]
             public string NewId { get; set; }
         }
-        public class PatchProblemIdResponse
+        public class PatchProblemIdResponse : BaseResponse
         {
-            /// <summary>
-            /// Whether the request was successful or not.
-            /// </summary>
-            public bool Success { get; set; }
-            /// <summary>
-            /// An integer describing the status of the query. Possible values are:
-            /// - 0: The request was successful.
-            /// - 1001: The problemset doesn't exist.
-            /// - 1002: The problemset is not editable.
-            /// - 1003: The problem with specified id doesn't exist.
-            /// </summary>
-            public int Code { get; set; }
         }
         /// <summary>
         /// Changes problem id for a specified problem.
@@ -146,56 +112,41 @@ namespace Syzoj.Api.Controllers
         [HttpPatch("{Id}/problem/{pid}/id")]
         public async Task<ActionResult<PatchProblemIdResponse>> PatchProblemId(Guid Id, string pid, [FromBody] PatchProblemIdRequest request)
         {
-            Problemset ps = await GetProblemset(Id);
-            if(ps == null)
+            var type = await dbContext.Problemsets.Where(ps => ps.Id == Id).Select(ps => ps.Type).FirstOrDefaultAsync();
+            if(type == null)
             {
                 return new PatchProblemIdResponse() {
                     Success = false,
-                    Code = 1001,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
                 };
             }
-            IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await problemsetManager.IsProblemsetEditableAsync(ps.Id))
+            IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(type);
+            if(!await problemsetManager.IsProblemsetEditableAsync(Id))
             {
                 return new PatchProblemIdResponse() {
                     Success = false,
-                    Code = 1002,
-                };
-            }
-
-            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
-            if(problem == null)
-            {
-                return new PatchProblemIdResponse() {
-                    Success = false,
-                    Code = 1003,
+                    ErrorMessage = "syzoj.error.problemsetNotEditable",
                 };
             }
 
-            problem.ProblemsetProblemId = request.NewId;
-            await dbContext.SaveChangesAsync();
+            var cnt = await dbContext.ProblemsetProblems
+                .Where(psp => psp.ProblemsetId == Id && psp.ProblemsetProblemId == pid)
+                .UpdateAsync(psp => new ProblemsetProblem() { ProblemsetProblemId = request.NewId });
+            if(cnt == 0)
+            {
+                return new PatchProblemIdResponse() {
+                    Success = false,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotFound",
+                };
+            }
+
             return new PatchProblemIdResponse() {
                 Success = true,
-                Code = 0,
             };
         }
 
-        public class GetProblemResponse
+        public class GetProblemResponse : BaseResponse
         {
-            /// <summary>
-            /// Whether the request was successful or not.
-            /// </summary>
-            public bool Success { get; set; }
-
-            /// <summary>
-            /// An integer describing the status of the query. Possible values are:
-            /// - 0: The request was successful.
-            /// - 1001: The problemset doesn't exist.
-            /// - 1002: The problem is not viewable.
-            /// - 1003: The problem with specified id doesn't exist.
-            /// </summary>
-            public int Code { get; set; }
-
             /// <summary>
             /// The global problem ID for the problem.
             /// </summary>
@@ -233,59 +184,51 @@ namespace Syzoj.Api.Controllers
         [HttpGet("{Id}/problem/{pid}")]
         public async Task<ActionResult<GetProblemResponse>> GetProblem(Guid Id, string pid)
         {
-            Problemset ps = await GetProblemset(Id);
-            if(ps == null)
+            var psType = await dbContext.Problemsets.Where(ps => ps.Id == Id).Select(ps => ps.Type).FirstOrDefaultAsync();
+            if(psType == null)
             {
                 return new GetProblemResponse() {
                     Success = false,
-                    Code = 1001,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
                 };
             }
-            IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
-            if(problem == null)
+            IAsyncProblemsetManager problemsetManager = problemsetManagerProvider.GetProblemsetManager(psType);
+            var problemId = await dbContext.ProblemsetProblems
+                .Where(psp => psp.ProblemsetId == Id && psp.ProblemsetProblemId == pid)
+                .Select(psp => psp.ProblemId)
+                .FirstOrDefaultAsync();
+            if(problemId == default(Guid))
             {
                 return new GetProblemResponse() {
                     Success = false,
-                    Code = 1003,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotFound",
                 };
             }
-            if(!await problemsetManager.IsProblemViewableAsync(ps.Id, problem.ProblemId))
+            if(!await problemsetManager.IsProblemViewableAsync(Id, problemId))
             {
                 return new GetProblemResponse() {
                     Success = false,
-                    Code = 1002,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotViewable",
                 };
             }
 
-            var content = MessagePackSerializer.Deserialize<object>(problem.Problem.Statement);
+            var (title, content, problemType, isSubmittable) = await dbContext.Problems
+                .Where(p => p.Id == problemId)
+                .Select(p => ValueTuple.Create(p.Title, MessagePackSerializer.Deserialize<object>(p.Statement), p.ProblemType, p.IsSubmittable))
+                .FirstOrDefaultAsync();
             return new GetProblemResponse() {
                 Success = true,
-                Code = 0,
-                ProblemId = problem.Problem.Id,
-                ProblemsetProblemId = problem.ProblemsetProblemId,
-                Title = problem.Problem.Title,
-                Type = problem.Problem.ProblemType,
+                ProblemId = problemId,
+                ProblemsetProblemId = pid,
+                Title = title,
+                Type = problemType,
                 Content = content,
-                Submittable = problem.Problem.IsSubmittable && await problemsetManager.IsProblemSubmittableAsync(ps.Id, problem.ProblemId)
+                Submittable = isSubmittable && await problemsetManager.IsProblemSubmittableAsync(Id, problemId)
             };
         }
 
-        public class LoadProblemResponse
+        public class LoadProblemResponse : BaseResponse
         {
-            /// <summary>
-            /// Whether the request was successful or not.
-            /// </summary>
-            public bool Success { get; set; }
-
-            /// <summary>
-            /// An integer describing the status of the query. Possible values are:
-            /// - 0: The request was successful.
-            /// - 1001: The problemset doesn't exist.
-            /// - 1002: The problem is not editable.
-            /// - 1003: The problem with specified id doesn't exist.
-            /// </summary>
-            public int Code { get; set; }
         }
         /// <summary>
         /// Loads the problem statement from data folder.
@@ -293,35 +236,37 @@ namespace Syzoj.Api.Controllers
         [HttpPost("{Id}/problem/{pid}/load")]
         public async Task<ActionResult<LoadProblemResponse>> LoadProblem(Guid Id, string pid)
         {
-            Problemset ps = await GetProblemset(Id);
-            if(ps == null)
+            var type = await dbContext.Problemsets.Where(ps => ps.Id == Id).Select(ps => ps.Type).FirstOrDefaultAsync();
+            if(type == null)
             {
                 return new LoadProblemResponse() {
                     Success = false,
-                    Code = 1001,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
                 };
             }
-            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
-            if(problem == null)
+            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(type);
+            var (problemType, problemId) = await dbContext.ProblemsetProblems
+                .Where(psp => psp.ProblemsetId == Id && psp.ProblemsetProblemId == pid)
+                .Select(psp => ValueTuple.Create(psp.Problem.ProblemType, psp.ProblemId))
+                .FirstOrDefaultAsync();
+            if(problemId == default(Guid))
             {
                 return new LoadProblemResponse() {
                     Success = false,
-                    Code = 1003,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotFound"
                 };
             }
-            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsProblemEditableAsync(ps.Id, problem.ProblemId))
+            if(!await manager.IsProblemEditableAsync(Id, problemId))
             {
                 return new LoadProblemResponse() {
                     Success = false,
-                    Code = 1002,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotEditable",
                 };
             }
-            IAsyncProblemParser parser = problemParserProvider.GetParser(problem.Problem.ProblemType);
-            await parser.ParseProblemAsync(problem.Problem.Id);
+            IAsyncProblemParser parser = problemParserProvider.GetParser(problemType);
+            await parser.ParseProblemAsync(problemId);
             return new LoadProblemResponse() {
                 Success = true,
-                Code = 0,
             };
         }
 
@@ -332,23 +277,8 @@ namespace Syzoj.Api.Controllers
             /// </summary>
             public object Content { get; set; }
         }
-        public class SubmitProblemResponse
+        public class SubmitProblemResponse : BaseResponse
         {
-            /// <summary>
-            /// Whether the request was successful or not.
-            /// </summary>
-            public bool Success { get; set; }
-
-            /// <summary>
-            /// An integer describing the status of the query. Possible values are:
-            /// - 0: The request was successful.
-            /// - 1001: The problemset doesn't exist.
-            /// - 1002: User is not allowed to submit to the problem.
-            /// - 1003: The problem with specified id doesn't exist.
-            /// - 1004: The problem is not submittable.
-            /// </summary>
-            public int Code { get; set; }
-
             /// <summary>
             /// The id of the new submission.
             /// </summary>
@@ -360,68 +290,61 @@ namespace Syzoj.Api.Controllers
         [HttpPost("{Id}/problem/{pid}/submit")]
         public async Task<ActionResult<SubmitProblemResponse>> SubmitProblem([FromRoute] Guid Id, [FromRoute] string pid, [FromBody] SubmitProblemRequest request)
         {
-            Problemset ps = await GetProblemset(Id);
-            if(ps == null)
+            var type = await dbContext.Problemsets.Where(ps => ps.Id == Id).Select(ps => ps.Type).FirstOrDefaultAsync();
+            if(type == null)
             {
                 return new SubmitProblemResponse() {
                     Success = false,
-                    Code = 1001,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
                 };
             }
-            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
-            if(problem == null)
+            var problemId = await dbContext.ProblemsetProblems
+                .Where(psp => psp.ProblemsetId == Id && psp.ProblemsetProblemId == pid)
+                .Select(psp => psp.ProblemId)
+                .FirstOrDefaultAsync();
+            if(problemId == null)
             {
                 return new SubmitProblemResponse() {
                     Success = false,
-                    Code = 1003,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotFound",
                 };
             }
-            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsProblemSubmittableAsync(ps.Id, problem.ProblemId))
+            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(type);
+            var (isSubmittable, problemType) = await dbContext.Problems
+                .Where(p => p.Id == problemId)
+                .Select(p => ValueTuple.Create(p.IsSubmittable, p.ProblemType))
+                .FirstOrDefaultAsync();
+            if(!isSubmittable)
             {
                 return new SubmitProblemResponse() {
                     Success = false,
-                    Code = 1002,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotSubmittable",
                 };
             }
-            if(!problem.Problem.IsSubmittable)
+            if(!await manager.IsProblemSubmittableAsync(Id, problemId))
             {
                 return new SubmitProblemResponse() {
                     Success = false,
-                    Code = 1004,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotSubmittable",
                 };
             }
             var submission = new Submission() {
-                ProblemId = problem.ProblemId,
-                ProblemsetId = problem.ProblemsetId,
+                Id = Guid.NewGuid(),
+                ProblemId = problemId,
+                ProblemsetId = Id,
             };
             dbContext.Submissions.Add(submission);
             await dbContext.SaveChangesAsync();
-            IAsyncProblemParser parser = problemParserProvider.GetParser(problem.Problem.ProblemType);
-            await parser.HandleSubmissionAsync(problem.Problem.Id, submission.Id, request.Content);
+            IAsyncProblemParser parser = problemParserProvider.GetParser(problemType);
+            await parser.HandleSubmissionAsync(problemId, submission.Id, request.Content);
             return new SubmitProblemResponse() {
                 Success = true,
-                Code = 0,
                 SubmissionId = submission.Id,
             };
         }
 
-        public class GetSubmissionsResponse
+        public class GetSubmissionsResponse : BaseResponse
         {
-            /// <summary>
-            /// Whether the request was successful or not.
-            /// </summary>
-            public bool Success { get; set; }
-
-            /// <summary>
-            /// An integer describing the status of the query. Possible values are:
-            /// - 0: The request was successful.
-            /// - 1001: The problemset doesn't exist.
-            /// - 1002: The problemset's submissions are not viewable.
-            /// - 1003: The problem doesn't exist.
-            /// </summary>
-            public int Code { get; set; }
-
             /// <summary>
             /// The list of submissions.
             /// </summary>
@@ -449,26 +372,25 @@ namespace Syzoj.Api.Controllers
         [HttpGet("{Id}/submissions")]
         public async Task<ActionResult<GetSubmissionsResponse>> GetSubmissions(Guid Id)
         {
-            Problemset ps = await GetProblemset(Id);
-            if(ps == null)
+            var type = await dbContext.Problemsets.Where(ps => ps.Id == Id).Select(ps => ps.Type).FirstOrDefaultAsync();
+            if(type == null)
             {
                 return new GetSubmissionsResponse() {
                     Success = false,
-                    Code = 1001,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
                 };
             }
-            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsSubmissionListVisibleAsync(ps.Id))
+            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(type);
+            if(!await manager.IsSubmissionListVisibleAsync(Id))
             {
                 return new GetSubmissionsResponse() {
                     Success = false,
-                    Code = 1002,
+                    ErrorMessage = "syzoj.error.problemsetSubmissionsNotViewable",
                 };
             }
 
-            var submissions = dbContext.Entry(ps)
-                .Collection(x => x.Submissions)
-                .Query()
+            var submissions = dbContext.Submissions
+                .Where(s => s.ProblemsetId == Id)
                 .Select(s => new SubmissionSummaryEntry() {
                     ProblemId = s.ProblemId,
                     ProblemsetProblemId = s.ProblemsetProblem.ProblemsetProblemId,
@@ -477,7 +399,6 @@ namespace Syzoj.Api.Controllers
                 });
             return new GetSubmissionsResponse() {
                 Success = true,
-                Code = 0,
                 Submissions = submissions,
             };
         }
@@ -488,33 +409,35 @@ namespace Syzoj.Api.Controllers
         [HttpGet("{Id}/problem/{pid}/submissions")]
         public async Task<ActionResult<GetSubmissionsResponse>> GetProblemSubmissions(Guid Id, string pid)
         {
-            Problemset ps = await GetProblemset(Id);
-            if(ps == null)
+            var type = await dbContext.Problemsets.Where(ps => ps.Id == Id).Select(ps => ps.Type).FirstOrDefaultAsync();
+            if(type == null)
             {
                 return new GetSubmissionsResponse() {
                     Success = false,
-                    Code = 1001,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
                 };
             }
-            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsSubmissionListVisibleAsync(ps.Id))
+            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(type);
+            if(!await manager.IsSubmissionListVisibleAsync(Id))
             {
                 return new GetSubmissionsResponse() {
                     Success = false,
-                    Code = 1002,
+                    ErrorMessage = "syzoj.error.problemsetSubmissionsNotViewable",
                 };
             }
-            ProblemsetProblem problem = await GetProblemsetProblem(Id, pid);
-            if(problem == null)
+            var problemId = await dbContext.ProblemsetProblems
+                .Where(psp => psp.ProblemsetId == Id && psp.ProblemsetProblemId == pid)
+                .Select(psp => psp.ProblemId)
+                .FirstOrDefaultAsync();
+            if(problemId == default(Guid))
             {
                 return new GetSubmissionsResponse() {
                     Success = false,
-                    Code = 1003,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotFound",
                 };
             }
-            var submissions = dbContext.Entry(problem)
-                .Collection(x => x.Submissions)
-                .Query()
+            var submissions = dbContext.Submissions
+                .Where(s => s.ProblemsetId == Id && s.ProblemId == problemId)
                 .Select(s => new SubmissionSummaryEntry() {
                     ProblemId = s.ProblemId,
                     ProblemsetProblemId = s.ProblemsetProblem.ProblemsetProblemId,
@@ -523,27 +446,12 @@ namespace Syzoj.Api.Controllers
                 });
             return new GetSubmissionsResponse() {
                 Success = true,
-                Code = 0,
                 Submissions = submissions,
             };
         }
 
-        public class GetSubmissionResponse
+        public class GetSubmissionResponse : BaseResponse
         {
-            /// <summary>
-            /// Whether the request was successful or not.
-            /// </summary>
-            public bool Success { get; set; }
-
-            /// <summary>
-            /// An integer describing the status of the query. Possible values are:
-            /// - 0: The request was successful.
-            /// - 1001: The problemset doesn't exist.
-            /// - 1002: The submission is not viewable.
-            /// - 1003: The submission doesn't exist.
-            /// </summary>
-            public int Code { get; set; }
-
             /// <summary>The global id of the corresponding problem.</summary>
             public Guid ProblemId { get; set; }
 
@@ -564,38 +472,35 @@ namespace Syzoj.Api.Controllers
         [HttpGet("{Id}/submission/{sid}")]
         public async Task<ActionResult<GetSubmissionResponse>> GetSubmission(Guid Id, Guid sid)
         {
-            Problemset ps = await GetProblemset(Id);
-            if(ps == null)
+            var type = await dbContext.Problemsets.Where(ps => ps.Id == Id).Select(ps => ps.Type).FirstOrDefaultAsync();
+            if(type == null)
             {
                 return new GetSubmissionResponse() {
                     Success = false,
-                    Code = 1001,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
                 };
             }
-            var submission = await dbContext.Entry(ps)
-                .Collection(x => x.Submissions)
-                .Query()
-                .Where(s => s.Id == sid)
+            var submission = await dbContext.Submissions
+                .Where(s => s.ProblemsetId == Id && s.Id == sid)
                 .Select(s => new { Submission = s, ProblemsetProblemId = s.ProblemsetProblem.ProblemsetProblemId })
                 .FirstOrDefaultAsync();
             if(submission == null)
             {
                 return new GetSubmissionResponse() {
                     Success = false,
-                    Code = 1003,
+                    ErrorMessage = "syzoj.error.problemsetSubmissionNotFound",
                 };
             }
-            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(ps.Type);
-            if(!await manager.IsSubmissionViewableAsync(ps.Id, submission.Submission.Id))
+            IAsyncProblemsetManager manager = problemsetManagerProvider.GetProblemsetManager(type);
+            if(!await manager.IsSubmissionViewableAsync(Id, submission.Submission.Id))
             {
                 return new GetSubmissionResponse() {
                     Success = false,
-                    Code = 1002,
+                    ErrorMessage = "syzoj.error.problemsetSubmissionNotViewable",
                 };
             }
             return new GetSubmissionResponse() {
                 Success = true,
-                Code = 0,
                 ProblemId = submission.Submission.ProblemId,
                 ProblemsetProblemId = submission.ProblemsetProblemId,
                 SubmissionId = submission.Submission.Id,
