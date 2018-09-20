@@ -49,7 +49,7 @@ namespace Syzoj.Api.Data
             var defaultProblemset = new Problemset() { Id = Guid.Parse("cd6363d3-ca44-4c81-b660-15db225a91cc"), Type = "debug" };
             modelBuilder.Entity<Problemset>()
                 .HasData(defaultProblemset);
-            var defaultProblem = new Problem() { Id = Guid.Parse("057f55f3-9c14-4811-a213-c4b80e03174c"), ProblemType = null, Path = "/data/problem/1/", Title = "Test problem", Statement = nilData, IsSubmittable = false };
+            var defaultProblem = new Problem() { Id = Guid.Parse("057f55f3-9c14-4811-a213-c4b80e03174c"), ProblemType = null, Path = "/data/problem/057f55f3-9c14-4811-a213-c4b80e03174c/", Title = "Test problem", Statement = nilData, IsSubmittable = false };
             modelBuilder.Entity<Problem>()
                 .HasData(defaultProblem);
             var defaultProblemsetProblem = new ProblemsetProblem() { ProblemsetId = defaultProblemset.Id, ProblemId = defaultProblem.Id, ProblemsetProblemId = "debug" };
