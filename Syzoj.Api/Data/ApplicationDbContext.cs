@@ -46,16 +46,16 @@ namespace Syzoj.Api.Data
                 .HasPrincipalKey(ps => ps.Id);
             
             byte[] nilData = MessagePack.MessagePackSerializer.Serialize(new MessagePack.Nil());
-            var defaultProblemset = new Problemset() { Id = 1, Type = "debug" };
+            var defaultProblemset = new Problemset() { Id = Guid.Parse("057f55f3-9c14-4811-a213-c4b80e03174c"), Type = "debug" };
             modelBuilder.Entity<Problemset>()
                 .HasData(defaultProblemset);
-            var defaultProblem = new Problem() { Id = Guid.NewGuid(), ProblemType = null, Path = "/data/problem/1/", Title = "Test problem", Statement = nilData, IsSubmittable = false };
+            var defaultProblem = new Problem() { Id = Guid.Parse("057f55f3-9c14-4811-a213-c4b80e03174c"), ProblemType = null, Path = "/data/problem/1/", Title = "Test problem", Statement = nilData, IsSubmittable = false };
             modelBuilder.Entity<Problem>()
                 .HasData(defaultProblem);
             var defaultProblemsetProblem = new ProblemsetProblem() { ProblemsetId = defaultProblemset.Id, ProblemId = defaultProblem.Id, ProblemsetProblemId = "debug" };
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasData(defaultProblemsetProblem);
-            var defaultSubmission = new Submission() { Id = Guid.NewGuid(), ProblemId = defaultProblem.Id, ProblemsetId = 1, Summary = nilData, Content = nilData };
+            var defaultSubmission = new Submission() { Id = Guid.Parse("057f55f3-9c14-4811-a213-c4b80e03174c"), ProblemId = defaultProblem.Id, ProblemsetId = defaultProblemset.Id, Summary = nilData, Content = nilData };
             modelBuilder.Entity<Submission>()
                 .HasData(defaultSubmission);
         }

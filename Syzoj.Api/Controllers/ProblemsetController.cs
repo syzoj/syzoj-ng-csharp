@@ -24,12 +24,12 @@ namespace Syzoj.Api.Controllers
             this.problemsetManagerProvider = problemsetManagerProvider;
         }
 
-        private Task<Problemset> GetProblemset(int id)
+        private Task<Problemset> GetProblemset(Guid id)
         {
             return dbContext.Problemsets.Where(psp => psp.Id == id).FirstOrDefaultAsync();
         }
 
-        private Task<ProblemsetProblem> GetProblemsetProblem(int id, string pid)
+        private Task<ProblemsetProblem> GetProblemsetProblem(Guid id, string pid)
         {
             return dbContext.ProblemsetProblems.Where(psp => psp.ProblemsetId == id && psp.ProblemsetProblemId == pid).Include(psp => psp.Problem).FirstOrDefaultAsync();
         }
@@ -84,7 +84,7 @@ namespace Syzoj.Api.Controllers
         /// <param name="page">Page number.</param>
         // TODO: Implement sorting and pagination
         [HttpGet("{id}/problems")]
-        public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] int id, [FromQuery] string sort, [FromQuery] string key, [FromQuery] int page)
+        public async Task<ActionResult<ProblemsetProblemListResponse>> GetProblemList([FromRoute] Guid id, [FromQuery] string sort, [FromQuery] string key, [FromQuery] int page)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
@@ -144,7 +144,7 @@ namespace Syzoj.Api.Controllers
         /// </summary>
         // TODO: Handle problem id conflict
         [HttpPatch("{id}/problem/{pid}/id")]
-        public async Task<ActionResult<PatchProblemIdResponse>> PatchProblemId(int id, string pid, [FromBody] PatchProblemIdRequest request)
+        public async Task<ActionResult<PatchProblemIdResponse>> PatchProblemId(Guid id, string pid, [FromBody] PatchProblemIdRequest request)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
@@ -231,7 +231,7 @@ namespace Syzoj.Api.Controllers
         /// Gets problem statement for a problem.
         /// </summary>
         [HttpGet("{id}/problem/{pid}")]
-        public async Task<ActionResult<GetProblemResponse>> GetProblem(int id, string pid)
+        public async Task<ActionResult<GetProblemResponse>> GetProblem(Guid id, string pid)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
@@ -291,7 +291,7 @@ namespace Syzoj.Api.Controllers
         /// Loads the problem statement from data folder.
         /// </summary>
         [HttpPost("{id}/problem/{pid}/load")]
-        public async Task<ActionResult<LoadProblemResponse>> LoadProblem(int id, string pid)
+        public async Task<ActionResult<LoadProblemResponse>> LoadProblem(Guid id, string pid)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
@@ -358,7 +358,7 @@ namespace Syzoj.Api.Controllers
         /// Creates a new submission.
         /// </summary>
         [HttpPost("{id}/problem/{pid}/submit")]
-        public async Task<ActionResult<SubmitProblemResponse>> SubmitProblem([FromRoute] int id, [FromRoute] string pid, [FromBody] SubmitProblemRequest request)
+        public async Task<ActionResult<SubmitProblemResponse>> SubmitProblem([FromRoute] Guid id, [FromRoute] string pid, [FromBody] SubmitProblemRequest request)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
@@ -447,7 +447,7 @@ namespace Syzoj.Api.Controllers
         /// Gets all submissions in the problemset.
         /// </summary>
         [HttpGet("{id}/submissions")]
-        public async Task<ActionResult<GetSubmissionsResponse>> GetSubmissions(int id)
+        public async Task<ActionResult<GetSubmissionsResponse>> GetSubmissions(Guid id)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
@@ -486,7 +486,7 @@ namespace Syzoj.Api.Controllers
         /// Gets all submissions for a specific problem in the problemset.
         /// </summary>
         [HttpGet("{id}/problem/{pid}/submissions")]
-        public async Task<ActionResult<GetSubmissionsResponse>> GetProblemSubmissions(int id, string pid)
+        public async Task<ActionResult<GetSubmissionsResponse>> GetProblemSubmissions(Guid id, string pid)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)
@@ -562,7 +562,7 @@ namespace Syzoj.Api.Controllers
         /// Gets a specified submission.
         /// </summary>
         [HttpGet("{id}/submission/{sid}")]
-        public async Task<ActionResult<GetSubmissionResponse>> GetSubmission(int id, Guid sid)
+        public async Task<ActionResult<GetSubmissionResponse>> GetSubmission(Guid id, Guid sid)
         {
             Problemset ps = await GetProblemset(id);
             if(ps == null)

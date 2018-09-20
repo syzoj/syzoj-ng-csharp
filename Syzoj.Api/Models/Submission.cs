@@ -7,7 +7,7 @@ namespace Syzoj.Api.Models
     {
         [Key]
         public Guid Id { get; set; }
-        public int ProblemsetId { get; set; }
+        public Guid ProblemsetId { get; set; }
         public virtual Problemset Problemset { get; set; }
         public Guid ProblemId { get; set; }
         public virtual Problem Problem { get; set; }
