@@ -23,7 +23,8 @@ namespace Syzoj.Api.Data
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasKey(psp => new { psp.ProblemsetId, psp.ProblemId });
             modelBuilder.Entity<ProblemsetProblem>()
-                .HasAlternateKey(psp => new { psp.ProblemsetId, psp.ProblemsetProblemId });
+                .HasIndex(psp => new { psp.ProblemsetId, psp.ProblemsetProblemId })
+                .IsUnique();
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasOne(psp => psp.Problem)
                 .WithMany()
@@ -45,25 +46,6 @@ namespace Syzoj.Api.Data
                 .WithMany(ps => ps.Submissions)
                 .HasForeignKey(s => s.ProblemsetId)
                 .HasPrincipalKey(ps => ps.Id);
-            modelBuilder.Entity<Submission>()
-                .Property(s => s.Summary)
-                .HasDefaultValue(nilData);
-            modelBuilder.Entity<Submission>()
-                .Property(s => s.Content)
-                .HasDefaultValue(nilData);
-            
-            var defaultProblemset = new Problemset() { Id = Guid.Parse("cd6363d3-ca44-4c81-b660-15db225a91cc"), Type = "debug" };
-            modelBuilder.Entity<Problemset>()
-                .HasData(defaultProblemset);
-            var defaultProblem = new Problem() { Id = Guid.Parse("057f55f3-9c14-4811-a213-c4b80e03174c"), ProblemType = null, Path = "/data/problem/057f55f3-9c14-4811-a213-c4b80e03174c/", Title = "Test problem", Statement = nilData, IsSubmittable = false };
-            modelBuilder.Entity<Problem>()
-                .HasData(defaultProblem);
-            var defaultProblemsetProblem = new ProblemsetProblem() { ProblemsetId = defaultProblemset.Id, ProblemId = defaultProblem.Id, ProblemsetProblemId = "debug" };
-            modelBuilder.Entity<ProblemsetProblem>()
-                .HasData(defaultProblemsetProblem);
-            var defaultSubmission = new Submission() { Id = Guid.Parse("d1f0a61b-a330-470a-8aea-1db725c39ea6"), ProblemId = defaultProblem.Id, ProblemsetId = defaultProblemset.Id, Summary = nilData, Content = nilData };
-            modelBuilder.Entity<Submission>()
-                .HasData(defaultSubmission);
         }
     }
 }

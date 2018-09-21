@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Syzoj.Api.Models
 {
@@ -9,14 +10,7 @@ namespace Syzoj.Api.Models
         [Key]
         public Guid Id { get; set; }
         public string ProblemType { get; set; }
-        public string Path { get; set; }
-        public string Title { get; set; }
-        [Required]
-        public byte[] Statement { get; set; }
-        /// <summary>
-        /// Optional information used for judging problems.
-        /// </summary>
-        public byte[] Metadata { get; set; }
-        public bool IsSubmittable { get; set; }
+        [Column(TypeName = "jsonb")]
+        public string Content { get; set; }
     }
 }
