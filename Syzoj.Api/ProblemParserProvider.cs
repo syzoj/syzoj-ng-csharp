@@ -12,25 +12,24 @@ namespace Syzoj.Api
         {
             this.provider = provider;
         }
-        private static IEnumerable<ValueTuple<string, Type>> defaultParsers = new ValueTuple<string, Type>[]
+
+        public ProblemParserProvider()
         {
-            
-        };
+        }
+
         private static Dictionary<string, Type> parsers = new Dictionary<string, Type>()
         {
-            
+            { "default", typeof(DefaultProblemParser) },
         };
-
-        public IEnumerable<ValueTuple<string, IAsyncProblemParser>> GetDefaultParsers()
-        {
-            return defaultParsers.Select(parser => (parser.Item1, (IAsyncProblemParser) provider.GetService(parser.Item2))).AsEnumerable();
-        }
 
         public IAsyncProblemParser GetParser(string name)
         {
             if(name == null)
-                throw new NotImplementedException();
-            return (IAsyncProblemParser) provider.GetService(parsers.GetValueOrDefault(name));
+                throw new ArgumentNullException();
+            var type = parsers.GetValueOrDefault(name);
+            if(type == null)
+                return null;
+            return (IAsyncProblemParser) provider.GetService(type);
         }
     }
 }
