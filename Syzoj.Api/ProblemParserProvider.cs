@@ -14,11 +14,11 @@ namespace Syzoj.Api
         }
         private static IEnumerable<ValueTuple<string, Type>> defaultParsers = new ValueTuple<string, Type>[]
         {
-            ("syzoj-legacy", typeof(LegacySyzojProblemParser))
+            
         };
         private static Dictionary<string, Type> parsers = new Dictionary<string, Type>()
         {
-            { "syzoj-legacy", typeof(LegacySyzojProblemParser) },
+            
         };
 
         public IEnumerable<ValueTuple<string, IAsyncProblemParser>> GetDefaultParsers()
