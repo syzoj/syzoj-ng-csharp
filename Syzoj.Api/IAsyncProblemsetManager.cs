@@ -1,53 +1,66 @@
 using System;
 using System.Threading.Tasks;
-using Syzoj.Api.Models;
 
 namespace Syzoj.Api
 {
     /// <summary>
-    /// This interface defines whether a given user is authorized to do
-    /// specified action under certain circumstances.
+    /// An instance of the interface is responsible for updating information
+    /// related to the problemset, invalidate caches, etc.
+    /// After an await the information is considered to be acknowledged,
+    /// but the manager may perform further actions.
     /// </summary>
     public interface IAsyncProblemsetManager
     {
         /// <summary>
-        /// Returns whether the user can edit the problemset.
+        /// Attaches a problem to the problemset.
         /// </summary>
-        Task<bool> IsProblemsetEditableAsync(Guid problemsetId);
-        /// <summary>
-        /// Returns whether the problem list should be visible to the
-        /// current user.
-        /// </summary>
-        Task<bool> IsProblemListVisibleAsync(Guid problemsetId);
+        Task AttachProblem(Guid problemsetId, Guid problemId, string name);
 
         /// <summary>
-        /// Returns whether the problem is viewable to the current user.
+        /// Detaches a problem from the problemset.
         /// </summary>
-        Task<bool> IsProblemViewableAsync(Guid problemsetId, Guid problemId);
+        Task DetachProblem(Guid problemsetId, Guid problemId);
 
         /// <summary>
-        /// Returns whether the current user can submit to the problem.
+        /// Changes name of a problem in problemset.
         /// </summary>
-        Task<bool> IsProblemSubmittableAsync(Guid problemsetId, Guid problemId);
+        Task ChangeProblemName(Guid problemsetId, Guid problemId, string newName);
 
         /// <summary>
-        /// Returns whether the current user can edit the problem data.
+        /// Updates problem statement for specified problem.
         /// </summary>
-        Task<bool> IsProblemEditableAsync(Guid problemsetId, Guid problemId);
+        Task PutProblem(Guid problemsetId, Guid problemId, object problem);
 
         /// <summary>
-        /// Returns whether the current user can see the list of submissions.
+        /// Patches problem statement for specifed problem.
         /// </summary>
-        Task<bool> IsSubmissionListVisibleAsync(Guid problemsetId);
+        Task PatchProblem(Guid problemsetId, Guid problemId, object problem);
 
         /// <summary>
-        /// Returns whether the current user can view the specified submission.
+        /// Creates a new submission. submissionId should be a fresh new GUID
+        /// that didn't exist. This does not verify the submission object nor
+        /// performs judge.
         /// </summary>
-        Task<bool> IsSubmissionViewableAsync(Guid problemsetId, Guid submissionId);
+        Task NewSubmission(Guid problemsetId, Guid problemId, Guid submissionId, object submission);
 
         /// <summary>
-        /// Returns whether the current user can interact with the specified submission.
+        /// Updates a submission.
         /// </summary>
-        Task<bool> IsSubmissionInteractableAsync(Guid problemsetId, Guid submissionId);
+        Task PutSubmission(Guid problemsetId, Guid problemId, Guid submissionId, object submission);
+
+        /// <summary>
+        /// Patches a submission.
+        /// </summary>
+        Task PatchSubmission(Guid problemsetId, Guid problemId, Guid submissionId, object submission);
+
+        /// <summary>
+        /// Performs garbage collection.
+        /// </summary>
+        Task DoGarbageCollect();
+
+        /// <summary>
+        /// Rebuilds the Redis index.
+        /// </summary>
+        Task RebuildIndex();
     }
 }

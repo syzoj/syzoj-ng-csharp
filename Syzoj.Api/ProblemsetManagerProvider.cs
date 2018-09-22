@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Syzoj.Api.Services;
 
 namespace Syzoj.Api
 {
@@ -7,13 +8,17 @@ namespace Syzoj.Api
     {
         private static Dictionary<string, Type> providers = new Dictionary<string, Type>()
         {
-            { "debug", typeof(DebugProblemsetManager) }
+            { "default", typeof(DefaultProblemsetManager) }
         };
         private readonly IServiceProvider serviceProvider;
 
         public ProblemsetManagerProvider(IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
+        }
+        public IAsyncProblemsetPermissionManager GetProblemsetPermissionManager(string Name)
+        {
+            return (IAsyncProblemsetPermissionManager) serviceProvider.GetService(providers.GetValueOrDefault(Name));
         }
         public IAsyncProblemsetManager GetProblemsetManager(string Name)
         {
