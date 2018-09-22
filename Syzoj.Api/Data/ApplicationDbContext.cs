@@ -20,6 +20,12 @@ namespace Syzoj.Api.Data
             base.OnModelCreating(modelBuilder);
             byte[] nilData = MessagePack.MessagePackSerializer.Serialize(new MessagePack.Nil());
 
+            modelBuilder.Entity<Problem>()
+                .ForNpgsqlUseXminAsConcurrencyToken();
+
+            modelBuilder.Entity<Problemset>()
+                .ForNpgsqlUseXminAsConcurrencyToken();
+
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasKey(psp => new { psp.ProblemsetId, psp.ProblemId });
             modelBuilder.Entity<ProblemsetProblem>()
@@ -35,6 +41,8 @@ namespace Syzoj.Api.Data
                 .WithMany(ps => ps.ProblemsetProblems)
                 .HasForeignKey(psp => psp.ProblemsetId)
                 .HasPrincipalKey(ps => ps.Id);
+            modelBuilder.Entity<ProblemsetProblem>()
+                .ForNpgsqlUseXminAsConcurrencyToken();
             
             modelBuilder.Entity<Submission>()
                 .HasOne(s => s.ProblemsetProblem)
@@ -46,6 +54,8 @@ namespace Syzoj.Api.Data
                 .WithMany(ps => ps.Submissions)
                 .HasForeignKey(s => s.ProblemsetId)
                 .HasPrincipalKey(ps => ps.Id);
+            modelBuilder.Entity<ProblemsetProblem>()
+                .ForNpgsqlUseXminAsConcurrencyToken();
         }
     }
 }

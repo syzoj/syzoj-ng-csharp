@@ -6,9 +6,13 @@ namespace Syzoj.Api
 {
     public class ProblemsetManagerProvider
     {
-        private static Dictionary<string, Type> providers = new Dictionary<string, Type>()
+        private static Dictionary<string, Type> managers = new Dictionary<string, Type>()
         {
             { "default", typeof(DefaultProblemsetManager) }
+        };
+        private static Dictionary<string, Type> permissionManagers = new Dictionary<string, Type>()
+        {
+            { "default", typeof(DefaultProblemsetPermissionManager) }
         };
         private readonly IServiceProvider serviceProvider;
 
@@ -18,11 +22,11 @@ namespace Syzoj.Api
         }
         public IAsyncProblemsetPermissionManager GetProblemsetPermissionManager(string Name)
         {
-            return (IAsyncProblemsetPermissionManager) serviceProvider.GetService(providers.GetValueOrDefault(Name));
+            return (IAsyncProblemsetPermissionManager) serviceProvider.GetService(permissionManagers.GetValueOrDefault(Name));
         }
         public IAsyncProblemsetManager GetProblemsetManager(string Name)
         {
-            return (IAsyncProblemsetManager) serviceProvider.GetService(providers.GetValueOrDefault(Name));
+            return (IAsyncProblemsetManager) serviceProvider.GetService(managers.GetValueOrDefault(Name));
         }
     }
 }

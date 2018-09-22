@@ -109,7 +109,8 @@ namespace Syzoj.Api
             });
 
             services.AddScoped<ProblemsetManagerProvider>();
-            services.AddScoped<DebugProblemsetManager>();
+            services.AddScoped<DefaultProblemsetManager>();
+            services.AddScoped<DefaultProblemsetPermissionManager>();
 
             services.AddScoped<ProblemParserProvider>();
         }
