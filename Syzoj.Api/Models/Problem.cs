@@ -9,6 +9,7 @@ namespace Syzoj.Api.Models
     {
         [Key]
         public Guid Id { get; set; }
+        [Required]
         public string ProblemType { get; set; }
         [Column(TypeName = "jsonb")]
         public string Content { get; set; }

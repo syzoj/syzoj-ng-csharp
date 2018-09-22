@@ -113,6 +113,7 @@ namespace Syzoj.Api
             services.AddScoped<DefaultProblemsetPermissionManager>();
 
             services.AddScoped<ProblemParserProvider>();
+            services.AddScoped<DefaultProblemParser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

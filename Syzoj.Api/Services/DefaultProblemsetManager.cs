@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Z.EntityFramework.Plus;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Syzoj.Api.Services
 {
@@ -37,14 +38,19 @@ namespace Syzoj.Api.Services
             #pragma warning disable CS4014
             var tran = redis.GetDatabase().CreateTransaction();
             tran.SortedSetAddAsync(
-                key: $"syzoj:problemset:{problemsetId}:problem_name",
-                member: name,
+                key: $"syzoj:problemset:{problemsetId}:sort:name",
+                member: name + problemId,
                 score: 0,
                 flags: CommandFlags.FireAndForget
             );
             tran.HashSetAsync(
                 key: $"syzoj:problemset:{problemsetId}:problem_id",
                 hashFields: new HashEntry[] { new HashEntry(name, problemId.ToString()) },
+                flags: CommandFlags.FireAndForget
+            );
+            tran.HashSetAsync(
+                key: $"syzoj:problemset:{problemsetId}:problem_name",
+                hashFields: new HashEntry[] { new HashEntry(problemId.ToString(), name) },
                 flags: CommandFlags.FireAndForget
             );
             #pragma warning restore CS4014
@@ -64,13 +70,13 @@ namespace Syzoj.Api.Services
             #pragma warning disable CS4014
             var tran = redis.GetDatabase().CreateTransaction();
             tran.SortedSetRemoveAsync(
-                key: $"syzoj:problemset:{problemsetId}:problem_name",
-                member: oldName,
+                key: $"syzoj:problemset:{problemsetId}:sort:name",
+                member: oldName + problemId,
                 flags: CommandFlags.FireAndForget
             );
             tran.SortedSetAddAsync(
-                key: $"syzoj:problemset:{problemsetId}:problem_name",
-                member: newName,
+                key: $"syzoj:problemset:{problemsetId}:sort:name",
+                member: newName + problemId,
                 score: 0,
                 flags: CommandFlags.FireAndForget
             );
@@ -82,6 +88,11 @@ namespace Syzoj.Api.Services
             tran.HashSetAsync(
                 key: $"syzoj:problemset:{problemsetId}:problem_id",
                 hashFields: new HashEntry[] { new HashEntry(newName, problemId.ToString()) },
+                flags: CommandFlags.FireAndForget
+            );
+            tran.HashSetAsync(
+                key: $"syzoj:problemset:{problemsetId}:problem_name",
+                hashFields: new HashEntry[] { new HashEntry(problemId.ToString(), newName) },
                 flags: CommandFlags.FireAndForget
             );
             #pragma warning restore CS4014
@@ -140,20 +151,13 @@ namespace Syzoj.Api.Services
                 throw new Exception("Redis transaction failed");
         }
 
-        public async Task PatchProblem(Guid problemsetId, Guid problemId, object problem)
+        public async Task PatchProblem(Guid problemsetId, Guid problemId, object problemPatch)
         {
-            var problemContent = await dbContext.Problems
-                .Where(p => p.Id == problemId)
-                .Select(p => p.Content)
-                .FirstOrDefaultAsync();
-            var problemContentObj = JsonConvert.DeserializeObject(problemContent);
-            var requestJson = JsonConvert.SerializeObject(problem);
-            JsonConvert.PopulateObject(requestJson, problemContentObj);
-            problemContent = JsonConvert.SerializeObject(problemContentObj);
-            await dbContext.Problems
-                .Where(p => p.Id == problemId)
-                .UpdateAsync(p => new Problem() { Content = problemContent });
-            
+            var problem = await dbContext.Problems.FindAsync(problemId);
+            JObject orgProblem = JObject.Parse(problem.Content);
+            orgProblem.Merge(problemPatch);
+            problem.Content = orgProblem.ToString();
+            await dbContext.SaveChangesAsync();
             await InvalidateProblemCache(problemId);
         }
 
@@ -165,9 +169,12 @@ namespace Syzoj.Api.Services
         public async Task PutProblem(Guid problemsetId, Guid problemId, object problem)
         {
             var problemContent = JsonConvert.SerializeObject(problem);
-            await dbContext.Problems
+            /*await dbContext.Problems
                 .Where(p => p.Id == problemId)
-                .UpdateAsync(p => new Problem() { Content = problemContent });
+                .UpdateAsync(p => new Problem() { Content = problemContent });*/
+            var problemObj = await dbContext.Problems.FindAsync(new object[] { problemId });
+            problemObj.Content = problemContent;
+            await dbContext.SaveChangesAsync();
             
             await InvalidateProblemCache(problemId);
         }

@@ -12,11 +12,19 @@ namespace Syzoj.Api
     {
         /// <summary>
         /// Returns whether the user has certain permission to a problemset.
+        /// Common permission names include:
+        /// - view: View the list of problems.
+        /// - edit: Change problemset, such as changing problem names.
+        /// - create: Create new problems. `edit` permission is usually also required.
         /// </summary>
         Task<bool> CheckProblemsetPermissionAsync(Guid problemsetId, string name);
 
         /// <summary>
         /// Returns whether the user has certain permission to a problem.
+        /// Common permission names include:
+        /// - view: View the problem statement.
+        /// - edit: Edit the problem.
+        /// - submit: Submit to the problem.
         /// </summary>
         Task<bool> CheckProblemPermissionAsync(Guid problemsetId, Guid problemId, string name);
 

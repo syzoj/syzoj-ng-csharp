@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Syzoj.Api.Services;
 
 namespace Syzoj.Api
@@ -29,7 +30,7 @@ namespace Syzoj.Api
             var type = parsers.GetValueOrDefault(name);
             if(type == null)
                 return null;
-            return (IAsyncProblemParser) provider.GetService(type);
+            return (IAsyncProblemParser) provider.GetRequiredService(type);
         }
     }
 }
