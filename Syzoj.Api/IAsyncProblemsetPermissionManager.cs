@@ -25,7 +25,11 @@ namespace Syzoj.Api
         /// - view: View the problem statement.
         /// - edit: Edit the problem.
         /// - submit: Submit to the problem.
+        /// - export: Export whole problem, including related files.
         /// </summary>
+        /// <remark>
+        /// Editing the problem also requires the 'export' privilege.
+        /// </remark>
         Task<bool> CheckProblemPermissionAsync(Guid problemsetId, Guid problemId, string name);
 
         /// <summary>

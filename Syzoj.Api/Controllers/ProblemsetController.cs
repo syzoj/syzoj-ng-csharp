@@ -10,6 +10,7 @@ using MessagePack;
 using System;
 using Z.EntityFramework.Plus;
 using StackExchange.Redis;
+using Newtonsoft.Json;
 
 namespace Syzoj.Api.Controllers
 {
@@ -758,6 +759,61 @@ namespace Syzoj.Api.Controllers
             return new PatchProblemResponse()
             {
                 Success = true,
+            };
+        }
+
+        public class ExportProblemResponse : BaseResponse
+        {
+            public object Content { get; set; }
+        }
+        /// <summary>
+        /// Exports the problem.
+        /// </summary>
+        /// <param name="Id">The ID of the problemset.</param>
+        /// <param name="name">The problem identifier in this problemset.</param>
+        [HttpGet("{Id}/problem/{name}/export")]
+        public async Task<ActionResult<ExportProblemResponse>> ExportProblem([FromRoute] Guid Id, [FromRoute] string name)
+        {
+            // FIXME: This method creates a detached problem if name duplicates.
+            var type = await GetProblemsetType(Id);
+            if(type == null)
+            {
+                return new ExportProblemResponse()
+                {
+                    Success = false,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
+                };
+            }
+
+            var problemsetPermissionManager = problemsetManagerProvider.GetProblemsetPermissionManager(type);
+            var problemIdString = await redis.GetDatabase().HashGetAsync(
+                $"syzoj:problemset:{Id}:problem_id",
+                name
+            );
+            Guid problemId;
+            if(problemIdString.IsNullOrEmpty)
+            {
+                problemId = await GetProblemId(Id, name);
+            }
+            else
+            {
+                problemId = Guid.Parse((string) problemIdString);
+            }
+
+            if(!await problemsetPermissionManager.CheckProblemPermissionAsync(Id, problemId, "export"))
+            {
+                return new ExportProblemResponse()
+                {
+                    Success = false,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotExportable",
+                };
+            }
+
+            var problem = await dbContext.Problems.FindAsync(problemId);
+            return new ExportProblemResponse()
+            {
+                Success = true,
+                Content = JsonConvert.DeserializeObject(problem.Content),
             };
         }
     }
