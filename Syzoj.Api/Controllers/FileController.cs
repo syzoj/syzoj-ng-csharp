@@ -24,9 +24,12 @@ namespace Syzoj.Api.Controllers
                 if(!provider.VerifySignature(str, signature))
                     return BadRequest();
                 if(expire < ((DateTimeOffset) DateTime.UtcNow).ToUnixTimeMilliseconds())
-                    return Forbid("Expired");
-                var realPath = Path.Join(provider.GetPath(), path);
-                return PhysicalFile(realPath, "application/octet-stream", fileName, true);
+                    return StatusCode(403);
+                var realPath = Path.Combine(provider.GetPath(), path);
+                if(System.IO.File.Exists(realPath))
+                    return PhysicalFile(realPath, "application/octet-stream", fileName, true);
+                else
+                    return NotFound();
             }
             else
             {
@@ -44,7 +47,9 @@ namespace Syzoj.Api.Controllers
                     return BadRequest();
                 if(expire < ((DateTimeOffset) DateTime.UtcNow).ToUnixTimeMilliseconds())
                     return Forbid("Expired");
-                var realPath = Path.Join(provider.GetPath(), path);
+                var realPath = Path.Combine(provider.GetPath(), path);
+                var dir = Path.GetDirectoryName(realPath);
+                System.IO.Directory.CreateDirectory(dir);
                 using(var fileStream = System.IO.File.Create(realPath))
                 {
                     await HttpContext.Request.Body.CopyToAsync(fileStream);

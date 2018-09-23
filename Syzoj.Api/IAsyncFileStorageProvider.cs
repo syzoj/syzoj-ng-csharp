@@ -23,6 +23,8 @@ namespace Syzoj.Api
 
         /// <summary>
         /// Generates a link to allow the user to download the file.
+        /// Should return null if the file's existence can be determined
+        /// immediately and it doesn't exist.
         /// The link is expected to expire quickly so it should be generated
         /// on demand.
         /// </summary>

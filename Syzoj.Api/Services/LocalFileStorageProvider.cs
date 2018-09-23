@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Syzoj.Api.Services
 {
@@ -14,6 +15,8 @@ namespace Syzoj.Api.Services
         private readonly string secret;
         public LocalFileStorageProvider(string path, string secret)
         {
+            if(!Directory.Exists(path))
+                throw new IOException("Directory doesn't exist.");
             this.path = path;
             this.secret = secret;
         }
@@ -54,6 +57,9 @@ namespace Syzoj.Api.Services
 
         public Task<string> GenerateDownloadLink(string path, string fileName)
         {
+            var realPath = Path.Combine(this.path, path);
+            if(!File.Exists(realPath))
+                return Task.FromResult<string>(null);
             var expire = ((DateTimeOffset) DateTime.UtcNow).ToUnixTimeMilliseconds() + 60000;
             var expireEncoded = WebUtility.UrlEncode(expire.ToString());
             var pathEncoded = WebUtility.UrlEncode(path);
@@ -79,8 +85,16 @@ namespace Syzoj.Api.Services
 
         public Task<IEnumerable<string>> GetFiles(string path)
         {
-            var realPath = Path.Join(this.path, path);
-            return Task.FromResult(Directory.EnumerateFiles(path));
+            Console.WriteLine(this.path);
+            var realPath = Path.Combine(this.path, path);
+            try
+            {
+                return Task.FromResult(Directory.EnumerateFiles(realPath).Select(s => Path.GetFileName(s)));
+            }
+            catch(DirectoryNotFoundException)
+            {
+                return Task.FromResult(Enumerable.Empty<string>());
+            }
         }
     }
 }

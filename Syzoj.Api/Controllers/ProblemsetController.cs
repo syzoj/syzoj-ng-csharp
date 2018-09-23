@@ -764,6 +764,14 @@ namespace Syzoj.Api.Controllers
 
         public class ExportProblemResponse : BaseResponse
         {
+            /// <summary>
+            /// The list of files for the problem.
+            /// </summary>
+            public IEnumerable<string> FileList { get; set; }
+
+            /// <summary>
+            /// The content of the problem.
+            /// </summary>
             public object Content { get; set; }
         }
         /// <summary>
@@ -772,7 +780,7 @@ namespace Syzoj.Api.Controllers
         /// <param name="Id">The ID of the problemset.</param>
         /// <param name="name">The problem identifier in this problemset.</param>
         [HttpGet("{Id}/problem/{name}/export")]
-        public async Task<ActionResult<ExportProblemResponse>> ExportProblem([FromRoute] Guid Id, [FromRoute] string name)
+        public async Task<ActionResult<ExportProblemResponse>> ExportProblem([FromRoute] Guid Id, [FromRoute] string name, [FromServices] IAsyncFileStorageProvider provider)
         {
             // FIXME: This method creates a detached problem if name duplicates.
             var type = await GetProblemsetType(Id);
@@ -800,6 +808,15 @@ namespace Syzoj.Api.Controllers
                 problemId = Guid.Parse((string) problemIdString);
             }
 
+            if(problemId == null)
+            {
+                return new ExportProblemResponse()
+                {
+                    Success = false,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotFound",
+                };
+            }
+
             if(!await problemsetPermissionManager.CheckProblemPermissionAsync(Id, problemId, "export"))
             {
                 return new ExportProblemResponse()
@@ -813,7 +830,77 @@ namespace Syzoj.Api.Controllers
             return new ExportProblemResponse()
             {
                 Success = true,
+                FileList = await provider.GetFiles($"data/problem/{problemId}/"),
                 Content = JsonConvert.DeserializeObject(problem.Content),
+            };
+        }
+
+        public class ExportProblemDownloadResponse : BaseResponse
+        {
+            /// <summary>
+            /// The URL to download the problem. If the file doesn't exist,
+            /// either this field will be null or the url will return a 404 response.
+            /// </summary>
+            public string Url { get; set; }
+        }
+        /// <summary>
+        /// Downloads the problem's files.
+        /// </summary>
+        /// <param name="Id">The ID of the problemset.</param>
+        /// <param name="name">The problem identifier in this problemset.</param>
+        /// <param name="file">The name of the file to download.</param>
+        /// <param name="fileName">The filename to download as.</param>
+        [HttpGet("{Id}/problem/{name}/export/{file}/{fileName}")]
+        public async Task<ActionResult<ExportProblemDownloadResponse>> ExportProblemDownload([FromRoute] Guid Id, [FromRoute] string name, [FromRoute] string file, [FromRoute] string fileName, [FromServices] IAsyncFileStorageProvider provider)
+        {
+            // FIXME: This method creates a detached problem if name duplicates.
+            var type = await GetProblemsetType(Id);
+            if(type == null)
+            {
+                return new ExportProblemDownloadResponse()
+                {
+                    Success = false,
+                    ErrorMessage = "syzoj.error.problemsetNotFound",
+                };
+            }
+
+            var problemsetPermissionManager = problemsetManagerProvider.GetProblemsetPermissionManager(type);
+            var problemIdString = await redis.GetDatabase().HashGetAsync(
+                $"syzoj:problemset:{Id}:problem_id",
+                name
+            );
+            Guid problemId;
+            if(problemIdString.IsNullOrEmpty)
+            {
+                problemId = await GetProblemId(Id, name);
+            }
+            else
+            {
+                problemId = Guid.Parse((string) problemIdString);
+            }
+
+            if(problemId == null)
+            {
+                return new ExportProblemDownloadResponse()
+                {
+                    Success = false,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotFound",
+                };
+            }
+
+            if(!await problemsetPermissionManager.CheckProblemPermissionAsync(Id, problemId, "export"))
+            {
+                return new ExportProblemDownloadResponse()
+                {
+                    Success = false,
+                    ErrorMessage = "syzoj.error.problemsetProblemNotExportable",
+                };
+            }
+
+            return new ExportProblemDownloadResponse()
+            {
+                Success = true,
+                Url = await provider.GenerateDownloadLink($"data/problem/{problemId}/{file}", fileName),
             };
         }
     }
