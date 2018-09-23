@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { MarkdownLatex } from './MarkdownLatex';
+import ReactMarkdown from 'react-markdown';
 import { Col, Grid, Row, Button } from 'react-bootstrap';
 import { CodeEditor } from './CodeEditor';
 
@@ -26,7 +26,7 @@ export class Problem extends Component {
     {
       return <div>
         <h2>{name}</h2>
-        <MarkdownLatex source={content} />
+        <ReactMarkdown source={content} />
       </div>;
     }
     else
