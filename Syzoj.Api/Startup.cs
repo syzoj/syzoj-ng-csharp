@@ -8,9 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
-using SharpFileSystem;
 using System;
-using SharpFileSystem.FileSystems;
 using System.IO;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
@@ -93,16 +91,15 @@ namespace Syzoj.Api
             });
             services.AddSingleton<ILegacySyzojJudger, LegacySyzojJudger>();
 
-            services.AddSingleton<IFileSystem>(s => {
+            services.AddSingleton<IAsyncFileStorageProvider>(s => {
                 var section = Configuration.GetSection("FileSystem");
                 var type = section.GetValue<string>("Type");
                 switch(type)
                 {
-                    case "Memory":
-                        return new MemoryFileSystem();
                     case "Local":
                         var path = section.GetValue<string>("Path");
-                        return new PhysicalFileSystem(path);
+                        var secret = section.GetValue<string>("Secret");
+                        return new LocalFileStorageProvider(path, secret);
                     default:
                         throw new ArgumentException("Invalid FileSystemType in configuration file.");
                 }
