@@ -76,7 +76,14 @@ namespace Syzoj.Api
             services.ConfigureApplicationCookie(options => {
                 options.Cookie.Name = "SYZOJSESS";
             });
-            services.AddIdentityCore<ApplicationUser>()
+            services.AddIdentityCore<ApplicationUser>(options => {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+            })
                  .AddEntityFrameworkStores<ApplicationDbContext>()
                  .AddDefaultUI()
                  .AddDefaultTokenProviders();
