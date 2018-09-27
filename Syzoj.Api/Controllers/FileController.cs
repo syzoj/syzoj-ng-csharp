@@ -46,7 +46,7 @@ namespace Syzoj.Api.Controllers
                 if(!provider.VerifySignature(str, signature))
                     return BadRequest();
                 if(expire < ((DateTimeOffset) DateTime.UtcNow).ToUnixTimeMilliseconds())
-                    return Forbid("Expired");
+                    return StatusCode(403);
                 var realPath = Path.Combine(provider.GetPath(), path);
                 var dir = Path.GetDirectoryName(realPath);
                 System.IO.Directory.CreateDirectory(dir);
