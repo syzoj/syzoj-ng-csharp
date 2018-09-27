@@ -7,7 +7,7 @@ export var locale = {
     "syzoj.error.problemsetProblemNotViewable": "无法查看此题目。",
     "syzoj.error.problemsetProblemNotEditable": "无法编辑此题目。",
     "syzoj.error.problemsetProblemNotSubmittable": "无法提交此题目。",
-    "syzoj.error.problemsetProblemNotExporttable": "无法导出此题目。",
+    "syzoj.error.problemsetProblemNotExportable": "无法导出此题目。",
     "syzoj.error.problemsetSubmissionsNotViewable": "无法查看该题库的提交记录。",
     "syzoj.error.problemsetSubmissionNotFound": "提交记录不存在。",
     "syzoj.error.problemsetSubmissionNotViewable": "无法查看该提交记录。",

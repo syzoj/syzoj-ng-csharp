@@ -113,13 +113,6 @@ namespace Syzoj.Api
                         throw new ArgumentException("Invalid FileSystemType in configuration file.");
                 }
             });
-
-            services.AddScoped<ProblemsetManagerProvider>();
-            services.AddScoped<DefaultProblemsetManager>();
-            services.AddScoped<DefaultProblemsetPermissionManager>();
-
-            services.AddScoped<ProblemParserProvider>();
-            services.AddScoped<DefaultProblemParser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
