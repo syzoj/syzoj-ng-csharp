@@ -57,6 +57,8 @@ namespace Syzoj.Api
                 return ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis"));
             });
 
+            services.AddSingleton<CacheManager>();
+
             services.AddDistributedRedisCache(options =>
             {
                 options.Configuration = Configuration.GetConnectionString("RedisCache");
