@@ -15,5 +15,6 @@ namespace Syzoj.Api.Models
         public virtual ProblemsetProblem ProblemsetProblem { get; set; }
         [Column(TypeName = "jsonb")]
         public string Content { get; set; }
+        public byte[] Data { get; set; }
     }
 }

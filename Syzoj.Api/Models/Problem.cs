@@ -13,5 +13,6 @@ namespace Syzoj.Api.Models
         public string ProblemType { get; set; }
         [Column(TypeName = "jsonb")]
         public string Content { get; set; }
+        public byte[] data { get; set; }
     }
 }
