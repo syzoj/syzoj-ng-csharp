@@ -5,7 +5,6 @@ namespace Syzoj.Api.Problems
         public static ProblemsetPermission ViewPermission = new ProblemsetViewPermission();
         public static ProblemsetPermission EditPermission = new ProblemsetEditPermission();
         
-        public ProblemsetPermission() : base() { }
         public ProblemsetPermission(string name, string errorMessage) : base(name, errorMessage) { }
         
         private class ProblemsetViewPermission : ProblemsetPermission

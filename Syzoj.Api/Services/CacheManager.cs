@@ -17,12 +17,12 @@ namespace Syzoj.Api.Services
             this.redis = redis;
         }
 
-        public async Task<T> CachedAsync<T>(string keyName, TimeSpan expiry, bool renewOnRead, Func<T> func)
+        public async Task<T> CachedAsync<T>(string keyName, TimeSpan expiry, bool renewOnRead, Func<Task<T>> func)
         {
             var val = await redis.GetDatabase().StringGetAsync(keyName);
             if(val.IsNullOrEmpty)
             {
-                var result = func.Invoke();
+                var result = await func.Invoke();
                 var stream = new MemoryStream();
                 IFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(stream, result);
@@ -42,12 +42,12 @@ namespace Syzoj.Api.Services
             }
         }
 
-        public async Task<T> CachedMessagePackAsync<T>(string keyName, TimeSpan expiry, bool renewOnRead, Func<T> func)
+        public async Task<T> CachedMessagePackAsync<T>(string keyName, TimeSpan expiry, bool renewOnRead, Func<Task<T>> func)
         {
             var val = await redis.GetDatabase().StringGetAsync(keyName);
             if(val.IsNullOrEmpty)
             {
-                var result = func.Invoke();
+                var result = await func.Invoke();
                 var data = MessagePackSerializer.Serialize(result);
                 redis.GetDatabase().StringSet(keyName, data, expiry, flags: CommandFlags.FireAndForget);
                 return result;
@@ -59,6 +59,25 @@ namespace Syzoj.Api.Services
                     redis.GetDatabase().KeyExpire(keyName, expiry, CommandFlags.FireAndForget);
                 }
                 return MessagePackSerializer.Deserialize<T>(val);
+            }
+        }
+
+        public async Task<string> CachedStringAsync(string keyName, TimeSpan expiry, bool renewOnRead, Func<Task<string>> func)
+        {
+            var val = await redis.GetDatabase().StringGetAsync(keyName);
+            if(val.IsNullOrEmpty)
+            {
+                var result = await func.Invoke();
+                redis.GetDatabase().StringSet(keyName, result, expiry, flags: CommandFlags.FireAndForget);
+                return result;
+            }
+            else
+            {
+                if(renewOnRead)
+                {
+                    redis.GetDatabase().KeyExpire(keyName, expiry, CommandFlags.FireAndForget);
+                }
+                return val;
             }
         }
     }

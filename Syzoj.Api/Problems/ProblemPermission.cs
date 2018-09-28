@@ -6,8 +6,7 @@ namespace Syzoj.Api.Problems
         public static ProblemPermission EditPermission = new ProblemEditPermission();
         public static ProblemPermission ExportPermission = new ProblemExportPermission();
         public static ProblemPermission SubmitPermission = new ProblemSubmitPermission();
-
-        public ProblemPermission() : base() { }
+        
         public ProblemPermission(string name, string errorMessage) : base(name, errorMessage) { }
 
         private class ProblemViewPermission : ProblemPermission
