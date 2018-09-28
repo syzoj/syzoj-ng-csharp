@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Syzoj.Api.Problems
+namespace Syzoj.Api.Problems.Permission
 {
     public abstract class PermissionManagerBase<T> : IPermissionManager<T>
         where T : Permission<T>

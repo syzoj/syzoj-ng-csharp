@@ -1,4 +1,4 @@
-namespace Syzoj.Api.Problems
+namespace Syzoj.Api.Problems.Permission
 {
     public class DebugPermissionManager<T> : IPermissionManager<T>
         where T : Permission<T>

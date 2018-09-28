@@ -1,4 +1,4 @@
-namespace Syzoj.Api.Problems
+namespace Syzoj.Api.Problems.Permission
 {
     public abstract class ProblemPermission : Permission<ProblemPermission>
     {

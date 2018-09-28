@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace Syzoj.Api.Problems
+namespace Syzoj.Api.Problems.Permission
 {
     /// <summary>
     /// This interface defines whether a given identity should be able to perform certain actions.

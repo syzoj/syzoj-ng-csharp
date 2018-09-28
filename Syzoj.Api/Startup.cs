@@ -17,6 +17,7 @@ using Syzoj.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Syzoj.Api.Services;
 using Newtonsoft.Json.Serialization;
+using Syzoj.Api.Problems;
 
 namespace Syzoj.Api
 {
@@ -89,6 +90,8 @@ namespace Syzoj.Api
                  .AddEntityFrameworkStores<ApplicationDbContext>()
                  .AddDefaultUI()
                  .AddDefaultTokenProviders();
+
+            services.AddScoped<IProblemsetManagerFactory, UniversalProblemsetManagerFactory>();
             
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
