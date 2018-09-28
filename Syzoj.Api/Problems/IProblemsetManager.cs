@@ -7,18 +7,25 @@ namespace Syzoj.Api.Problems
     public interface IProblemsetManager
     {
         /// <summary>
-        /// Returns the permission manager for current user.
+        /// The ID of the problemset.
         /// </summary>
-        Task<IPermissionManager<ProblemsetPermission>> GetProblemsetPermissionManagerAsync();
+        Guid Id { get; }
+        /// <summary>
+        /// Returns the permission manager for current user.
+        /// Note that userId equals Guid.Empty when user is not logged in.
+        /// </summary>
+        Task<IPermissionManager<ProblemsetPermission>> GetProblemsetPermissionManagerAsync(Guid userId);
 
         /// <summary>
         /// Returns the permission manager for a certain problem for current user.
+        /// Note that userId equals Guid.Empty when user is not logged in.
         /// </summary>
-        Task<IPermissionManager<ProblemPermission>> GetProblemPermissionManagerAsync(Guid problemId);
+        Task<IPermissionManager<ProblemPermission>> GetProblemPermissionManagerAsync(Guid userId, Guid problemId);
 
         /// <summary>
         /// Returns the permission manager for a certain submission for current user.
+        /// Note that userId equals Guid.Empty when user is not logged in.
         /// </summary>
-        Task<IPermissionManager<SubmissionPermission>> GetSubmissionPermissionManagerAsync(Guid submissionId);
+        Task<IPermissionManager<SubmissionPermission>> GetSubmissionPermissionManagerAsync(Guid userId, Guid submissionId);
     }
 }
