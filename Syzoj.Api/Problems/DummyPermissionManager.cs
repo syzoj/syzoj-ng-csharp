@@ -5,7 +5,7 @@ namespace Syzoj.Api.Problems
     {
         public bool HasPermission(T perm)
         {
-            return true;
+            return false;
         }
     }
 }
