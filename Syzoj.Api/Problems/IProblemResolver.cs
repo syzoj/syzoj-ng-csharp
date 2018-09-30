@@ -8,8 +8,8 @@ namespace Syzoj.Api.Problems
     public interface IProblemResolver
     {
         /// <summary>
-        /// Returns whether the submission has been completed and its status will not change until rejudge.
+        /// The ID of the problem.
         /// </summary>
-        bool IsCompleted(Guid submissionId);
+        Guid Id { get; }
     }
 }

@@ -35,6 +35,7 @@ namespace Syzoj.Api
         {
             services.AddMvc(options => {
                 options.ModelBinderProviders.Insert(0, new ProblemsetManagerBinderProvider());
+                options.ModelBinderProviders.Insert(0, new ProblemResolverBinderProvider());
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
@@ -96,6 +97,7 @@ namespace Syzoj.Api
 
             services.AddScoped<IProblemsetManagerProvider, UniversalProblemsetManagerProvider>();
             services.AddScoped<DebugProblemsetManagerProvider>();
+            services.AddScoped<IProblemResolverProvider, UniversalProblemResolverProvider>();
             
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
