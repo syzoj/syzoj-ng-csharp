@@ -5,7 +5,7 @@ using Syzoj.Api.Problems.Permission;
 
 namespace Syzoj.Api.Services
 {
-    public class DebugProblemsetManagerFactory : IProblemsetManagerFactory
+    public class DebugProblemsetManagerProvider : IProblemsetManagerProvider
     {
         public Task<IProblemsetManager> GetProblemsetManager(Guid problemsetId)
         {

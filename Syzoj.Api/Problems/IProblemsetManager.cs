@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Syzoj.Api.Problems.Permission;
 
 namespace Syzoj.Api.Problems

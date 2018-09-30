@@ -33,7 +33,10 @@ namespace Syzoj.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            services.AddMvc(options => {
+                options.ModelBinderProviders.Insert(0, new ProblemsetManagerBinderProvider());
+            })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
 
             // In production, the React files will be served from this directory
@@ -91,7 +94,8 @@ namespace Syzoj.Api
                  .AddDefaultUI()
                  .AddDefaultTokenProviders();
 
-            services.AddScoped<IProblemsetManagerFactory, UniversalProblemsetManagerFactory>();
+            services.AddScoped<IProblemsetManagerProvider, UniversalProblemsetManagerProvider>();
+            services.AddScoped<DebugProblemsetManagerProvider>();
             
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
