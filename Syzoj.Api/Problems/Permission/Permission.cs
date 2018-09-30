@@ -5,7 +5,7 @@ namespace Syzoj.Api.Problems.Permission
     public abstract class Permission<T>
         where T : Permission<T>
     {
-        private static IDictionary<string, T> Permissions;
+        private static IDictionary<string, T> Permissions = new Dictionary<string, T>();
 
         private static void RegisterPermission(T perm)
         {
