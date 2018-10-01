@@ -6,7 +6,7 @@ namespace Syzoj.Api.Filters
     [AttributeUsage(AttributeTargets.Class)]
     public class ProblemControllerAttribute : Attribute, IRouteTemplateProvider
     {
-        public string Template => "api/problem/{problemsetId}/{problemId}";
+        public string Template => "api/problem/{problemsetId}/{problemName}";
 
         public int? Order => 0;
 
