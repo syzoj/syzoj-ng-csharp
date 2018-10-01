@@ -6,6 +6,7 @@ namespace Syzoj.Api.Problems.Permission
         public static ProblemPermission EditPermission = new ProblemEditPermission();
         public static ProblemPermission ExportPermission = new ProblemExportPermission();
         public static ProblemPermission SubmitPermission = new ProblemSubmitPermission();
+        public static ProblemPermission TransferOutPermission = new ProblemTransferOutPermission();
         
         public ProblemPermission(string name, string errorMessage) : base(name, errorMessage) { }
 
@@ -27,6 +28,11 @@ namespace Syzoj.Api.Problems.Permission
         private class ProblemSubmitPermission : ProblemPermission
         {
             public ProblemSubmitPermission() : base("submit", "syzoj.error.problemsetProblemNotSubmittable") { }
+        }
+
+        private class ProblemTransferOutPermission : ProblemPermission
+        {
+            public ProblemTransferOutPermission() : base("submit", "syzoj.error.problemsetProblemTransferOutDenied") { }
         }
     }
 }

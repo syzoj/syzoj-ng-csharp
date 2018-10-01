@@ -9,7 +9,13 @@ namespace Syzoj.Api.Problems.Permission
 
         protected void AddPermission(T perm)
         {
-            permissions.Add(perm);
+            if(permissions.Add(perm))
+            {
+                foreach(T p in perm.ImpliedPermissions)
+                {
+                    AddPermission(p);
+                }
+            }
         }
 
         // TODO: Handle cyclic permission
