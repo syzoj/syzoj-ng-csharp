@@ -13,7 +13,7 @@ namespace Syzoj.Api.Services
     {
         private IDictionary<string, Type> problemResolvers = new Dictionary<string, Type>()
         {
-            
+            { "standard", typeof(Syzoj.Api.Problems.Standard.StandardProblemResolverProvider) },
         };
         private readonly ApplicationDbContext dbContext;
         private readonly CacheManager cache;

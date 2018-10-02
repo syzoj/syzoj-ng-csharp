@@ -98,6 +98,7 @@ namespace Syzoj.Api
             services.AddScoped<IProblemsetManagerProvider, UniversalProblemsetManagerProvider>();
             services.AddScoped<DebugProblemsetManagerProvider>();
             services.AddScoped<IProblemResolverProvider, UniversalProblemResolverProvider>();
+            services.AddScoped<Syzoj.Api.Problems.Standard.StandardProblemResolverProvider>();
             
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();

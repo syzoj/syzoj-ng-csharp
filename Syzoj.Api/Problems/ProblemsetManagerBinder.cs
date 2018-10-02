@@ -25,7 +25,6 @@ namespace Syzoj.Api.Problems
             if(value == ValueProviderResult.None)
                 return;
             
-            bindingContext.ModelState.SetModelValue("problemsetId", value);
             var id = value.FirstValue;
             Guid problemsetId;
             if(!Guid.TryParse(id, out problemsetId))

@@ -30,7 +30,6 @@ namespace Syzoj.Api.Problems
             if(problemsetIdValue == ValueProviderResult.None)
                 return;
             
-            bindingContext.ModelState.SetModelValue("problemsetId", problemsetIdValue);
             var id = problemsetIdValue.FirstValue;
             Guid problemsetId;
             if(!Guid.TryParse(id, out problemsetId))
@@ -47,7 +46,6 @@ namespace Syzoj.Api.Problems
             if(problemNameValue == ValueProviderResult.None)
                 return;
             
-            bindingContext.ModelState.SetModelValue("problemName", problemNameValue);
             var problemName = problemNameValue.FirstValue;
             
             // TODO: Use Redis for this
@@ -65,15 +63,6 @@ namespace Syzoj.Api.Problems
             }
 
             var problemResolver = await provider.GetProblemResolver(problemId);
-            if(problemResolver == null)
-            {
-                bindingContext.ModelState.TryAddModelError(
-                    "problemsetId",
-                    "Problemset with specified problemsetId does not exist."
-                );
-                return;
-            }
-
             bindingContext.Result = ModelBindingResult.Success(problemResolver);
         }
     }
