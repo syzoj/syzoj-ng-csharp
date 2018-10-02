@@ -1,7 +1,7 @@
-# Syzoj.Api
-[![Build Status](https://travis-ci.org/syzoj/Syzoj.Api.svg?branch=master)](https://travis-ci.org/syzoj/Syzoj.Api)
+# syzoj-ng
+[![Build Status](https://travis-ci.org/syzoj/syzoj-ng.svg?branch=master)](https://travis-ci.org/syzoj/syzoj-ng)
 
-The SYZOJ next generation api server, in ASP .NET Core
+The next generation SYZOJ, with server written in ASP.NET Core and designed in modern standards
 
 ## Prerequisites
 * [ASP.NET Core SDK 2.1](https://www.microsoft.com/net/download/linux-package-manager/ubuntu18-04/sdk-current)
