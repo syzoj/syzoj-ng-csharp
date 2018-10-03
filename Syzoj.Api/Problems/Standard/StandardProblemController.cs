@@ -80,5 +80,19 @@ namespace Syzoj.Api.Problems.Standard
                 return BadRequest();
             }
         }
+
+        [HttpPost("submission/{submissionId}/submit")]
+        public async Task<ActionResult<CustomResponse<bool>>> Submit(Guid problemId, Guid submissionId)
+        {
+            var problemResolver = await resolverService.GetProblemResolver(problemId);
+            if(problemResolver is StandardProblemResolver standardProblemResolver)
+            {
+                return new CustomResponse<bool>(await standardProblemResolver.SubmitCodeAsync(submissionId, "language", "code"));
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
     }
 }

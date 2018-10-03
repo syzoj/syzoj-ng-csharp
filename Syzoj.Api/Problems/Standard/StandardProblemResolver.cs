@@ -36,11 +36,31 @@ namespace Syzoj.Api.Problems.Standard
         public Task CreateSubmissionAsync(Guid submissionId)
         {
             var redis = ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
-            redis.GetDatabase().HashSet(
+            return redis.GetDatabase().HashSetAsync(
                 $"syzoj:problem:{Id}:submission:{submissionId}:data",
-                new HashEntry[] { new HashEntry("status", 0) },
-                CommandFlags.FireAndForget);
-            return Task.CompletedTask;
+                new HashEntry[] { new HashEntry("status", 0) });
+        }
+
+        public async Task<bool> SubmitCodeAsync(Guid submissionId, string language, string code)
+        {
+            var redis = ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
+            var status = await redis.GetDatabase().HashGetAsync(
+                $"syzoj:problem:{Id}:submission:{submissionId}:data",
+                "status");
+            if(!status.HasValue || (string)status != "0")
+                return false;
+            
+            await redis.GetDatabase().HashSetAsync(
+                $"syzoj:problem:{Id}:submission:{submissionId}:data",
+                new HashEntry[] {
+                    new HashEntry("status", 1),
+                    new HashEntry("language", language),
+                    new HashEntry("code", code),
+                });
+            
+            var judger = ServiceProvider.GetRequiredService<StandardProblemJudger>();
+            await judger.SubmitJudge(submissionId);
+            return true;
         }
     }
 }

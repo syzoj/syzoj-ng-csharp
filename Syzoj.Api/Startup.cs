@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
@@ -141,6 +141,7 @@ namespace Syzoj.Api
             services.AddSingleton<IEventHandler, ProblemsetEventHandler>();
 
             services.AddSingleton<IProblemResolverProvider, Problems.Standard.StandardProblemResolverProvider>();
+            services.AddSingleton<Problems.Standard.StandardProblemJudger>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -176,6 +177,9 @@ namespace Syzoj.Api
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
+
+            // Warm up worker services
+            app.ApplicationServices.GetRequiredService<Problems.Standard.StandardProblemJudger>();
         }
     }
 }
