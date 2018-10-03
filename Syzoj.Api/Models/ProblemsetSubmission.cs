@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Syzoj.Api.Models
 {
-    public class Submission
+    public class ProblemsetSubmission
     {
         [Key]
         public Guid Id { get; set; }

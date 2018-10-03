@@ -10,7 +10,7 @@ namespace Syzoj.Api.Data
         public DbSet<Problem> Problems { get; set; }
         public DbSet<Problemset> Problemsets { get; set; }
         public DbSet<ProblemsetProblem> ProblemsetProblems { get; set; }
-        public DbSet<Submission> Submissions { get; set; }
+        public DbSet<ProblemsetSubmission> ProblemsetSubmissions { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -44,12 +44,12 @@ namespace Syzoj.Api.Data
             modelBuilder.Entity<ProblemsetProblem>()
                 .ForNpgsqlUseXminAsConcurrencyToken();
             
-            modelBuilder.Entity<Submission>()
+            modelBuilder.Entity<ProblemsetSubmission>()
                 .HasOne(s => s.ProblemsetProblem)
                 .WithMany(ps => ps.Submissions)
                 .HasForeignKey(s => new { s.ProblemsetId, s.ProblemId})
                 .HasPrincipalKey(ps => new { ps.ProblemsetId, ps.ProblemId });
-            modelBuilder.Entity<Submission>()
+            modelBuilder.Entity<ProblemsetSubmission>()
                 .HasOne(s => s.Problemset)
                 .WithMany(ps => ps.Submissions)
                 .HasForeignKey(s => s.ProblemsetId)
