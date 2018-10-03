@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
@@ -114,6 +114,7 @@ namespace Syzoj.Api
                 if(!Uri.TryCreate(Configuration.GetConnectionString("RabbitMQ"), UriKind.Absolute, out uri))
                     throw new ArgumentException("Invalid RabbitMQ connection string");
                 factory.Uri = uri;
+                factory.DispatchConsumersAsync = true;
                 return factory.CreateConnection();
             });
             services.AddSingleton<ILegacySyzojJudger, LegacySyzojJudger>();
