@@ -5,7 +5,7 @@ namespace Syzoj.Api.Problems
 {
     public interface IProblemResolverProvider
     {
-        Task<IProblemResolver> GetProblemResolver(Guid problemId);
-        Task<ISubmissionResolver> GetSubmissionResolver(Guid problemsetId, Guid submissionId);
+        string ProblemType { get; }
+        Task<IProblemResolver> GetProblemResolver(IServiceProvider serviceProvider, Guid problemId);
     }
 }

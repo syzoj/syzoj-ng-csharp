@@ -33,10 +33,7 @@ namespace Syzoj.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(options => {
-                options.ModelBinderProviders.Insert(0, new ProblemsetManagerBinderProvider());
-                options.ModelBinderProviders.Insert(0, new ProblemResolverBinderProvider());
-            })
+            services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
 
@@ -94,11 +91,6 @@ namespace Syzoj.Api
                  .AddEntityFrameworkStores<ApplicationDbContext>()
                  .AddDefaultUI()
                  .AddDefaultTokenProviders();
-
-            services.AddScoped<IProblemsetManagerProvider, UniversalProblemsetManagerProvider>();
-            services.AddScoped<DebugProblemsetManagerProvider>();
-            services.AddScoped<IProblemResolverProvider, UniversalProblemResolverProvider>();
-            services.AddScoped<Syzoj.Api.Problems.Standard.StandardProblemResolverProvider>();
             
             services.AddSingleton<IConnection>(s => {
                 var factory = new ConnectionFactory();
@@ -123,6 +115,9 @@ namespace Syzoj.Api
                         throw new ArgumentException("Invalid FileSystemType in configuration file.");
                 }
             });
+
+            services.AddSingleton<ProblemResolverDictionary>();
+            services.AddScoped<IProblemResolverService, ProblemResolverService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
