@@ -130,6 +130,7 @@ namespace Syzoj.Api
                 }
             });
 
+            services.AddSingleton<IProblemResolverProvider, Problems.Standard.StandardProblemResolverProvider>();
             services.AddSingleton<ProblemResolverDictionary>();
             services.AddScoped<IProblemResolverService, ProblemResolverService>();
         }
