@@ -5,11 +5,12 @@ using Syzoj.Api.Models;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using Syzoj.Api.Mvc;
 
 namespace Syzoj.Api.Controllers
 {
     [Route("api/auth")]
-    public class AuthController : ControllerBase
+    public class AuthController : CustomControllerBase
     {
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
@@ -26,63 +27,50 @@ namespace Syzoj.Api.Controllers
             public string Password { get; set; }
             public bool IsPersistent { get; set; }
         }
-        public class LoginResponse : BaseResponse
-        {
-            /// <summary>
-            /// A string indicating the result of login. Possible values are:
-            /// - Banned: The user is banned.
-            /// - Lockout: The user is locked out.
-            /// - RequiresTwoFactor: Second factor authentication is required.
-            /// - Success: The login succeeded.
-            /// </summary>
-            public string Result { get; set; }
-        }
         /// <summary>
         /// Performs login.
         /// </summary>
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<CustomResponse>> Login([FromBody] LoginRequest request)
         {
             var result = await signInManager.PasswordSignInAsync(request.UserName, request.Password, request.IsPersistent, false);
             if(result.IsNotAllowed)
             {
-                return new LoginResponse()
-                {
-                    Success = true,
-                    Result = "Banned",
-                };
+                return this.StatusCode(403, new CustomResponse<object>() {
+                    Success = false,
+                    Errors = new ActionError[] { new ActionError() {
+                        Message = "Banned",
+                    }},
+                });
             }
             else if(result.IsLockedOut)
             {
-                return new LoginResponse()
-                {
-                    Success = true,
-                    Result = "Lockout",
-                };
+                return this.StatusCode(403, new CustomResponse<object>() {
+                    Success = false,
+                    Errors = new ActionError[] { new ActionError() {
+                        Message = "Lockout",
+                    }},
+                });
             }
             else if(result.RequiresTwoFactor)
             {
-                return new LoginResponse()
-                {
-                    Success = true,
-                    Result = "RequiresTwoFactor",
-                };
+                return this.StatusCode(403, new CustomResponse<object>() {
+                    Success = false,
+                    Errors = new ActionError[] { new ActionError() {
+                        Message = "RequiresTwoFactor",
+                    }},
+                });
             }
             else if(result.Succeeded)
             {
-                return new LoginResponse()
-                {
-                    Success = true,
-                    Result = "Success",
-                };
+                return new CustomResponse();
             }
             else
             {
-                return new LoginResponse()
-                {
+                return this.StatusCode(403, new CustomResponse<object>() {
                     Success = true,
                     Result = "Failed",
-                };
+                });
             }
         }
 
@@ -92,34 +80,23 @@ namespace Syzoj.Api.Controllers
             public string Password { get; set; }
             public string Email { get; set; }
         }
-        public class RegisterResponse : BaseResponse
-        {
-            /// <summary>
-            /// Whether the registration succeeded.
-            /// </summary>
-            public bool RegisterSucceeded { get; set; }
-
-            /// <summary>
-            /// The list of errors.
-            /// </summary>
-            public IEnumerable<IdentityError> Errors { get; set; }
-        }
         /// <summary>
         /// Performs register.
         /// </summary>
         [HttpPost("register")]
-        public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult<CustomResponse>> Register([FromBody] RegisterRequest request)
         {
             var user = new ApplicationUser() {
                 UserName = request.UserName,
                 Email = request.Email,
             };
             var result = await userManager.CreateAsync(user, request.Password);
-            return new RegisterResponse()
+            return new CustomResponse()
             {
-                Success = true,
-                RegisterSucceeded = result.Succeeded,
-                Errors = result.Errors,
+                Success = result.Succeeded,
+                Errors = result.Errors.Select(e => new ActionError() {
+                    Message = $"{e.Code}: {e.Description}",
+                }),
             };
         }
     }

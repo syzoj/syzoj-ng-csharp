@@ -44,13 +44,12 @@ namespace Syzoj.Api
                         Success = false,
                         Errors = context.ModelState.SelectMany(kv =>
                             kv.Value.Errors.Select(e => new ActionError() {
-                                Code = 0,
                                 Message = $"{kv.Key}: {e}",
                             })
                         ),
                         Result = null,
                     });
-            })
+            });
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
