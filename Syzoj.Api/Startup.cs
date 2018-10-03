@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Identity;
 using Syzoj.Api.Services;
 using Newtonsoft.Json.Serialization;
 using Syzoj.Api.Problems;
+using Syzoj.Api.Mvc;
+using System.Linq;
 
 namespace Syzoj.Api
 {
@@ -36,6 +38,19 @@ namespace Syzoj.Api
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
+            services.Configure<ApiBehaviorOptions>(options => {
+                options.InvalidModelStateResponseFactory = context =>
+                    new BadRequestObjectResult(new CustomResponse<object>() {
+                        Success = false,
+                        Errors = context.ModelState.SelectMany(kv =>
+                            kv.Value.Errors.Select(e => new ActionError() {
+                                Code = 0,
+                                Message = $"{kv.Key}: {e}",
+                            })
+                        ),
+                        Result = null,
+                    });
+            })
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
