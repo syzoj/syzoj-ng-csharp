@@ -7,6 +7,5 @@ namespace Syzoj.Api.Problems
     {
         string ProblemType { get; }
         Task<IProblemResolver> GetProblemResolver(IServiceProvider serviceProvider, Guid problemId);
-        Task<IProblemResolver> CreateProblem(IServiceProvider serviceProvider, Guid problemId);
     }
 }

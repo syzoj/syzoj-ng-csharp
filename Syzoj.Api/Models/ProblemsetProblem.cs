@@ -10,7 +10,7 @@ namespace Syzoj.Api.Models
         public virtual Problemset Problemset { get; set; }
         public Guid ProblemId { get; set; }
         public virtual Problem Problem { get; set; }
-        public virtual ICollection<Submission> Submissions { get; set; }
+        public virtual ICollection<ProblemsetSubmission> Submissions { get; set; }
         [MinLength(1)]
         [MaxLength(128)]
         [Required]

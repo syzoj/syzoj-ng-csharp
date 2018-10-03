@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using MessagePack;
 using Microsoft.AspNetCore.Mvc;
+using Syzoj.Api.Data;
 using Syzoj.Api.Mvc;
 using Syzoj.Api.Problems.Standard.Model;
 
@@ -32,10 +34,14 @@ namespace Syzoj.Api.Problems.Standard
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult<CustomResponse<Guid>>> Create()
+        public async Task<ActionResult<CustomResponse<Guid>>> Create([FromServices] ApplicationDbContext context)
         {
-            var problemResolver = await resolverService.CreateNewProblem("standard");
-            return new CustomResponse<Guid>(problemResolver.Id);
+            var problemId = Guid.NewGuid();
+            var problem = await context.Problems.FindAsync(problemId);
+            var problemData = new StandardProblemContent();
+            problem.Data = MessagePackSerializer.Serialize(problemData);
+            await context.SaveChangesAsync();;
+            return new CustomResponse<Guid>(problemId);
         }
 
         [HttpGet("download/{fileId}/{fileName}")]

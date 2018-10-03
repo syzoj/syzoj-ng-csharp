@@ -11,6 +11,6 @@ namespace Syzoj.Api.Models
         [Required]
         public string Type { get; set; }
         public virtual ICollection<ProblemsetProblem> ProblemsetProblems { get; set; }
-        public virtual ICollection<Submission> Submissions { get; set; }
+        public virtual ICollection<ProblemsetSubmission> Submissions { get; set; }
     }
 }

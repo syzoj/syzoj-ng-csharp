@@ -20,25 +20,6 @@ namespace Syzoj.Api.Problems
             this.serviceProvider = serviceProvider;
         }
 
-        public async Task<IProblemResolver> CreateNewProblem(string problemType)
-        {
-            var problemId = Guid.NewGuid();
-            var problem = new Problem()
-            {
-                Id = problemId,
-                ProblemType = problemType,
-                Content = "null",
-                Data = null,
-            };
-            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            context.Problems.Add(problem);
-
-            IProblemResolverProvider provider = dict.GetProvider(problem.ProblemType);
-            var problemResolver = await provider.CreateProblem(serviceProvider, problemId);
-            await context.SaveChangesAsync();
-            return problemResolver;
-        }
-
         public async Task<IProblemResolver> GetProblemResolver(Guid problemId)
         {
             var problem = await context.Problems.FindAsync(problemId);
