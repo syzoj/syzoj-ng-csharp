@@ -2,12 +2,13 @@ using System;
 using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 using Syzoj.Api.Data;
 using Syzoj.Api.Problems.Standard.Model;
 
 namespace Syzoj.Api.Problems.Standard
 {
-    public class StandardProblemResolver : ProblemResolverBase
+    public class StandardProblemResolver : ProblemResolverBase, ISubmittable
     {
         public StandardProblemResolver(IServiceProvider serviceProvider, Guid problemId) : base(serviceProvider, problemId)
         {
@@ -30,6 +31,16 @@ namespace Syzoj.Api.Problems.Standard
         {
             var storageProvider = ServiceProvider.GetRequiredService<IAsyncFileStorageProvider>();
             return storageProvider.GenerateUploadLink($"data/problem/{Id}/{fileId}");
+        }
+
+        public Task CreateSubmissionAsync(Guid submissionId)
+        {
+            var redis = ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
+            redis.GetDatabase().HashSet(
+                $"syzoj:problem:{Id}:submission:{submissionId}:data",
+                new HashEntry[] { new HashEntry("status", 0) },
+                CommandFlags.FireAndForget);
+            return Task.CompletedTask;
         }
     }
 }
