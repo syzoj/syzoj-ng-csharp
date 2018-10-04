@@ -67,5 +67,12 @@ namespace Syzoj.Api.Problems.Standard
             await judger.SubmitJudge(submissionId);
             return true;
         }
+
+        public async Task<bool> Put(StandardProblemContent content)
+        {
+            var model = await this.GetProblemModel();
+            model.Data = MessagePackSerializer.Serialize(content);
+            return true;
+        }
     }
 }

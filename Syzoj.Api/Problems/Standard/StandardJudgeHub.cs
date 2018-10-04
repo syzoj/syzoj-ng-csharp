@@ -76,6 +76,7 @@ namespace Syzoj.Api.Problems.Standard
         {
             var data = (HubData) Context.Items["data"];
             data.Model.Close();
+            logger.LogInformation("OnDisconnectAsync called");
             return base.OnDisconnectedAsync(exception);
         }
 

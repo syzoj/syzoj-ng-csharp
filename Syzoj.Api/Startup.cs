@@ -182,9 +182,6 @@ namespace Syzoj.Api
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
-
-            // Warm up worker services
-            app.ApplicationServices.GetRequiredService<Problems.Standard.StandardProblemJudger>();
         }
     }
 }
