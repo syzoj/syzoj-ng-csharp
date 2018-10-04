@@ -21,17 +21,6 @@ namespace Syzoj.Api.Problems.Standard
             });
             this.model.ExchangeDeclare("standard-progress", "fanout", false, false);
             this.model.QueueDeclare("standard-result", true, false, false);
-
-            var listener = new AsyncEventingBasicConsumer(model);
-            listener.Received += Received;
-            this.model.BasicConsume("standard-judge", false, listener);
-        }
-
-        private Task Received(object sender, BasicDeliverEventArgs args)
-        {
-            Guid submissionId = new Guid(args.Body);
-            System.Console.WriteLine($"Process submission {submissionId}");
-            return Task.FromException(new NotImplementedException()); // is not logged nor nacked
         }
 
         public Task SubmitJudge(Guid submissionId)

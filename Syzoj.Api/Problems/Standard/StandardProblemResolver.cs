@@ -33,25 +33,30 @@ namespace Syzoj.Api.Problems.Standard
             return storageProvider.GenerateUploadLink($"data/problem/{Id}/{fileId}");
         }
 
-        public Task CreateSubmissionAsync(Guid submissionId)
+        public async Task CreateSubmissionAsync(Guid submissionId)
         {
             var redis = ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
-            return redis.GetDatabase().HashSetAsync(
-                $"syzoj:problem:{Id}:submission:{submissionId}:data",
-                new HashEntry[] { new HashEntry("status", 0) });
+            var model = await this.GetProblemModel();
+            await redis.GetDatabase().HashSetAsync(
+                $"syzoj:problem-standard:{submissionId}:data",
+                new HashEntry[] {
+                    new HashEntry("status", 0),
+                    new HashEntry("problemId", Id.ToString()),
+                    new HashEntry("data", model.Data),
+                });
         }
 
         public async Task<bool> SubmitCodeAsync(Guid submissionId, string language, string code)
         {
             var redis = ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
             var status = await redis.GetDatabase().HashGetAsync(
-                $"syzoj:problem:{Id}:submission:{submissionId}:data",
-                "status");
-            if(!status.HasValue || (string)status != "0")
+                $"syzoj:problem-standard:{submissionId}:data",
+                new RedisValue[] { "status", "problemId" });
+            if(!status[0].HasValue || (string)status[0] != "0" || Guid.Parse((string)status[1]) != Id)
                 return false;
             
             await redis.GetDatabase().HashSetAsync(
-                $"syzoj:problem:{Id}:submission:{submissionId}:data",
+                $"syzoj:problem-standard:{submissionId}:data",
                 new HashEntry[] {
                     new HashEntry("status", 1),
                     new HashEntry("language", language),

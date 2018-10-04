@@ -8,6 +8,7 @@ namespace Syzoj.Api.Problems.Standard.Model
     public class StandardTestData
     {
         public IDictionary<Guid, StandardTestCase> TestCases { get; set; }
+        public IDictionary<Guid, StandardJudgerSettings> JudgerSettings { get; set; }
         public IList<Subtask> Subtasks { get; set; }
     }
 }

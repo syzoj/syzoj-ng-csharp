@@ -53,6 +53,8 @@ namespace Syzoj.Api
                     });
             });
 
+            services.AddSignalR();
+
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -166,6 +168,9 @@ namespace Syzoj.Api
 
             app.UseSession();
             app.UseAuthentication();
+            app.UseSignalR(route => {
+                route.MapHub<Problems.Standard.StandardJudgeHub>("/standard-judge");
+            });
             app.UseMvc();
 
             app.UseSpa(spa =>
