@@ -10,8 +10,8 @@ namespace Syzoj.Api.Problems.Standard.Model
     [MessagePackObject(keyAsPropertyName: true)]
     public class StandardTestCase
     {
-        public Guid InputFile { get; set; }
-        public Guid OutputFile { get; set; }        
+        public string InputFile { get; set; }
+        public string OutputFile { get; set; }        
         public Guid JudgerSettings { get; set; }
         /// <summary>
         /// A list of additional files to be placed in the working directory

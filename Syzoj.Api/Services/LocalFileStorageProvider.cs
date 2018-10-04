@@ -11,13 +11,15 @@ namespace Syzoj.Api.Services
 {
     public class LocalFileStorageProvider : IAsyncFileStorageProvider
     {
+        // The path should be a fully qualified path that ends with a slash.
         private readonly string path;
         private readonly string secret;
         public LocalFileStorageProvider(string path, string secret)
         {
-            if(!Directory.Exists(path))
+            var realPath = Path.GetFullPath(path + Path.DirectorySeparatorChar);
+            if(!Directory.Exists(realPath))
                 throw new IOException("Directory doesn't exist.");
-            this.path = path;
+            this.path = realPath;
             this.secret = secret;
         }
 

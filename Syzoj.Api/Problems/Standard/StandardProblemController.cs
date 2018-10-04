@@ -63,13 +63,14 @@ namespace Syzoj.Api.Problems.Standard
             }
         }
 
-        [HttpGet("download/{fileId}/{fileName}")]
-        public async Task<ActionResult<CustomResponse<string>>> Download(Guid problemId, Guid fileId, string fileName)
+        [HttpGet("download/{*fileName:required}")]
+        public async Task<ActionResult<CustomResponse<string>>> Download(Guid problemId, string fileName)
         {
             var problemResolver = await resolverService.GetProblemResolver(problemId);
             if(problemResolver is StandardProblemResolver standardProblemResolver)
             {
-                return new CustomResponse<string>(await standardProblemResolver.GenerateDownloadLink(fileId, fileName));
+                var url = await standardProblemResolver.GenerateDownloadLink(fileName);
+                return new CustomResponse<string>(url);
             }
             else
             {
@@ -80,18 +81,18 @@ namespace Syzoj.Api.Problems.Standard
         public class UploadResponse
         {
             public string UploadLink { get; set; }
-            public Guid FileId { get; set; }
+            public string FileName { get; set; }
         }
-        [HttpPost("upload")]
-        public async Task<ActionResult<CustomResponse<UploadResponse>>> Upload(Guid problemId)
+        [HttpPost("upload/{*fileName:required}")]
+        public async Task<ActionResult<CustomResponse<UploadResponse>>> Upload(Guid problemId, string fileName)
         {
             var problemResolver = await resolverService.GetProblemResolver(problemId);
             if(problemResolver is StandardProblemResolver standardProblemResolver)
             {
-                Guid fileId = Guid.NewGuid();
+                var url = await standardProblemResolver.GenerateUploadLink(fileName);
                 return new CustomResponse<UploadResponse>(new UploadResponse() {
-                    UploadLink = await standardProblemResolver.GenerateUploadLink(fileId),
-                    FileId = fileId,
+                    UploadLink = url,
+                    FileName = fileName,
                 });
             }
             else

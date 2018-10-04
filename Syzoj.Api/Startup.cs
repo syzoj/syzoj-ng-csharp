@@ -46,7 +46,7 @@ namespace Syzoj.Api
                         Success = false,
                         Errors = context.ModelState.SelectMany(kv =>
                             kv.Value.Errors.Select(e => new ActionError() {
-                                Message = $"{kv.Key}: {e}",
+                                Message = $"{kv.Key}: {e.ErrorMessage}",
                             })
                         ),
                         Result = null,

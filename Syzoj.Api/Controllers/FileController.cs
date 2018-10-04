@@ -25,7 +25,11 @@ namespace Syzoj.Api.Controllers
                     return BadRequest();
                 if(expire < ((DateTimeOffset) DateTime.UtcNow).ToUnixTimeMilliseconds())
                     return StatusCode(403);
-                var realPath = Path.Combine(provider.GetPath(), path);
+                var realPath = provider.GetPath() + path;
+                if(Path.GetFullPath(realPath) != realPath)
+                    return BadRequest();
+                if(realPath.EndsWith(Path.DirectorySeparatorChar) || realPath.EndsWith(Path.AltDirectorySeparatorChar))
+                    return BadRequest();
                 if(System.IO.File.Exists(realPath))
                     return PhysicalFile(realPath, "application/octet-stream", fileName, true);
                 else
@@ -47,7 +51,11 @@ namespace Syzoj.Api.Controllers
                     return BadRequest();
                 if(expire < ((DateTimeOffset) DateTime.UtcNow).ToUnixTimeMilliseconds())
                     return StatusCode(403);
-                var realPath = Path.Combine(provider.GetPath(), path);
+                var realPath = provider.GetPath() + path;
+                if(Path.GetFullPath(realPath) != realPath)
+                    return BadRequest();
+                if(realPath.EndsWith(Path.DirectorySeparatorChar) || realPath.EndsWith(Path.AltDirectorySeparatorChar))
+                    return BadRequest();
                 var dir = Path.GetDirectoryName(realPath);
                 System.IO.Directory.CreateDirectory(dir);
                 using(var fileStream = System.IO.File.Create(realPath))

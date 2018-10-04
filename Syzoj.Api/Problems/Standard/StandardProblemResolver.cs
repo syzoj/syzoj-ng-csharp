@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,16 +22,16 @@ namespace Syzoj.Api.Problems.Standard
             return content;
         }
 
-        public Task<string> GenerateDownloadLink(Guid fileId, string fileName)
+        public Task<string> GenerateDownloadLink(string fileName)
         {
             var storageProvider = ServiceProvider.GetRequiredService<IAsyncFileStorageProvider>();
-            return storageProvider.GenerateDownloadLink($"data/problem/{Id}/{fileId}", fileName);
+            return storageProvider.GenerateDownloadLink($"data/problem/{Id}/{fileName}", Path.GetFileName(fileName));
         }
 
-        public Task<string> GenerateUploadLink(Guid fileId)
+        public Task<string> GenerateUploadLink(string fileName)
         {
             var storageProvider = ServiceProvider.GetRequiredService<IAsyncFileStorageProvider>();
-            return storageProvider.GenerateUploadLink($"data/problem/{Id}/{fileId}");
+            return storageProvider.GenerateUploadLink($"data/problem/{Id}/{fileName}");
         }
 
         public async Task CreateSubmissionAsync(Guid submissionId)
@@ -72,6 +73,8 @@ namespace Syzoj.Api.Problems.Standard
         {
             var model = await this.GetProblemModel();
             model.Data = MessagePackSerializer.Serialize(content);
+            var context = ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await context.SaveChangesAsync();
             return true;
         }
     }
