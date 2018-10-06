@@ -5,11 +5,12 @@ using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Syzoj.Api.Data;
+using Syzoj.Api.Problems.Interfaces;
 using Syzoj.Api.Problems.Standard.Model;
 
 namespace Syzoj.Api.Problems.Standard
 {
-    public class StandardProblemResolver : ProblemResolverBase, ISubmittable
+    public class StandardProblemResolver : ProblemResolverBase, ISubmittable, IViewable
     {
         public StandardProblemResolver(IServiceProvider serviceProvider, Guid problemId) : base(serviceProvider, problemId)
         {
@@ -17,8 +18,7 @@ namespace Syzoj.Api.Problems.Standard
 
         public async Task<StandardProblemContent> GetContent()
         {
-            var model = await GetProblemModel();
-            var content = MessagePackSerializer.Deserialize<StandardProblemContent>(model.Data);
+            var content = await GetProblemContent();
             return content;
         }
 
@@ -37,13 +37,13 @@ namespace Syzoj.Api.Problems.Standard
         public async Task CreateSubmissionAsync(Guid submissionId)
         {
             var redis = ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
-            var model = await this.GetProblemModel();
+            var content = await this.GetProblemContent();
             await redis.GetDatabase().HashSetAsync(
                 $"syzoj:problem-standard:{submissionId}:data",
                 new HashEntry[] {
                     new HashEntry("status", 0),
                     new HashEntry("problemId", Id.ToString()),
-                    new HashEntry("data", model.Data),
+                    new HashEntry("data", MessagePackSerializer.Serialize(content.TestData)),
                 });
         }
 
@@ -71,11 +71,32 @@ namespace Syzoj.Api.Problems.Standard
 
         public async Task<bool> Put(StandardProblemContent content)
         {
-            var model = await this.GetProblemModel();
-            model.Data = MessagePackSerializer.Serialize(content);
-            var context = ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            await context.SaveChangesAsync();
+            await SetProblemContent(content);
             return true;
+        }
+
+        public async Task<ProblemViewModel> GetProblemView()
+        {
+            var content = await GetProblemContent();
+            return new ProblemViewModel() {
+                ProblemType = "standard",
+                Data = content.Statement,
+            };
+        }
+
+        private async Task<StandardProblemContent> GetProblemContent()
+        {
+            var dbContext = ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var model = await dbContext.Problems.FindAsync(Id);
+            return MessagePackSerializer.Deserialize<StandardProblemContent>(model.Data);
+        }
+
+        private async Task SetProblemContent(StandardProblemContent content)
+        {
+            var dbContext = ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var model = await dbContext.Problems.FindAsync(Id);
+            model.Data = MessagePackSerializer.Serialize(content);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

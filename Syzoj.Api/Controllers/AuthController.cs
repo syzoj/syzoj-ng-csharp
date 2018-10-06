@@ -68,8 +68,10 @@ namespace Syzoj.Api.Controllers
             else
             {
                 return this.StatusCode(403, new CustomResponse<object>() {
-                    Success = true,
-                    Result = "Failed",
+                    Success = false,
+                    Errors = new ActionError[] { new ActionError() {
+                        Message = "Login failed",
+                    }},
                 });
             }
         }

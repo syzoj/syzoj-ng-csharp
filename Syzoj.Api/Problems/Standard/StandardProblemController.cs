@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.AspNetCore.Mvc;
@@ -9,43 +10,38 @@ using Syzoj.Api.Problems.Standard.Model;
 
 namespace Syzoj.Api.Problems.Standard
 {
-    [Route("api/problem/{problemId}/standard")]
+    [Route("api/problem/standard/{problemId}")]
     [ApiController]
     public class StandardProblemController : CustomControllerBase
     {
+        private readonly ApplicationDbContext dbContext;
         private readonly IProblemResolverService resolverService;
 
-        public StandardProblemController(IProblemResolverService resolverService)
+        public StandardProblemController(ApplicationDbContext dbContext, IProblemResolverService resolverService)
         {
+            this.dbContext = dbContext;
             this.resolverService = resolverService;
         }
 
         [HttpGet("view")]
         public async Task<ActionResult<CustomResponse<StandardProblemContent>>> View(Guid problemId)
         {
-            var problemResolver = await resolverService.GetProblemResolver(problemId);
-            if(problemResolver is StandardProblemResolver standardProblemResolver)
-            {
-                return new CustomResponse<StandardProblemContent>(await standardProblemResolver.GetContent());
-            }
-            else
-            {
-                return BadRequest();
-            }
+            var problem = await dbContext.Problems.FindAsync(problemId);
+            if(problem == null)
+                return NotFound();
+            var problemContent = MessagePackSerializer.Deserialize<StandardProblemContent>(problem.Data);
+            return new CustomResponse<StandardProblemContent>(problemContent);
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult<CustomResponse<Guid>>> Create([FromServices] ApplicationDbContext context)
+        public async Task<ActionResult<CustomResponse<Guid>>> Create([FromBody] StandardProblemContent initialContent)
         {
             var problemId = Guid.NewGuid();
-            var problem = new Problem() {
-                Id = problemId,
-                ProblemType = "standard",
-            };
-            context.Problems.Add(problem);
-            var problemData = new StandardProblemContent();
-            problem.Data = MessagePackSerializer.Serialize(problemData);
-            await context.SaveChangesAsync();;
+            await resolverService.RegisterProblem(problemId, "standard");
+            // TODO: Potential data corruption
+            var problem = await dbContext.Problems.FindAsync(problemId);
+            problem.Data = MessagePackSerializer.Serialize(initialContent);
+            await dbContext.SaveChangesAsync();
             return new CustomResponse<Guid>(problemId);
         }
 
@@ -101,13 +97,18 @@ namespace Syzoj.Api.Problems.Standard
             }
         }
 
+        public class StandardProblemSubmissionRequest
+        {
+            public string Language { get; set; }
+            public string Code { get; set; }
+        }
         [HttpPost("submission/{submissionId}/submit")]
-        public async Task<ActionResult<CustomResponse<bool>>> Submit(Guid problemId, Guid submissionId)
+        public async Task<ActionResult<CustomResponse<bool>>> Submit(Guid problemId, Guid submissionId, [FromBody] StandardProblemSubmissionRequest request)
         {
             var problemResolver = await resolverService.GetProblemResolver(problemId);
             if(problemResolver is StandardProblemResolver standardProblemResolver)
             {
-                return new CustomResponse<bool>(await standardProblemResolver.SubmitCodeAsync(submissionId, "language", "code"));
+                return new CustomResponse<bool>(await standardProblemResolver.SubmitCodeAsync(submissionId, request.Language, request.Code));
             }
             else
             {

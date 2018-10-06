@@ -15,11 +15,5 @@ namespace Syzoj.Api.Problems
             this.Id = problemId;
             this.ServiceProvider = serviceProvider;
         }
-
-        protected virtual Task<Problem> GetProblemModel()
-        {
-            return ServiceProvider.GetRequiredService<ApplicationDbContext>()
-                .Problems.FindAsync(Id);
-        }
     }
 }

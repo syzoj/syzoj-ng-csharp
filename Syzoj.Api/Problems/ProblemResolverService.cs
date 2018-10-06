@@ -29,5 +29,16 @@ namespace Syzoj.Api.Problems
             IProblemResolverProvider provider = dict.GetProvider(problem.ProblemType);
             return await provider.GetProblemResolver(serviceProvider, problemId);
         }
+
+        public Task RegisterProblem(Guid problemId, string problemType)
+        {
+            var problem = new Problem()
+            {
+                Id = problemId,
+                ProblemType = problemType,
+            };
+            context.Problems.Add(problem);
+            return context.SaveChangesAsync();
+        }
     }
 }

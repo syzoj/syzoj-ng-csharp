@@ -15,5 +15,6 @@ namespace Syzoj.Api.Models
         [MaxLength(128)]
         [Required]
         public string ProblemsetProblemId { get; set; }
+        public string Title { get; set; }
     }
 }
