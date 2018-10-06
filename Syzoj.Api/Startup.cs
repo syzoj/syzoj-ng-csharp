@@ -140,7 +140,6 @@ namespace Syzoj.Api
             services.AddSingleton<ProblemsetResolverDictionary>();
             services.AddScoped<IProblemsetResolverService, ProblemsetResolverService>();
             services.AddSingleton<IEventService, EventService>();
-            services.AddSingleton<IEventHandler, ProblemsetEventHandler>();
 
             services.AddSingleton<IProblemResolverProvider, Problems.Standard.StandardProblemResolverProvider>();
             services.AddSingleton<Problems.Standard.StandardProblemJudger>();

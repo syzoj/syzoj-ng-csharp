@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Syzoj.Api.Problems.Standard.Model;
+using Syzoj.Api.Problemsets;
 
 namespace Syzoj.Api.Problems
 {
@@ -13,5 +14,6 @@ namespace Syzoj.Api.Problems
         /// The ID of the problem.
         /// </summary>
         Guid Id { get; }
+        Task<bool> IsProblemsetAcceptable(IProblemsetResolver problemsetResolver);
     }
 }

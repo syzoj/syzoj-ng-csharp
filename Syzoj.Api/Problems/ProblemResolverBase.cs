@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Syzoj.Api.Data;
 using Syzoj.Api.Models;
+using Syzoj.Api.Problemsets;
 
 namespace Syzoj.Api.Problems
 {
@@ -15,5 +16,7 @@ namespace Syzoj.Api.Problems
             this.Id = problemId;
             this.ServiceProvider = serviceProvider;
         }
+
+        public abstract Task<bool> IsProblemsetAcceptable(IProblemsetResolver problemsetResolver);
     }
 }

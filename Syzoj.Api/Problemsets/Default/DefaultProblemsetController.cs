@@ -93,7 +93,7 @@ namespace Syzoj.Api.Problemsets.Default
                 {
                     ModelState.AddModelError("problemId", "problemId is invalid.");
                 }
-                if(!await defaultProblemsetResolver.IsProblemAcceptable(problemResolver))
+                if(!await defaultProblemsetResolver.IsProblemAcceptable(problemResolver) || !await problemResolver.IsProblemsetAcceptable(defaultProblemsetResolver))
                 {
                     ModelState.AddModelError("problemId", "The problem type is not acceptable by the problemset.");
                 }

@@ -12,7 +12,7 @@ namespace Syzoj.Api.Problemsets.Default
         {
         }
 
-        public Task<bool> IsProblemAcceptable(IProblemResolver problem)
+        public override Task<bool> IsProblemAcceptable(IProblemResolver problem)
         {
             return Task.FromResult(problem is ISubmittable && problem is IViewable);
         }

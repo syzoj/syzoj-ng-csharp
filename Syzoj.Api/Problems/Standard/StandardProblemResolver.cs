@@ -7,6 +7,8 @@ using StackExchange.Redis;
 using Syzoj.Api.Data;
 using Syzoj.Api.Problems.Interfaces;
 using Syzoj.Api.Problems.Standard.Model;
+using Syzoj.Api.Problemsets;
+using Syzoj.Api.Problemsets.Interfaces;
 
 namespace Syzoj.Api.Problems.Standard
 {
@@ -97,6 +99,11 @@ namespace Syzoj.Api.Problems.Standard
             var model = await dbContext.Problems.FindAsync(Id);
             model.Data = MessagePackSerializer.Serialize(content);
             await dbContext.SaveChangesAsync();
+        }
+
+        public override Task<bool> IsProblemsetAcceptable(IProblemsetResolver problemsetResolver)
+        {
+            return Task.FromResult(problemsetResolver is ISubmissionPermissionHandler);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Syzoj.Api.Events;
+using Syzoj.Api.Problems;
 
 namespace Syzoj.Api.Problemsets
 {
@@ -16,9 +17,6 @@ namespace Syzoj.Api.Problemsets
             this.Id = problemsetId;
         }
 
-        public virtual Task HandleProblemsetEvent(IProblemsetEvent e)
-        {
-            return Task.CompletedTask;
-        }
+        public abstract Task<bool> IsProblemAcceptable(IProblemResolver problemResolver);
     }
 }
