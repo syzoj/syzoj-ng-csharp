@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using MessagePack;
 
 namespace Syzoj.Api.Problems.Standard.Model
@@ -8,10 +9,15 @@ namespace Syzoj.Api.Problems.Standard.Model
     [MessagePackObject(keyAsPropertyName: true)]
     public class ProblemStatement
     {
-        public string Description { get; set; }
-        public string InputFormat { get; set; }
-        public string OutputFormat { get; set; }
-        public string Example { get; set; }
-        public string LimitAndHint { get; set; }
+        [Required(AllowEmptyStrings = true)]
+        public string Description { get; set; } = "";
+        [Required(AllowEmptyStrings = true)]
+        public string InputFormat { get; set; } = "";
+        [Required(AllowEmptyStrings = true)]
+        public string OutputFormat { get; set; } = "";
+        [Required(AllowEmptyStrings = true)]
+        public string Example { get; set; } = "";
+        [Required(AllowEmptyStrings = true)]
+        public string LimitAndHint { get; set; } = "";
     }
 }

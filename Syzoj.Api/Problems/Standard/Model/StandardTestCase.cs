@@ -11,7 +11,7 @@ namespace Syzoj.Api.Problems.Standard.Model
     public class StandardTestCase
     {
         public string InputFile { get; set; }
-        public string OutputFile { get; set; }        
+        public string OutputFile { get; set; }
         public Guid JudgerSettings { get; set; }
         /// <summary>
         /// A list of additional files to be placed in the working directory
