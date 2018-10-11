@@ -15,5 +15,6 @@ export function request(url, method, request) {
     }).then((response) => {
         if(!response.Success)
             throw response.Errors.map(e => e.Message)
+        return response.Result
     })
 }
