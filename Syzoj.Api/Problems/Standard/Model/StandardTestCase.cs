@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using MessagePack;
 
 namespace Syzoj.Api.Problems.Standard.Model
@@ -17,6 +18,7 @@ namespace Syzoj.Api.Problems.Standard.Model
         /// A list of additional files to be placed in the working directory
         /// of the program.
         /// </summary>
-        public IDictionary<string, Guid> Files { get; set; }
-    }
+        [Required]
+        public IDictionary<string, Guid> Files { get; set; } = new Dictionary<string, Guid>();
+     }
 }

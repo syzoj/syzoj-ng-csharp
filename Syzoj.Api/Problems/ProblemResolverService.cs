@@ -22,7 +22,7 @@ namespace Syzoj.Api.Problems
 
         public async Task<IProblemResolver> GetProblemResolver(Guid problemId)
         {
-            var problem = await context.Problems.FindAsync(problemId);
+            var problem = await context.Set<Problem>().FindAsync(problemId);
             if(problem == null)
                 return null;
             
@@ -37,7 +37,7 @@ namespace Syzoj.Api.Problems
                 Id = problemId,
                 ProblemType = problemType,
             };
-            context.Problems.Add(problem);
+            context.Set<Problem>().Add(problem);
             return context.SaveChangesAsync();
         }
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using MessagePack;
 
 namespace Syzoj.Api.Problems.Standard.Model
@@ -7,8 +8,10 @@ namespace Syzoj.Api.Problems.Standard.Model
     [MessagePackObject(keyAsPropertyName: true)]
     public class Subtask
     {
-        public IEnumerable<int> Dependencies { get; set; }
-        public IEnumerable<Guid> TestCases { get; set; }
+        [Required]
+        public IEnumerable<int> Dependencies { get; set; } = new int[] {};
+        [Required]
+        public IEnumerable<Guid> TestCases { get; set; } = new Guid[] {};
         public SubtaskScoringStrategy Strategy { get; set; }
         public decimal Score { get; set; }
     }

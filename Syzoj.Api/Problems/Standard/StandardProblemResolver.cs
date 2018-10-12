@@ -5,6 +5,7 @@ using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Syzoj.Api.Data;
+using Syzoj.Api.Models;
 using Syzoj.Api.Problems.Interfaces;
 using Syzoj.Api.Problems.Standard.Model;
 using Syzoj.Api.Problemsets;
@@ -89,14 +90,14 @@ namespace Syzoj.Api.Problems.Standard
         private async Task<StandardProblemContent> GetProblemContent()
         {
             var dbContext = ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var model = await dbContext.Problems.FindAsync(Id);
+            var model = await dbContext.Set<Problem>().FindAsync(Id);
             return MessagePackSerializer.Deserialize<StandardProblemContent>(model.Data);
         }
 
         private async Task SetProblemContent(StandardProblemContent content)
         {
             var dbContext = ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var model = await dbContext.Problems.FindAsync(Id);
+            var model = await dbContext.Set<Problem>().FindAsync(Id);
             model.Data = MessagePackSerializer.Serialize(content);
             await dbContext.SaveChangesAsync();
         }

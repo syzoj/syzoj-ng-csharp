@@ -26,7 +26,7 @@ namespace Syzoj.Api.Problems.Standard
         [HttpGet("view")]
         public async Task<ActionResult<CustomResponse<StandardProblemContent>>> View(Guid problemId)
         {
-            var problem = await dbContext.Problems.FindAsync(problemId);
+            var problem = await dbContext.Set<Problem>().FindAsync(problemId);
             if(problem == null)
                 return NotFound();
             var problemContent = MessagePackSerializer.Deserialize<StandardProblemContent>(problem.Data);
@@ -39,7 +39,7 @@ namespace Syzoj.Api.Problems.Standard
             var problemId = Guid.NewGuid();
             await resolverService.RegisterProblem(problemId, "standard");
             // TODO: Potential data corruption
-            var problem = await dbContext.Problems.FindAsync(problemId);
+            var problem = await dbContext.Set<Problem>().FindAsync(problemId);
             problem.Data = MessagePackSerializer.Serialize(initialContent);
             await dbContext.SaveChangesAsync();
             return new CustomResponse<Guid>(problemId);

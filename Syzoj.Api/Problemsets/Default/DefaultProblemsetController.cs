@@ -37,7 +37,7 @@ namespace Syzoj.Api.Problemsets.Default
             var problemsetResolver = await problemsetResolverService.GetProblemsetResolver(problemsetId);
             if(problemsetResolver is DefaultProblemsetResolver defaultProblemsetResolver)
             {
-                var problemsetModel = await dbContext.Problemsets.FindAsync(problemsetId);
+                var problemsetModel = await dbContext.Set<Problemset>().FindAsync(problemsetId);
                 var problemsetProblems = dbContext.Entry(problemsetModel)
                     .Collection(p => p.ProblemsetProblems)
                     .Query();
@@ -104,7 +104,7 @@ namespace Syzoj.Api.Problemsets.Default
                     ProblemsetProblemId = request.ProblemsetProblemId,
                     Title = request.Title,
                 };
-                dbContext.ProblemsetProblems.Add(entry);
+                dbContext.Set<ProblemsetProblem>().Add(entry);
                 await dbContext.SaveChangesAsync();
                 return new CustomResponse<bool>(true);
             }

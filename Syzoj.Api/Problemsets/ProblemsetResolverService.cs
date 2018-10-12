@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Syzoj.Api.Data;
+using Syzoj.Api.Models;
 
 namespace Syzoj.Api.Problemsets
 {
@@ -19,7 +20,7 @@ namespace Syzoj.Api.Problemsets
 
         public async Task<IProblemsetResolver> GetProblemsetResolver(Guid problemsetId)
         {
-            var problemset = await context.Problemsets.FindAsync(problemsetId);
+            var problemset = await context.Set<Problemset>().FindAsync(problemsetId);
             if(problemset == null)
                 return null;
             

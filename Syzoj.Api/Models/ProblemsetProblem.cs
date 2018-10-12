@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+using Syzoj.Api.Data;
 
 namespace Syzoj.Api.Models
 {
+    [DbModel]
     public class ProblemsetProblem
     {
         public Guid ProblemsetId { get; set; }
@@ -16,5 +19,26 @@ namespace Syzoj.Api.Models
         [Required]
         public string ProblemsetProblemId { get; set; }
         public string Title { get; set; }
+
+        public static void OnModelCreating(ApplicationDbContext dbContext, ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProblemsetProblem>()
+                .HasKey(psp => new { psp.ProblemsetId, psp.ProblemId });
+            modelBuilder.Entity<ProblemsetProblem>()
+                .HasIndex(psp => new { psp.ProblemsetId, psp.ProblemsetProblemId })
+                .IsUnique();
+            modelBuilder.Entity<ProblemsetProblem>()
+                .HasOne(psp => psp.Problem)
+                .WithMany()
+                .HasForeignKey(psp => psp.ProblemId)
+                .HasPrincipalKey(p => p.Id);
+            modelBuilder.Entity<ProblemsetProblem>()
+                .HasOne(psp => psp.Problemset)
+                .WithMany(ps => ps.ProblemsetProblems)
+                .HasForeignKey(psp => psp.ProblemsetId)
+                .HasPrincipalKey(ps => ps.Id);
+            modelBuilder.Entity<ProblemsetProblem>()
+                .ForNpgsqlUseXminAsConcurrencyToken();
+        }
     }
 }
