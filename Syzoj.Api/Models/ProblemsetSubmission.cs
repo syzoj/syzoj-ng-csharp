@@ -23,15 +23,14 @@ namespace Syzoj.Api.Models
         public static void OnModelCreating(ApplicationDbContext dbContext, ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ProblemsetSubmission>()
+                .ToTable("ProblemsetSubmissions")
                 .HasOne(s => s.ProblemsetProblem)
                 .WithMany(ps => ps.Submissions)
-                .HasForeignKey(s => new { s.ProblemsetId, s.ProblemId})
-                .HasPrincipalKey(ps => new { ps.ProblemsetId, ps.ProblemId });
+                .HasForeignKey(s => new { s.ProblemsetId, s.ProblemId});
             modelBuilder.Entity<ProblemsetSubmission>()
                 .HasOne(s => s.Problemset)
                 .WithMany(ps => ps.Submissions)
-                .HasForeignKey(s => s.ProblemsetId)
-                .HasPrincipalKey(ps => ps.Id);
+                .HasForeignKey(s => s.ProblemsetId);
         }
     }
 }

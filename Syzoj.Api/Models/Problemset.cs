@@ -18,7 +18,8 @@ namespace Syzoj.Api.Models
 
         public static void OnModelCreating(ApplicationDbContext dbContext, ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Problem>()
+            modelBuilder.Entity<Problemset>()
+                .ToTable("Problemsets")
                 .ForNpgsqlUseXminAsConcurrencyToken();
         }
     }

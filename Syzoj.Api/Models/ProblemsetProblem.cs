@@ -23,6 +23,7 @@ namespace Syzoj.Api.Models
         public static void OnModelCreating(ApplicationDbContext dbContext, ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ProblemsetProblem>()
+                .ToTable("ProblemsetProblems")
                 .HasKey(psp => new { psp.ProblemsetId, psp.ProblemId });
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasIndex(psp => new { psp.ProblemsetId, psp.ProblemsetProblemId })
@@ -30,13 +31,11 @@ namespace Syzoj.Api.Models
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasOne(psp => psp.Problem)
                 .WithMany()
-                .HasForeignKey(psp => psp.ProblemId)
-                .HasPrincipalKey(p => p.Id);
+                .HasForeignKey(psp => psp.ProblemId);
             modelBuilder.Entity<ProblemsetProblem>()
                 .HasOne(psp => psp.Problemset)
                 .WithMany(ps => ps.ProblemsetProblems)
-                .HasForeignKey(psp => psp.ProblemsetId)
-                .HasPrincipalKey(ps => ps.Id);
+                .HasForeignKey(psp => psp.ProblemsetId);
             modelBuilder.Entity<ProblemsetProblem>()
                 .ForNpgsqlUseXminAsConcurrencyToken();
         }
