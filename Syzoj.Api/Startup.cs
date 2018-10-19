@@ -20,6 +20,7 @@ using Newtonsoft.Json.Serialization;
 using Syzoj.Api.Problems;
 using Syzoj.Api.Mvc;
 using System.Linq;
+using Syzoj.Api.Object;
 
 namespace Syzoj.Api
 {
@@ -134,6 +135,8 @@ namespace Syzoj.Api
             });
 
             services.AddSingleton<Problems.Standard.StandardProblemJudger>();
+
+            services.AddSingleton<IObjectService, ObjectService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
