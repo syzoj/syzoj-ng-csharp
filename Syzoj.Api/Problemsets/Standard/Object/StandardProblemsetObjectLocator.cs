@@ -3,18 +3,18 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Syzoj.Api.Data;
 using Syzoj.Api.Object;
-using Syzoj.Api.Problems.Standard.Model;
+using Syzoj.Api.Problemsets.Standard.Model;
 
-namespace Syzoj.Api.Problems.Standard
+namespace Syzoj.Api.Problemsets.Standard.Object
 {
-    public class StandardProblemLocator : IObjectLocator
+    public class StandardProblemsetObjectLocator : IObjectLocator
     {
         private readonly IServiceProvider provider;
-        public StandardProblemLocator(IServiceProvider provider)
+
+        public StandardProblemsetObjectLocator(IServiceProvider provider)
         {
             this.provider = provider;
         }
-
         public async Task<IObject> GetObject(string segment)
         {
             Guid guid;
@@ -22,18 +22,18 @@ namespace Syzoj.Api.Problems.Standard
                 return null;
             
             var dbContext = provider.GetRequiredService<ApplicationDbContext>();
-            var model = await dbContext.Set<ProblemDbModel>().FindAsync(new object[] { guid });
+            var model = await dbContext.Set<ProblemsetDbModel>().FindAsync(new object[] { guid });
             if(model == null)
                 return null;
             
-            return new StandardProblem(provider, dbContext, model);
+            return new StandardProblemset(provider, dbContext, model);
         }
 
         public Task<IObjectLocator> GetObjectLocator(string segment)
-            => Task.FromResult<IObjectLocator>(null);
+        {
+            return Task.FromResult<IObjectLocator>(null);
+        }
 
-        public Uri GetUri()
-            => new Uri("object:///Syzoj.Api/problem-standard/");
-        
+        public Uri GetUri() => new Uri("object:///problemset-standard/problemset/");
     }
 }

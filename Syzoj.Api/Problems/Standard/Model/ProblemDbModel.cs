@@ -14,6 +14,7 @@ namespace Syzoj.Api.Problems.Standard.Model
         public string Content { get; set; }
         public string Tags { get; set; }
         public byte[] JudgingSettings { get; set; }
+        
         public static void OnModelCreating(ApplicationDbContext dbContext, ModelBuilder modelBuilder)
         {
 

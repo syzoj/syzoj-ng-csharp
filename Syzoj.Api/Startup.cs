@@ -138,8 +138,13 @@ namespace Syzoj.Api
             services.AddSingleton<Problems.Standard.StandardProblemJudger>();
 
             services.AddObjectLocatorProvider();
+            services.AddSingleton<Syzoj.Api.Problems.Standard.Object.StandardProblemLocator>();
+            services.AddSingleton<Syzoj.Api.Problems.Standard.Object.StandardProblemObjectLocator>();
+            services.AddSingleton<Syzoj.Api.Problemsets.Standard.Object.StandardProblemsetLocator>();
+            services.AddSingleton<Syzoj.Api.Problemsets.Standard.Object.StandardProblemsetObjectLocator>();
             services.AddBaseObjectLocator<DictionaryObjectLocator>("Syzoj.Api", (serviceProvider) => new DictionaryObjectLocator(new Uri("object:///Syzoj.Api/")) {
-                { "problem-standard", serviceProvider.GetRequiredService<Syzoj.Api.Problems.Standard.StandardProblemLocator>() },
+                { "problem-standard", serviceProvider.GetRequiredService<Syzoj.Api.Problems.Standard.Object.StandardProblemLocator>() },
+                { "problemset-standard", serviceProvider.GetRequiredService<Syzoj.Api.Problemsets.Standard.Object.StandardProblemsetLocator>() },
             });
         }
 
