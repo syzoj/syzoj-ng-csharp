@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,6 +9,10 @@ namespace Syzoj.Api.Object
         public static IServiceCollection AddBaseObjectLocator<T>(this IServiceCollection collection)
             where T : class, IBaseObjectLocator
             => collection.AddSingleton<IBaseObjectLocator, T>();
+
+        public static IServiceCollection AddBaseObjectLocator<T>(this IServiceCollection collection, Func<IServiceProvider, T> obj)
+            where T : class, IBaseObjectLocator
+            => collection.AddSingleton<IBaseObjectLocator, T>(obj);
         
         public static IServiceCollection AddObjectLocatorProvider(this IServiceCollection collection)
             => collection.AddSingleton<IObjectLocatorProvider, ObjectLocatorProvider>();
@@ -16,6 +21,11 @@ namespace Syzoj.Api.Object
             where T : class, IObjectLocator
             => collection.AddSingleton<T>()
                 .AddSingleton<IBaseObjectLocator>((serviceProvider) => new BaseObjectLocator(name, serviceProvider.GetRequiredService<T>()));
+        
+        public static IServiceCollection AddBaseObjectLocator<T>(this IServiceCollection collection, string name, Func<IServiceProvider, T> obj)
+            where T : class, IObjectLocator
+            => collection.AddSingleton<T>()
+                .AddSingleton<IBaseObjectLocator>((serviceProvider) => new BaseObjectLocator(name, obj(serviceProvider)));
 
         private class BaseObjectLocator : IBaseObjectLocator
         {

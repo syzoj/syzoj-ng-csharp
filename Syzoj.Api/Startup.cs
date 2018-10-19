@@ -138,6 +138,9 @@ namespace Syzoj.Api
             services.AddSingleton<Problems.Standard.StandardProblemJudger>();
 
             services.AddObjectLocatorProvider();
+            services.AddBaseObjectLocator<DictionaryObjectLocator>("Syzoj.Api", (serviceProvider) => new DictionaryObjectLocator(new Uri("object:///Syzoj.Api/")) {
+                { "problem-standard", serviceProvider.GetRequiredService<Syzoj.Api.Problems.Standard.StandardProblemLocator>() },
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
