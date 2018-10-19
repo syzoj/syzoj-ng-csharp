@@ -87,7 +87,8 @@ namespace Syzoj.Api
             services.AddSession();
 
             services.AddDbContext<ApplicationDbContext>(options => 
-                options.UseNpgsql(Configuration.GetConnectionString("Database")));
+                options.UseNpgsql(Configuration.GetConnectionString("Database")),
+                ServiceLifetime.Transient);
             // services.AddIdentityCore<ApplicationUser>()
             services.AddAuthentication(options => {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
