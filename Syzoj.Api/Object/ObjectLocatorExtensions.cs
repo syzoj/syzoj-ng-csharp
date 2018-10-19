@@ -7,17 +7,15 @@ namespace Syzoj.Api.Object
     {
         public static IServiceCollection AddBaseObjectLocator<T>(this IServiceCollection collection)
             where T : class, IBaseObjectLocator
-                => collection.AddSingleton<IBaseObjectLocator, T>();
+            => collection.AddSingleton<IBaseObjectLocator, T>();
         
         public static IServiceCollection AddObjectLocatorProvider(this IServiceCollection collection)
             => collection.AddSingleton<IObjectLocatorProvider, ObjectLocatorProvider>();
         
         public static IServiceCollection AddBaseObjectLocator<T>(this IServiceCollection collection, string name)
             where T : class, IObjectLocator
-        {
-            return collection.AddSingleton<T>()
+            => collection.AddSingleton<T>()
                 .AddSingleton<IBaseObjectLocator>((serviceProvider) => new BaseObjectLocator(name, serviceProvider.GetRequiredService<T>()));
-        }
 
         private class BaseObjectLocator : IBaseObjectLocator
         {
