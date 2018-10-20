@@ -36,7 +36,9 @@ namespace Syzoj.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
+            services.AddMvc(options => {
+                options.ModelBinderProviders.Insert(0, new ObjectBinderProvider());
+            })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
             services.Configure<ApiBehaviorOptions>(options => {
