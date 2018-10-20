@@ -6,8 +6,7 @@ namespace Syzoj.Api.Object
     public interface IObjectService
     {
         Task<IObject> GetObject(Guid Id);
-        Task<TObject> CreateObject<TObject, TObjectProvider>(Func<Guid, Task<TObject>> creator)
-            where TObject : IObject
-            where TObjectProvider : IObjectProvider<TObject>;
+        Task<Guid> CreateObject<TObjectProvider>() where TObjectProvider : IObjectProvider;
+        Task DeleteObject(Guid Id);
     }
 }

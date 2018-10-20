@@ -48,9 +48,8 @@ namespace Syzoj.Api.Object
             }
         }
 
-        public async Task<TObject> CreateObject<TObject, TObjectProvider>(Func<Guid, Task<TObject>> creator)
-            where TObject : IObject
-            where TObjectProvider : IObjectProvider<TObject>
+        public async Task<Guid> CreateObject<TObjectProvider>()
+            where TObjectProvider : IObjectProvider
         {
             var model = new ObjectDbModel()
             {
@@ -63,12 +62,23 @@ namespace Syzoj.Api.Object
                 dbContext.Add(model);
                 await dbContext.SaveChangesAsync();
             }
-            var obj = await creator(model.Id);
-            if(obj.Id != model.Id)
+            return model.Id;
+        }
+
+        public async Task DeleteObject(Guid Id)
+        {
+            using(var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>())
             {
-                throw new InvalidOperationException("CreateObject: The ID of created object does not match given ID.");
+                var model = await dbContext.Set<ObjectDbModel>().FindAsync(Id);
+                if(model == null)
+                {
+                    this.logger.LogWarning("Attempting to delete a nonexistent object {Id}", Id);
+                    return;
+                }
+
+                dbContext.Remove(model);
+                await dbContext.SaveChangesAsync();
             }
-            return obj;
         }
     }
 }
