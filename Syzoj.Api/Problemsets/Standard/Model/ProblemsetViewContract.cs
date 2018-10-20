@@ -2,14 +2,13 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Syzoj.Api.Data;
+using Syzoj.Api.Object;
 
 namespace Syzoj.Api.Problemsets.Standard.Model
 {
     [DbModel]
-    public class ProblemsetViewContract
+    public class ProblemsetViewContract : DbModelBase
     {
-        [Key]
-        public Guid Id { get; set; }
         public Guid ProblemsetId { get; set; }
         public Guid? ProblemContractId { get; set; }
         public string Title { get; set; }

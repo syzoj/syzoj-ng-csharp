@@ -10,101 +10,68 @@ using Syzoj.Api.Problems.Standard.Model;
 
 namespace Syzoj.Api.Problems.Standard
 {
-    public class Problem : IProblemAcceptingContract<IViewProblemsetContract, IViewProblemContract>
+    public class Problem : DbModelObjectBase<Model.Problem>, IProblemAcceptingContract<IViewProblemsetContract, IViewProblemContract>
     {
-        private readonly ApplicationDbContext dbContext;
-        private readonly Model.Problem model;
         private readonly ProblemViewContract.ProblemViewContractProvider viewContractProvider;
-
-        public Guid Id => model.Id;
         private Problem(ApplicationDbContext dbContext, Model.Problem model, ProblemViewContract.ProblemViewContractProvider viewContractProvider)
+            : base(dbContext, model)
         {
-            this.dbContext = dbContext;
-            this.model = model;
             this.viewContractProvider = viewContractProvider;
         }
 
         async Task<IViewProblemContract> IProblemAcceptingContract<IViewProblemsetContract, IViewProblemContract>.BuildContract(IViewProblemsetContract contract)
         {
-            return (IViewProblemContract) await viewContractProvider.CreateObject(model.Id, contract.Id);
+            return (IViewProblemContract) await viewContractProvider.CreateObject(Model.Id, contract.Id);
         }
 
         private Task<ProblemStatement> GetStatement()
-            => Task.FromResult(MessagePack.MessagePackSerializer.Deserialize<ProblemStatement>(model._Statement));
+            => Task.FromResult(MessagePack.MessagePackSerializer.Deserialize<ProblemStatement>(Model._Statement));
 
-        public class ProblemProvider : IObjectProvider<Problem>
+        public class ProblemProvider : DbModelObjectBase<Model.Problem>.Provider<Problem, ProblemProvider>
         {
-            private readonly IServiceProvider serviceProvider;
-            private readonly IObjectService service;
             private readonly ProblemViewContract.ProblemViewContractProvider viewContractProvider;
 
-            public ProblemProvider(IServiceProvider serviceProvider, IObjectService service, ProblemViewContract.ProblemViewContractProvider viewContractProvider)
+            public ProblemProvider(IServiceProvider serviceProvider, ProblemViewContract.ProblemViewContractProvider viewContractProvider)
+                : base(serviceProvider)
             {
-                this.serviceProvider = serviceProvider;
-                this.service = service;
                 this.viewContractProvider = viewContractProvider;
             }
 
-            public async Task<Problem> GetObject(Guid Id)
+            protected override Task<Problem> GetObjectImpl(ApplicationDbContext dbContext, Model.Problem model)
             {
-                var scope = serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                var model = await dbContext.Set<Model.Problem>().FindAsync(Id);
-                if(model == null)
-                    return null;
-                
-                return new Problem(dbContext, model, viewContractProvider);
+                return Task.FromResult(new Problem(dbContext, model, viewContractProvider));
             }
 
-            public async Task<Problem> CreateObject(ProblemStatement statement)
+            public Task<Problem> CreateObject(ProblemStatement statement)
             {
-                if(statement == null)
-                    throw new ArgumentNullException(nameof(statement));
-
-                var scope = serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                var id = await service.CreateObject<ProblemProvider>();
-                var model = new Model.Problem()
+                return base.CreateObject(new Model.Problem()
                 {
-                    Id = id,
                     _Statement = MessagePack.MessagePackSerializer.Serialize(statement)
-                };
-                dbContext.Set<Model.Problem>().Add(model);
-                await dbContext.SaveChangesAsync();
-                return new Problem(dbContext, model, viewContractProvider);
-            }
-
-            Task<IObject> IObjectProvider.GetObject(Guid Id)
-            {
-                return GetObject(Id).ContinueWith(p => (IObject) p.Result);
+                });
             }
         }
 
-        public class ProblemViewContract : IViewProblemContract
+        public class ProblemViewContract : DbModelObjectBase<Model.ProblemViewContract>, IViewProblemContract
         {
-            private readonly ApplicationDbContext dbContext;
-            private readonly Model.ProblemViewContract model;
-            private readonly IObjectService service;
             private Problem problem;
+            private readonly IObjectService objectService;
 
-            private ProblemViewContract(ApplicationDbContext dbContext, Model.ProblemViewContract model, IObjectService service)
+            public ProblemViewContract(ApplicationDbContext dbContext, Model.ProblemViewContract model, IObjectService objectService)
+                : base(dbContext, model)
             {
-                this.dbContext = dbContext;
-                this.model = model;
-                this.service = service;
+                this.objectService = objectService;
             }
 
             private async Task OnLoad()
             {
-                this.problem = (Problem) await service.GetObject(model.ProblemId);
+                this.problem = (Problem) await objectService.GetObject(Model.ProblemId);
             }
-            public Guid Id => model.Id;
 
             public async Task CancelContract()
             {
-                dbContext.Set<Model.ProblemViewContract>().Remove(model);
-                await dbContext.SaveChangesAsync();
-                await service.DeleteObject(model.Id);
+                DbContext.Set<Model.ProblemViewContract>().Remove(Model);
+                await DbContext.SaveChangesAsync();
+                await objectService.DeleteObject(Model.Id);
             }
 
             public async Task<ViewModel> GetProblemStatement()
@@ -116,52 +83,26 @@ namespace Syzoj.Api.Problems.Standard
                 };
             }
 
-            public class ProblemViewContractProvider : IObjectProvider<ProblemViewContract>
+            public class ProblemViewContractProvider : DbModelObjectBase<Model.ProblemViewContract>.Provider<ProblemViewContract, ProblemViewContractProvider>
             {
-                private readonly IServiceProvider serviceProvider;
-                private readonly IObjectService service;
-
-                public ProblemViewContractProvider(IServiceProvider serviceProvider, IObjectService service)
+                public ProblemViewContractProvider(IServiceProvider serviceProvider) : base(serviceProvider)
                 {
-                    this.serviceProvider = serviceProvider;
-                    this.service = service;
                 }
 
-                public async Task<ProblemViewContract> GetObject(Guid Id)
+                protected override async Task<ProblemViewContract> GetObjectImpl(ApplicationDbContext dbContext, Model.ProblemViewContract model)
                 {
-                    var scope = serviceProvider.CreateScope();
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var model = await dbContext.Set<Model.ProblemViewContract>().FindAsync(Id);
-                    if(model == null)
-                        return null;
-                    
-                    var obj = new ProblemViewContract(dbContext, model, service);
+                    var obj = new ProblemViewContract(dbContext, model, ObjectService);
                     await obj.OnLoad();
                     return obj;
                 }
 
-                public async Task<ProblemViewContract> CreateObject(Guid problemId, Guid problemsetContractId)
+                public Task<ProblemViewContract> CreateObject(Guid problemId, Guid problemsetContractId)
                 {
-                    var scope = serviceProvider.CreateScope();
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var id = await service.CreateObject<ProblemViewContractProvider>();
-                    var model = new Model.ProblemViewContract()
+                    return base.CreateObject(new Model.ProblemViewContract()
                     {
-                        Id = id,
                         ProblemId = problemId,
                         ProblemsetContractId = problemsetContractId
-                    };
-                    dbContext.Set<Model.ProblemViewContract>().Add(model);
-                    await dbContext.SaveChangesAsync();
-                    
-                    var obj = new ProblemViewContract(dbContext, model, service);
-                    await obj.OnLoad();
-                    return obj;
-                }
-
-                Task<IObject> IObjectProvider.GetObject(Guid Id)
-                {
-                    return GetObject(Id).ContinueWith(pv => (IObject) pv.Result);
+                    });
                 }
             }
         }

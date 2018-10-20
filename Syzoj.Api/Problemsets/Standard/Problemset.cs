@@ -12,21 +12,17 @@ using Syzoj.Api.Problemsets.Standard.Model;
 
 namespace Syzoj.Api.Problemsets.Standard
 {
-    public class Problemset : IObject
+    public class Problemset : DbModelObjectBase<Model.Problemset>
     {
-        private readonly ApplicationDbContext dbContext;
-        private readonly Model.Problemset model;
         private readonly ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider;
         private readonly IObjectService service;
 
         private Problemset(ApplicationDbContext dbContext, Model.Problemset model, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider, IObjectService service)
+            : base(dbContext, model)
         {
-            this.dbContext = dbContext;
-            this.model = model;
             this.viewContractProvider = viewContractProvider;
             this.service = service;
         }
-        public Guid Id => model.Id;
 
         public async Task AddProblem(IObject problem)
         {
@@ -44,7 +40,7 @@ namespace Syzoj.Api.Problemsets.Standard
 
         public async Task<IEnumerable<ViewModel>> GetProblems()
         {
-            var contracts = await dbContext.Entry(model).Collection(ps => ps.ViewContracts).Query()
+            var contracts = await DbContext.Entry(Model).Collection(ps => ps.ViewContracts).Query()
                 .Select(c => c.ProblemContractId)
                 .ToListAsync();
             var result = new List<ViewModel>();
@@ -57,24 +53,19 @@ namespace Syzoj.Api.Problemsets.Standard
             return result;
         }
 
-        public class ProblemsetViewContract : IViewProblemsetContract
+        public class ProblemsetViewContract : DbModelObjectBase<Model.ProblemsetViewContract>, IViewProblemsetContract
         {
-            private readonly ApplicationDbContext dbContext;
-            private readonly Model.ProblemsetViewContract model;
-
             private ProblemsetViewContract(ApplicationDbContext dbContext, Model.ProblemsetViewContract model)
+                : base(dbContext, model)
             {
-                this.dbContext = dbContext;
-                this.model = model;
             }
-            public Guid Id => model.Id;
 
             bool IViewProblemsetContract.RequiresNotification => false;
 
             internal Task AttachProblemContract(IViewProblemContract problemContract)
             {
-                model.ProblemContractId = problemContract.Id;
-                return dbContext.SaveChangesAsync();
+                Model.ProblemContractId = problemContract.Id;
+                return DbContext.SaveChangesAsync();
             }
 
             Task IViewProblemsetContract.OnProblemUpdated()
@@ -82,89 +73,40 @@ namespace Syzoj.Api.Problemsets.Standard
                 return Task.CompletedTask;
             }
 
-            public class ProblemsetViewContractProvider : IObjectProvider<ProblemsetViewContract>
+            public class ProblemsetViewContractProvider : DbModelObjectBase<Model.ProblemsetViewContract>.Provider<ProblemsetViewContract, ProblemsetViewContractProvider>
             {
-                private readonly IServiceProvider serviceProvider;
-                private readonly IObjectService service;
-
-                public ProblemsetViewContractProvider(IServiceProvider serviceProvider, IObjectService service)
+                public ProblemsetViewContractProvider(IServiceProvider serviceProvider)
+                    : base(serviceProvider)
                 {
-                    this.serviceProvider = serviceProvider;
-                    this.service = service;
-                }
-                
-                public async Task<ProblemsetViewContract> GetObject(Guid Id)
-                {
-                    var scope = serviceProvider.CreateScope();
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var model = await dbContext.Set<Model.ProblemsetViewContract>().FindAsync(Id);
-                    if(model == null)
-                        return null;
-                    
-                    return new ProblemsetViewContract(dbContext, model);
                 }
 
-                public async Task<ProblemsetViewContract> CreateObject(Problemset problemset)
+                protected override Task<ProblemsetViewContract> GetObjectImpl(ApplicationDbContext dbContext, Model.ProblemsetViewContract model)
+                    => Task.FromResult(new ProblemsetViewContract(dbContext, model));
+
+                public Task<ProblemsetViewContract> CreateObject(Problemset problemset)
                 {
-                    var scope = serviceProvider.CreateScope();
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var id = await service.CreateObject<ProblemsetViewContractProvider>();
-                    var model = new Model.ProblemsetViewContract()
-                    {
-                        Id = id,
+                    return base.CreateObject(new Model.ProblemsetViewContract() {
                         ProblemsetId = problemset.Id
-                    };
-                    dbContext.Set<Model.ProblemsetViewContract>().Add(model);
-                    await dbContext.SaveChangesAsync();
-                    return new ProblemsetViewContract(dbContext, model);
-                }
-
-                Task<IObject> IObjectProvider.GetObject(Guid Id)
-                {
-                    return GetObject(Id).ContinueWith(p => (IObject) p.Result);
+                    });
                 }
             }
         }
 
-        public class ProblemsetProvider : IObjectProvider<Problemset>
+        public class ProblemsetProvider : DbModelObjectBase<Model.Problemset>.Provider<Problemset, ProblemsetProvider>
         {
-            private readonly IServiceProvider serviceProvider;
-            private readonly IObjectService service;
             private readonly ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider;
-            public ProblemsetProvider(IServiceProvider serviceProvider, IObjectService service, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider)
+            public ProblemsetProvider(IServiceProvider serviceProvider, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider)
+                : base(serviceProvider)
             {
-                this.serviceProvider = serviceProvider;
-                this.service = service;
                 this.viewContractProvider = viewContractProvider;
             }
-            public async Task<Problemset> GetObject(Guid Id)
-            {
-                var scope = serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                var model = await dbContext.FindAsync<Model.Problemset>(Id);;
-                if(model == null)
-                    return null;
-                
-                return new Problemset(dbContext, model, viewContractProvider, service);
-            }
 
-            public async Task<Problemset> CreateObject()
-            {
-                var scope = serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                var id = await service.CreateObject<ProblemsetProvider>();
-                var model = new Model.Problemset()
-                {
-                    Id = id
-                };
-                dbContext.Add<Model.Problemset>(model);
-                await dbContext.SaveChangesAsync();
-                return new Problemset(dbContext, model, viewContractProvider, service);
-            }
+            protected override Task<Problemset> GetObjectImpl(ApplicationDbContext dbContext, Model.Problemset model)
+                => Task.FromResult(new Problemset(dbContext, model, viewContractProvider, ObjectService));
 
-            Task<IObject> IObjectProvider.GetObject(Guid Id)
+            public Task<Problemset> CreateObject()
             {
-                return GetObject(Id).ContinueWith(ps => (IObject) ps.Result);
+                return base.CreateObject(new Model.Problemset());
             }
         }
     }
