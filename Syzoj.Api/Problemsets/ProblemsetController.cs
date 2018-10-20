@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Syzoj.Api.Interfaces;
 using Syzoj.Api.Mvc;
 using Syzoj.Api.Object;
+using Syzoj.Api.Problemsets.Standard;
 
 namespace Syzoj.Api.Problemsets
 {
@@ -23,7 +24,7 @@ namespace Syzoj.Api.Problemsets
             this.objectService = objectService;
         }
         [HttpGet("create")]
-        public async Task<ActionResult<CustomResponse<Guid>>> Create([FromServices] Problemsets.Standard.Problemset.ProblemsetProvider provider)
+        public async Task<ActionResult<CustomResponse<Guid>>> Create([FromServices] Problemset.ProblemsetProvider provider)
         {
             var obj = await provider.CreateObject();
             return new CustomResponse<Guid>(obj.Id);
@@ -36,7 +37,7 @@ namespace Syzoj.Api.Problemsets
         }
         [HttpPost("{problemsetId}/addproblem")]
         public async Task<ActionResult<CustomResponse>> AddProblem(
-            [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemsets.Standard.Problemset problemset,
+            [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemset problemset,
             [FromBody] AddProblemRequest request)
         {
             var problem = await objectService.GetObject(request.ProblemId);
@@ -57,10 +58,10 @@ namespace Syzoj.Api.Problemsets
         }
 
         [HttpGet("{problemsetId}/problems")]
-        public async Task<ActionResult<CustomPagedResponse<ViewModel>>> Problems(
+        public async Task<ActionResult<CustomPagedResponse<Problemset.ProblemSummary>>> Problems(
             [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemsets.Standard.Problemset problemset)
         {
-            return new CustomPagedResponse<ViewModel>(await problemset.GetProblems());
+            return new CustomPagedResponse<Problemset.ProblemSummary>(await problemset.GetProblems());
         }
 
         [HttpGet("{problemsetId}/problem/{problemIdentifier}")]
@@ -68,7 +69,10 @@ namespace Syzoj.Api.Problemsets
             [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemsets.Standard.Problemset problemset,
             [FromRoute] [BindRequired] string problemIdentifier)
         {
-            return new CustomResponse<ViewModel>(await problemset.GetProblem(problemIdentifier));
+            var result = await problemset.GetProblem(problemIdentifier);
+            if(result == null)
+                return NotFound(new CustomResponse<ViewModel>());
+            return new CustomResponse<ViewModel>(result);
         }
     }
 }

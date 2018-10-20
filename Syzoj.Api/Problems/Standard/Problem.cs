@@ -27,6 +27,9 @@ namespace Syzoj.Api.Problems.Standard
 
         private Task<ProblemStatement> GetStatement()
             => Task.FromResult(MessagePack.MessagePackSerializer.Deserialize<ProblemStatement>(Model._Statement));
+        
+        private Task<string> GetDefaultTitle()
+            => GetStatement().ContinueWith(s => s.Result.Title);
 
         public class ProblemProvider : DbModelObjectBase<Model.Problem>.Provider<Problem, ProblemProvider>
         {
@@ -87,6 +90,11 @@ namespace Syzoj.Api.Problems.Standard
             public Task RequestNotificationOnUpdate()
             {
                 return Task.CompletedTask;
+            }
+
+            public Task<string> GetProblemDefaultTitle()
+            {
+                return problem.GetDefaultTitle();
             }
 
             public class ProblemViewContractProvider : DbModelObjectBase<Model.ProblemViewContract>.Provider<ProblemViewContract, ProblemViewContractProvider>

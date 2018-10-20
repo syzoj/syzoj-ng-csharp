@@ -43,19 +43,29 @@ namespace Syzoj.Api.Problemsets.Standard
             }
         }
 
-        public async Task<IEnumerable<ViewModel>> GetProblems()
+        public class ProblemSummary
+        {
+            public Guid Id { get; set; }
+            public string Identifier { get; set; }
+            public string Title { get; set; }
+        }
+        public async Task<IEnumerable<ProblemSummary>> GetProblems()
         {
             var contracts = await DbContext.Entry(Model).Collection(ps => ps.ViewContracts).Query()
-                .Select(c => c.ProblemContractId)
                 .ToListAsync();
-            var result = new List<ViewModel>();
-            foreach(var id in contracts)
+            var result = new List<ProblemSummary>();
+            foreach(var model in contracts)
             {
-                var contract = await service.GetObject(id.Value) as IViewProblemContract;
+                var contract = await service.GetObject(model.ProblemContractId.Value) as IViewProblemContract;
                 if(contract != null)
-                    result.Add(await contract.GetProblemStatement());
-                else
-                    logger.LogWarning("Standard Problemset {id} has a corrupt problem entry: {contractId}", Model.Id, id);
+                {
+                    var title = model.Title ?? await contract.GetProblemDefaultTitle();
+                    result.Add(new ProblemSummary() {
+                        Id = model.Id,
+                        Identifier = model.Identifier,
+                        Title = title
+                    });
+                }
             }
             return result;
         }
