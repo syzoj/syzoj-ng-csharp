@@ -26,7 +26,7 @@ namespace Syzoj.Api.Data
                 var method = model.GetMethod("OnModelCreating", BindingFlags.Public | BindingFlags.Static);
                 if(method != null)
                 {
-                    method.Invoke(null, new object[] { this, modelBuilder });
+                    method.Invoke(null, new object[] { modelBuilder });
                 }
             }
         }

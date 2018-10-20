@@ -18,7 +18,7 @@ namespace Syzoj.Api.Models
         public string Content { get; set; }
         public byte[] Data { get; set; }
 
-        public static void OnModelCreating(ApplicationDbContext dbContext, ModelBuilder modelBuilder)
+        public static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Problem>()
                 .ToTable("Problems")

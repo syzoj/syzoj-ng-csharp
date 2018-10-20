@@ -20,7 +20,7 @@ namespace Syzoj.Api.Models
         public string ProblemsetProblemId { get; set; }
         public string Title { get; set; }
 
-        public static void OnModelCreating(ApplicationDbContext dbContext, ModelBuilder modelBuilder)
+        public static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ProblemsetProblem>()
                 .ToTable("ProblemsetProblems")

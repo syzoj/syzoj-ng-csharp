@@ -16,7 +16,7 @@ namespace Syzoj.Api.Models
         public virtual ICollection<ProblemsetProblem> ProblemsetProblems { get; set; }
         public virtual ICollection<ProblemsetSubmission> Submissions { get; set; }
 
-        public static void OnModelCreating(ApplicationDbContext dbContext, ModelBuilder modelBuilder)
+        public static void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Problemset>()
                 .ToTable("Problemsets")
