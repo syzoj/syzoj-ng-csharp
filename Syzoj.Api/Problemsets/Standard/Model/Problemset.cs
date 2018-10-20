@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Syzoj.Api.Data;
 
@@ -9,5 +10,6 @@ namespace Syzoj.Api.Problemsets.Standard.Model
     {
         [Key]
         public Guid Id { get; set; }
+        public IEnumerable<ProblemsetViewContract> ViewContracts { get; set; }
     }
 }

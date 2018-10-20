@@ -18,7 +18,7 @@ namespace Syzoj.Api.Problemsets.Standard.Model
         {
             modelBuilder.Entity<ProblemsetViewContract>()
                 .HasOne<Problemset>()
-                .WithMany()
+                .WithMany(ps => ps.ViewContracts)
                 .HasForeignKey(pv => pv.ProblemsetId);
         }
     }

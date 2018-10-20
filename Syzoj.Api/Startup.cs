@@ -139,6 +139,8 @@ namespace Syzoj.Api
             services.AddSingleton<IObjectService, ObjectService>();
             services.AddSingleton<Problems.Standard.Problem.ProblemProvider>();
             services.AddSingleton<Problems.Standard.Problem.ProblemViewContract.ProblemViewContractProvider>();
+            services.AddSingleton<Problemsets.Standard.Problemset.ProblemsetProvider>();
+            services.AddSingleton<Problemsets.Standard.Problemset.ProblemsetViewContract.ProblemsetViewContractProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

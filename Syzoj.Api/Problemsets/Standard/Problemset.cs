@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Syzoj.Api.Data;
 using Syzoj.Api.Interfaces.View;
@@ -14,12 +17,14 @@ namespace Syzoj.Api.Problemsets.Standard
         private readonly ApplicationDbContext dbContext;
         private readonly Model.Problemset model;
         private readonly ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider;
+        private readonly IObjectService service;
 
-        private Problemset(ApplicationDbContext dbContext, Model.Problemset model, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider)
+        private Problemset(ApplicationDbContext dbContext, Model.Problemset model, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider, IObjectService service)
         {
             this.dbContext = dbContext;
             this.model = model;
             this.viewContractProvider = viewContractProvider;
+            this.service = service;
         }
         public Guid Id => model.Id;
 
@@ -35,6 +40,21 @@ namespace Syzoj.Api.Problemsets.Standard
             {
                 throw new InvalidOperationException(String.Format("Unsupported problem {Id} for standard problemset", problem.Id));
             }
+        }
+
+        public async Task<IEnumerable<ViewModel>> GetProblems()
+        {
+            var contracts = await dbContext.Entry(model).Collection(ps => ps.ViewContracts).Query()
+                .Select(c => c.ProblemContractId)
+                .ToListAsync();
+            var result = new List<ViewModel>();
+            foreach(var id in contracts)
+            {
+                var contract = await service.GetObject(id.Value) as IViewProblemContract;
+                if(contract != null)
+                    result.Add(await contract.GetProblemStatement());
+            }
+            return result;
         }
 
         public class ProblemsetViewContract : IViewProblemsetContract
@@ -75,7 +95,8 @@ namespace Syzoj.Api.Problemsets.Standard
                 
                 public async Task<ProblemsetViewContract> GetObject(Guid Id)
                 {
-                    var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
+                    var scope = serviceProvider.CreateScope();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     var model = await dbContext.Set<Model.ProblemsetViewContract>().FindAsync(Id);
                     if(model == null)
                         return null;
@@ -85,7 +106,8 @@ namespace Syzoj.Api.Problemsets.Standard
 
                 public async Task<ProblemsetViewContract> CreateObject(Problemset problemset)
                 {
-                    var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
+                    var scope = serviceProvider.CreateScope();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     var id = await service.CreateObject<ProblemsetViewContractProvider>();
                     var model = new Model.ProblemsetViewContract()
                     {
@@ -99,7 +121,7 @@ namespace Syzoj.Api.Problemsets.Standard
 
                 Task<IObject> IObjectProvider.GetObject(Guid Id)
                 {
-                    return GetObject(Id).ContinueWith(p => (IObject) p);
+                    return GetObject(Id).ContinueWith(p => (IObject) p.Result);
                 }
             }
         }
@@ -115,14 +137,34 @@ namespace Syzoj.Api.Problemsets.Standard
                 this.service = service;
                 this.viewContractProvider = viewContractProvider;
             }
-            public async Task<IObject> GetObject(Guid Id)
+            public async Task<Problemset> GetObject(Guid Id)
             {
-                var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
-                var model = await dbContext.Set<Model.Problemset>().FindAsync(Id);
+                var scope = serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var model = await dbContext.FindAsync<Model.Problemset>(Id);;
                 if(model == null)
                     return null;
                 
-                return new Problemset(dbContext, model, viewContractProvider);
+                return new Problemset(dbContext, model, viewContractProvider, service);
+            }
+
+            public async Task<Problemset> CreateObject()
+            {
+                var scope = serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var id = await service.CreateObject<ProblemsetProvider>();
+                var model = new Model.Problemset()
+                {
+                    Id = id
+                };
+                dbContext.Add<Model.Problemset>(model);
+                await dbContext.SaveChangesAsync();
+                return new Problemset(dbContext, model, viewContractProvider, service);
+            }
+
+            Task<IObject> IObjectProvider.GetObject(Guid Id)
+            {
+                return GetObject(Id).ContinueWith(ps => (IObject) ps.Result);
             }
         }
     }

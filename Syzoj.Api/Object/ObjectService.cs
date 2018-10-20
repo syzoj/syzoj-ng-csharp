@@ -19,7 +19,8 @@ namespace Syzoj.Api.Object
 
         public async Task<IObject> GetObject(Guid Id)
         {
-            using(var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>())
+            var scope = serviceProvider.CreateScope();
+            using(var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
             {
                 var model = await dbContext.Set<ObjectDbModel>().FindAsync(Id);
                 if(model == null)
@@ -44,7 +45,9 @@ namespace Syzoj.Api.Object
                     return null;
                 }
 
-                return await provider.GetObject(Id);
+                var obj = await provider.GetObject(Id);
+                this.logger.LogDebug("Object {id}: {obj}", Id, obj);
+                return obj;
             }
         }
 
@@ -57,7 +60,8 @@ namespace Syzoj.Api.Object
                 Type = typeof(TObjectProvider).AssemblyQualifiedName,
                 Info = null,
             };
-            using(var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>())
+            var scope = serviceProvider.CreateScope();
+            using(var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
             {
                 dbContext.Add(model);
                 await dbContext.SaveChangesAsync();
@@ -67,7 +71,8 @@ namespace Syzoj.Api.Object
 
         public async Task DeleteObject(Guid Id)
         {
-            using(var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>())
+            var scope = serviceProvider.CreateScope();
+            using(var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
             {
                 var model = await dbContext.Set<ObjectDbModel>().FindAsync(Id);
                 if(model == null)
