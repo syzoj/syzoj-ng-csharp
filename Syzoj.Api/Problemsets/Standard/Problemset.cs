@@ -86,8 +86,6 @@ namespace Syzoj.Api.Problemsets.Standard
             {
             }
 
-            bool IViewProblemsetContract.RequiresNotification => false;
-
             internal Task AttachProblemContract(IViewProblemContract problemContract)
             {
                 Model.ProblemContractId = problemContract.Id;

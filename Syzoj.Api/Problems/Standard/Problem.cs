@@ -84,6 +84,11 @@ namespace Syzoj.Api.Problems.Standard
                 };
             }
 
+            public Task RequestNotificationOnUpdate()
+            {
+                return Task.CompletedTask;
+            }
+
             public class ProblemViewContractProvider : DbModelObjectBase<Model.ProblemViewContract>.Provider<ProblemViewContract, ProblemViewContractProvider>
             {
                 public ProblemViewContractProvider(IServiceProvider serviceProvider) : base(serviceProvider)

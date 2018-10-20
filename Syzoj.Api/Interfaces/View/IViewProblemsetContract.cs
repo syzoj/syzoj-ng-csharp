@@ -5,7 +5,6 @@ namespace Syzoj.Api.Interfaces.View
 {
     public interface IViewProblemsetContract : IObject
     {
-        bool RequiresNotification { get; }
         Task OnProblemUpdated();
     }
 }
