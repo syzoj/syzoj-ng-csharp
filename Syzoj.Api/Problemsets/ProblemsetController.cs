@@ -32,6 +32,7 @@ namespace Syzoj.Api.Problemsets
         public class AddProblemRequest
         {
             public Guid ProblemId { get; set; }
+            public string Identifier { get; set; }
         }
         [HttpPost("{problemsetId}/addproblem")]
         public async Task<ActionResult<CustomResponse>> AddProblem(
@@ -45,7 +46,7 @@ namespace Syzoj.Api.Problemsets
                 return BadRequest(ModelState);
             }
 
-            var success = await problemset.AddProblem(problem);
+            var success = await problemset.AddProblem(problem, request.Identifier);
             if(!success)
             {
                 ModelState.AddModelError("problemId", "Problem is not supported by this problemset.");
@@ -56,10 +57,18 @@ namespace Syzoj.Api.Problemsets
         }
 
         [HttpGet("{problemsetId}/problems")]
-        public async Task<IEnumerable<ViewModel>> Problems(
+        public async Task<ActionResult<CustomPagedResponse<ViewModel>>> Problems(
             [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemsets.Standard.Problemset problemset)
         {
-            return await problemset.GetProblems();
+            return new CustomPagedResponse<ViewModel>(await problemset.GetProblems());
+        }
+
+        [HttpGet("{problemsetId}/problem/{problemIdentifier}")]
+        public async Task<ActionResult<CustomResponse<ViewModel>>> Problem(
+            [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemsets.Standard.Problemset problemset,
+            [FromRoute] [BindRequired] string problemIdentifier)
+        {
+            return new CustomResponse<ViewModel>(await problemset.GetProblem(problemIdentifier));
         }
     }
 }

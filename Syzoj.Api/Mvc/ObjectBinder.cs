@@ -11,8 +11,6 @@ namespace Syzoj.Api.Mvc
     {
         public async Task BindModelAsync(ModelBindingContext bindingContext)
         {
-            var logger = bindingContext.HttpContext.RequestServices.GetRequiredService<ILogger<ObjectBinder>>();
-            logger.LogDebug("Working");
             if(bindingContext == null)
             {
                 throw new ArgumentNullException(nameof(bindingContext));
@@ -26,7 +24,6 @@ namespace Syzoj.Api.Mvc
             bindingContext.ModelState.SetModelValue(bindingContext.ModelName, valueProviderResult);
             
             var value = valueProviderResult.FirstValue;
-            logger.LogDebug($"Get object {value}");
             Guid id;
             if(Guid.TryParse(value, out id))
             {
@@ -34,7 +31,6 @@ namespace Syzoj.Api.Mvc
                 IObject obj = await objectService.GetObject(id);
                 if(obj != null && bindingContext.ModelType.IsAssignableFrom(obj.GetType()))
                 {
-                    logger.LogDebug($"Found object {obj}");
                     bindingContext.Result = ModelBindingResult.Success(obj);
                 }
                 else

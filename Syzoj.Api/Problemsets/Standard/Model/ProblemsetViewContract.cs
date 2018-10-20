@@ -11,6 +11,7 @@ namespace Syzoj.Api.Problemsets.Standard.Model
     {
         public Guid ProblemsetId { get; set; }
         public Guid? ProblemContractId { get; set; }
+        public string Identifier { get; set; }
         public string Title { get; set; }
 
         public static void OnModelCreating(ModelBuilder modelBuilder)
@@ -19,6 +20,9 @@ namespace Syzoj.Api.Problemsets.Standard.Model
                 .HasOne<Problemset>()
                 .WithMany(ps => ps.ViewContracts)
                 .HasForeignKey(pv => pv.ProblemsetId);
+            modelBuilder.Entity<ProblemsetViewContract>()
+                .HasIndex(pvc => new { pvc.ProblemsetId, pvc.Identifier })
+                .IsUnique();
         }
     }
 }

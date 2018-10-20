@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Syzoj.Api.Data;
 using Syzoj.Api.Interfaces;
 using Syzoj.Api.Interfaces.View;
@@ -17,19 +18,21 @@ namespace Syzoj.Api.Problemsets.Standard
     {
         private readonly ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider;
         private readonly IObjectService service;
+        private readonly ILogger<Problemset> logger;
 
-        private Problemset(ApplicationDbContext dbContext, Model.Problemset model, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider, IObjectService service)
+        private Problemset(ApplicationDbContext dbContext, Model.Problemset model, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider, IObjectService service, ILoggerFactory loggerFactory)
             : base(dbContext, model)
         {
             this.viewContractProvider = viewContractProvider;
             this.service = service;
+            this.logger = loggerFactory.CreateLogger<Problemset>();
         }
 
-        public async Task<bool> AddProblem(IObject problem)
+        public async Task<bool> AddProblem(IObject problem, string identifier)
         {
             if(problem is IProblemAcceptingContract<IViewProblemsetContract, IViewProblemContract> problemWithContract)
             {
-                var problemsetContract = await viewContractProvider.CreateObject(this);
+                var problemsetContract = await viewContractProvider.CreateObject(this, identifier);
                 var problemContract = await problemWithContract.BuildContract(problemsetContract);
                 await problemsetContract.AttachProblemContract(problemContract);
                 return true;
@@ -51,8 +54,29 @@ namespace Syzoj.Api.Problemsets.Standard
                 var contract = await service.GetObject(id.Value) as IViewProblemContract;
                 if(contract != null)
                     result.Add(await contract.GetProblemStatement());
+                else
+                    logger.LogWarning("Standard Problemset {id} has a corrupt problem entry: {contractId}", Model.Id, id);
             }
             return result;
+        }
+
+        public async Task<ViewModel> GetProblem(string identifier)
+        {
+            var id = await DbContext.Entry(Model).Collection(ps => ps.ViewContracts).Query()
+                .Where(c => c.Identifier == identifier)
+                .Select(c => c.ProblemContractId)
+                .FirstOrDefaultAsync();
+            if(id == null)
+                return null;
+
+            var contract = await service.GetObject(id.Value) as IViewProblemContract;
+            if(contract == null)
+            {
+                logger.LogWarning("Standard Problemset {id} has a corrupt problem entry: {contractId}", Model.Id, id);
+                return null;
+            }
+
+            return await contract.GetProblemStatement();
         }
 
         public class ProblemsetViewContract : DbModelObjectBase<Model.ProblemsetViewContract>, IViewProblemsetContract
@@ -85,10 +109,11 @@ namespace Syzoj.Api.Problemsets.Standard
                 protected override Task<ProblemsetViewContract> GetObjectImpl(ApplicationDbContext dbContext, Model.ProblemsetViewContract model)
                     => Task.FromResult(new ProblemsetViewContract(dbContext, model));
 
-                public Task<ProblemsetViewContract> CreateObject(Problemset problemset)
+                public Task<ProblemsetViewContract> CreateObject(Problemset problemset, string identifier)
                 {
                     return base.CreateObject(new Model.ProblemsetViewContract() {
-                        ProblemsetId = problemset.Id
+                        ProblemsetId = problemset.Id,
+                        Identifier = identifier
                     });
                 }
             }
@@ -97,14 +122,17 @@ namespace Syzoj.Api.Problemsets.Standard
         public class ProblemsetProvider : DbModelObjectBase<Model.Problemset>.Provider<Problemset, ProblemsetProvider>
         {
             private readonly ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider;
-            public ProblemsetProvider(IServiceProvider serviceProvider, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider)
+            private readonly ILoggerFactory loggerFactory;
+
+            public ProblemsetProvider(IServiceProvider serviceProvider, ProblemsetViewContract.ProblemsetViewContractProvider viewContractProvider, ILoggerFactory loggerFactory)
                 : base(serviceProvider)
             {
                 this.viewContractProvider = viewContractProvider;
+                this.loggerFactory = loggerFactory;
             }
 
             protected override Task<Problemset> GetObjectImpl(ApplicationDbContext dbContext, Model.Problemset model)
-                => Task.FromResult(new Problemset(dbContext, model, viewContractProvider, ObjectService));
+                => Task.FromResult(new Problemset(dbContext, model, viewContractProvider, ObjectService, loggerFactory));
 
             public Task<Problemset> CreateObject()
             {
