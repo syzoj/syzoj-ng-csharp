@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Syzoj.Api.Data;
+using Syzoj.Api.Interfaces;
 using Syzoj.Api.Interfaces.View;
 using Syzoj.Api.Object;
 using Syzoj.Api.Problems.Standard.Model;

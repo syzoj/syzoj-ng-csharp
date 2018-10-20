@@ -1,4 +1,4 @@
-namespace Syzoj.Api.Interfaces.View
+namespace Syzoj.Api.Interfaces
 {
     public class ViewModel
     {

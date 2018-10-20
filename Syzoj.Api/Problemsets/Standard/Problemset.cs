@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Syzoj.Api.Data;
+using Syzoj.Api.Interfaces;
 using Syzoj.Api.Interfaces.View;
 using Syzoj.Api.Object;
 using Syzoj.Api.Problems;
@@ -24,17 +25,18 @@ namespace Syzoj.Api.Problemsets.Standard
             this.service = service;
         }
 
-        public async Task AddProblem(IObject problem)
+        public async Task<bool> AddProblem(IObject problem)
         {
             if(problem is IProblemAcceptingContract<IViewProblemsetContract, IViewProblemContract> problemWithContract)
             {
                 var problemsetContract = await viewContractProvider.CreateObject(this);
                 var problemContract = await problemWithContract.BuildContract(problemsetContract);
                 await problemsetContract.AttachProblemContract(problemContract);
+                return true;
             }
             else
             {
-                throw new InvalidOperationException(String.Format("Unsupported problem {Id} for standard problemset", problem.Id));
+                return false;
             }
         }
 
