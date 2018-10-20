@@ -29,6 +29,9 @@ namespace Syzoj.Api.Problems.Standard
             return (IViewProblemContract) await viewContractProvider.CreateObject(model.Id, contract.Id);
         }
 
+        private Task<ProblemStatement> GetStatement()
+            => Task.FromResult(MessagePack.MessagePackSerializer.Deserialize<ProblemStatement>(model._Statement));
+
         public class ProblemProvider : IObjectProvider<Problem>
         {
             private readonly IServiceProvider serviceProvider;
@@ -78,21 +81,35 @@ namespace Syzoj.Api.Problems.Standard
         {
             private readonly ApplicationDbContext dbContext;
             private readonly Model.ProblemViewContract model;
+            private readonly IObjectService service;
+            private Problem problem;
 
-            private ProblemViewContract(ApplicationDbContext dbContext, Model.ProblemViewContract model)
+            private ProblemViewContract(ApplicationDbContext dbContext, Model.ProblemViewContract model, IObjectService service)
             {
                 this.dbContext = dbContext;
                 this.model = model;
+                this.service = service;
+            }
+
+            private async Task OnLoad()
+            {
+                this.problem = (Problem) await service.GetObject(model.ProblemId);
             }
             public Guid Id => model.Id;
 
+            public async Task CancelContract()
+            {
+                dbContext.Set<Model.ProblemViewContract>().Remove(model);
+                await dbContext.SaveChangesAsync();
+                await service.DeleteObject(model.Id);
+            }
+
             public async Task<ViewModel> GetProblemStatement()
             {
-                var problem = await dbContext.Set<Model.Problem>().FindAsync(model.ProblemId);
                 return new ViewModel()
                 {
                     ComponentName = "problem-standard",
-                    Content = MessagePack.MessagePackSerializer.Deserialize<ProblemStatement>(problem._Statement)
+                    Content = await problem.GetStatement()
                 };
             }
 
@@ -114,7 +131,7 @@ namespace Syzoj.Api.Problems.Standard
                     if(model == null)
                         return null;
                     
-                    return new ProblemViewContract(dbContext, model);
+                    return new ProblemViewContract(dbContext, model, service);
                 }
 
                 public async Task<ProblemViewContract> CreateObject(Guid problemId, Guid problemsetContractId)
@@ -129,7 +146,7 @@ namespace Syzoj.Api.Problems.Standard
                     };
                     dbContext.Set<Model.ProblemViewContract>().Add(model);
                     await dbContext.SaveChangesAsync();
-                    return new ProblemViewContract(dbContext, model);
+                    return new ProblemViewContract(dbContext, model, service);
                 }
 
                 Task<IObject> IObjectProvider.GetObject(Guid Id)

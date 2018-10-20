@@ -6,5 +6,6 @@ namespace Syzoj.Api.Interfaces.View
     public interface IViewProblemContract : IObject
     {
         Task<ViewModel> GetProblemStatement();
+        Task CancelContract();
     }
 }
