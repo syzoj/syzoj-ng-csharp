@@ -7,7 +7,7 @@ export function request(url, method, request) {
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(request),
+        body: request ? JSON.stringify(request) : null,
     }).then((response) => {
         if(response.status >= 500)
             throw "Internal server error: " + url

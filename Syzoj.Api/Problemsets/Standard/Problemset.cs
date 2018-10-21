@@ -70,23 +70,34 @@ namespace Syzoj.Api.Problemsets.Standard
             return result;
         }
 
-        public async Task<ViewModel> GetProblem(string identifier)
+        public class ProblemContent
         {
-            var id = await DbContext.Entry(Model).Collection(ps => ps.ViewContracts).Query()
-                .Where(c => c.Identifier == identifier)
-                .Select(c => c.ProblemContractId)
-                .FirstOrDefaultAsync();
-            if(id == null)
+            public Guid Id { get; set; }
+            public string Identifier { get; set; }
+            public string Title { get; set; }
+            public ViewModel Content { get; set; }
+        }
+        public async Task<ProblemContent> GetProblem(string identifier)
+        {
+            var entry = await DbContext.Entry(Model).Collection(ps => ps.ViewContracts).Query()
+                .FirstOrDefaultAsync(c => c.Identifier == identifier);
+            if(entry == null || entry.ProblemContractId == null)
                 return null;
 
-            var contract = await service.GetObject(id.Value) as IViewProblemContract;
+            var contract = await service.GetObject(entry.ProblemContractId.Value) as IViewProblemContract;
             if(contract == null)
             {
-                logger.LogWarning("Standard Problemset {id} has a corrupt problem entry: {contractId}", Model.Id, id);
+                logger.LogWarning("Standard Problemset {id} has a corrupt problem entry: {contractId}", Model.Id, entry);
                 return null;
             }
 
-            return await contract.GetProblemStatement();
+            return new ProblemContent()
+            {
+                Id = entry.Id,
+                Identifier = entry.Identifier,
+                Title = entry.Title ?? await contract.GetProblemDefaultTitle(),
+                Content = await contract.GetProblemStatement(),
+            };
         }
 
         public class ProblemsetViewContract : DbModelObjectBase<Model.ProblemsetViewContract>, IViewProblemsetContract

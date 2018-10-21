@@ -7,6 +7,7 @@ import { Counter } from './components/Counter'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { Create } from './pages/problem/Create'
+import StandardProblemView from './pages/problem/standard/View'
 
 export default class App extends Component {
   displayName = App.name
@@ -20,6 +21,7 @@ export default class App extends Component {
         <Route path='/register' component={Register} />
         <Route path='/login' component={Login} />
         <Route path='/problem/create' component={Create} />
+        <Route path='/problem/standard/:id/view' component={StandardProblemView} />
       </Layout>
     );
   }

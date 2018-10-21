@@ -12,7 +12,7 @@ export default class Create extends Component {
     }
 
     doCreate() {
-        request("/api/problem/standard/000000000000-0000-0000-0000-00000000/create", "post", {}).then(v => {
+        request("/api/problem-standard/create", "post", {}).then(v => {
             this.setState({redirect: "/problem/standard/" + v + "/view"})
         }).catch(e => {
             this.setState({errors: e})

@@ -25,11 +25,11 @@ namespace Syzoj.Api.Problems.Standard
             return (IViewProblemContract) await viewContractProvider.CreateObject(Model.Id, contract.Id);
         }
 
-        private Task<ProblemStatement> GetStatement()
+        public Task<ProblemStatement> GetProblemStatement()
             => Task.FromResult(MessagePack.MessagePackSerializer.Deserialize<ProblemStatement>(Model._Statement));
         
         private Task<string> GetDefaultTitle()
-            => GetStatement().ContinueWith(s => s.Result.Title);
+            => GetProblemStatement().ContinueWith(s => s.Result.Title);
 
         public class ProblemProvider : DbModelObjectBase<Model.Problem>.Provider<Problem, ProblemProvider>
         {
@@ -83,7 +83,7 @@ namespace Syzoj.Api.Problems.Standard
                 return new ViewModel()
                 {
                     ComponentName = "problem-standard",
-                    Content = await problem.GetStatement()
+                    Content = await problem.GetProblemStatement()
                 };
             }
 

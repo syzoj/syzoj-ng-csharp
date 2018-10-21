@@ -9,8 +9,8 @@ namespace Syzoj.Api.Problems.Standard.Model
     [MessagePackObject(keyAsPropertyName: true)]
     public class ProblemStatement
     {
-        [Required(AllowEmptyStrings = true)]
-        public string Title { get; set; } = "";
+        [Required(AllowEmptyStrings = false)]
+        public string Title { get; set; } = "Problem";
         [Required(AllowEmptyStrings = true)]
         public string Description { get; set; } = "";
         [Required(AllowEmptyStrings = true)]

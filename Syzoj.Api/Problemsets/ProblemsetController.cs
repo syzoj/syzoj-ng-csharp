@@ -65,14 +65,14 @@ namespace Syzoj.Api.Problemsets
         }
 
         [HttpGet("{problemsetId}/problem/{problemIdentifier}")]
-        public async Task<ActionResult<CustomResponse<ViewModel>>> Problem(
+        public async Task<ActionResult<CustomResponse<Problemset.ProblemContent>>> Problem(
             [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemsets.Standard.Problemset problemset,
             [FromRoute] [BindRequired] string problemIdentifier)
         {
             var result = await problemset.GetProblem(problemIdentifier);
             if(result == null)
-                return NotFound(new CustomResponse<ViewModel>());
-            return new CustomResponse<ViewModel>(result);
+                return NotFound(new CustomResponse<Problemset.ProblemContent>());
+            return new CustomResponse<Problemset.ProblemContent>(result);
         }
     }
 }
