@@ -9,6 +9,5 @@ namespace Syzoj.Api.Problems.Standard.Model
     public class Problem : DbModelBase
     {
         public byte[] _Statement { get; set; }
-        public virtual ICollection<ProblemViewContract> ViewContracts { get; set; }
     }
 }
