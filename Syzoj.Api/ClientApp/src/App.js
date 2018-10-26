@@ -8,6 +8,8 @@ import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { Create } from './pages/problem/Create'
 import StandardProblemView from './pages/problem/standard/View'
+import StandardProblemsetList from './pages/problemset/standard/List'
+import StandardProblemsetView from './pages/problemset/standard/View'
 
 export default class App extends Component {
   displayName = App.name
@@ -22,6 +24,8 @@ export default class App extends Component {
         <Route path='/login' component={Login} />
         <Route path='/problem/create' component={Create} />
         <Route path='/problem/standard/:id/view' component={StandardProblemView} />
+        <Route path='/problemset-standard/list' component={StandardProblemsetList} />
+        <Route path='/problemset-standard/view/:id' component={StandardProblemsetView} />
       </Layout>
     );
   }

@@ -32,7 +32,7 @@ namespace Syzoj.Api.Problems.Standard
         public Task<ViewModel> GetProblemContent()
         {
             return Task.FromResult(new ViewModel() {
-                Template = "standard-problem-view",
+                Template = "problem-standard-view",
                 Content = new {
                     Statement = statement
                 }

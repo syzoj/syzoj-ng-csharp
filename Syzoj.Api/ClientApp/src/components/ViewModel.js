@@ -3,7 +3,7 @@ import Config from '../config'
 
 export default class ViewModel extends Component {
     constructor(props) {
-        base(props)
+        super(props)
         this.state = {loading: true }
     }
 
