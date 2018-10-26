@@ -5,5 +5,8 @@ export default {
     ],
     problemType: {
         "standard": {}
+    },
+    templates: {
+        "problem-standard-view": () => import('./components/problem/standard/View').then(v => v.default)
     }
 }
