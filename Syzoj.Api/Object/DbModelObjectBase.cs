@@ -34,28 +34,23 @@ namespace Syzoj.Api.Object
 
             protected abstract Task<TObject> GetObjectImpl(ApplicationDbContext dbContext, TDbModel model);
 
-            public virtual async Task<TObject> GetObject(Guid Id)
+            public virtual async Task<TObject> GetObject(ApplicationDbContext dbContext, Guid Id)
             {
-                var scope = ServiceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var model = await dbContext.FindAsync<TDbModel>(Id);
                 return await GetObjectImpl(dbContext, model);
             }
 
-            protected virtual async Task<TObject> CreateObject(TDbModel model)
+            protected virtual async Task<TObject> CreateObject(ApplicationDbContext dbContext, TDbModel model)
             {
-                var id = await ObjectService.CreateObject<TObjectProvider>();
+                var id = await ObjectService.CreateObject<TObjectProvider>(dbContext);
                 model.Id = id;
-                var scope = ServiceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 dbContext.Add(model);
-                await dbContext.SaveChangesAsync();
                 return await GetObjectImpl(dbContext, model);
             }
 
-            Task<IObject> IObjectProvider.GetObject(Guid Id)
+            Task<IObject> IObjectProvider.GetObject(ApplicationDbContext dbContext, Guid Id)
             {
-                return GetObject(Id).ContinueWith(o => (IObject) o.Result);
+                return GetObject(dbContext, Id).ContinueWith(o => (IObject) o.Result);
             }
         }
     }

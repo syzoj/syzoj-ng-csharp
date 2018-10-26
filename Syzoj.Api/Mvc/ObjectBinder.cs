@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Syzoj.Api.Data;
 using Syzoj.Api.Object;
 
 namespace Syzoj.Api.Mvc
@@ -28,7 +29,8 @@ namespace Syzoj.Api.Mvc
             if(Guid.TryParse(value, out id))
             {
                 var objectService = bindingContext.HttpContext.RequestServices.GetRequiredService<IObjectService>();
-                IObject obj = await objectService.GetObject(id);
+                var dbContext = bindingContext.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                IObject obj = await objectService.GetObject(dbContext, id);
                 if(obj != null && bindingContext.ModelType.IsAssignableFrom(obj.GetType()))
                 {
                     bindingContext.Result = ModelBindingResult.Success(obj);

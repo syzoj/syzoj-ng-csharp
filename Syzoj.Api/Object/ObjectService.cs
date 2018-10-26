@@ -17,41 +17,37 @@ namespace Syzoj.Api.Object
             this.serviceProvider = serviceProvider;
         }
 
-        public async Task<IObject> GetObject(Guid Id)
+        public async Task<IObject> GetObject(ApplicationDbContext dbContext, Guid Id)
         {
-            var scope = serviceProvider.CreateScope();
-            using(var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
+            var model = await dbContext.Set<ObjectDbModel>().FindAsync(Id);
+            if(model == null)
+                return null;
+            
+            Type t = Type.GetType(model.Type);
+            if(t == null)
             {
-                var model = await dbContext.Set<ObjectDbModel>().FindAsync(Id);
-                if(model == null)
-                    return null;
-                
-                Type t = Type.GetType(model.Type);
-                if(t == null)
-                {
-                    this.logger.LogWarning("Object id {Id} has an invalid Type {Type} associated with it.", model.Id, model.Type);
-                    return null;
-                }
-                if(!typeof(IObjectProvider).IsAssignableFrom(t))
-                {
-                    this.logger.LogError("Object id {Id} has type {Type} that does not implement IObjectProvider.", model.Id, model.Type);
-                    return null;
-                }
-
-                IObjectProvider provider = (IObjectProvider) serviceProvider.GetService(t);
-                if(provider == null)
-                {
-                    this.logger.LogError("Object id {Id} has a Type {type} that is not registered in services.", model.Type);
-                    return null;
-                }
-
-                var obj = await provider.GetObject(Id);
-                this.logger.LogDebug("Object {id}: {obj}", Id, obj);
-                return obj;
+                this.logger.LogWarning("Object id {Id} has an invalid Type {Type} associated with it.", model.Id, model.Type);
+                return null;
             }
+            if(!typeof(IObjectProvider).IsAssignableFrom(t))
+            {
+                this.logger.LogError("Object id {Id} has type {Type} that does not implement IObjectProvider.", model.Id, model.Type);
+                return null;
+            }
+
+            IObjectProvider provider = (IObjectProvider) serviceProvider.GetService(t);
+            if(provider == null)
+            {
+                this.logger.LogError("Object id {Id} has a Type {type} that is not registered in services.", model.Type);
+                return null;
+            }
+
+            var obj = await provider.GetObject(dbContext, Id);
+            this.logger.LogDebug("Object {id}: {obj}", Id, obj);
+            return obj;
         }
 
-        public async Task<Guid> CreateObject<TObjectProvider>()
+        public Task<Guid> CreateObject<TObjectProvider>(ApplicationDbContext dbContext)
             where TObjectProvider : IObjectProvider
         {
             var model = new ObjectDbModel()
@@ -60,30 +56,20 @@ namespace Syzoj.Api.Object
                 Type = typeof(TObjectProvider).AssemblyQualifiedName,
                 Info = null,
             };
-            var scope = serviceProvider.CreateScope();
-            using(var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
-            {
-                dbContext.Add(model);
-                await dbContext.SaveChangesAsync();
-            }
-            return model.Id;
+            dbContext.Add(model);
+            return Task.FromResult(model.Id);
         }
 
-        public async Task DeleteObject(Guid Id)
+        public async Task DeleteObject(ApplicationDbContext dbContext, Guid Id)
         {
-            var scope = serviceProvider.CreateScope();
-            using(var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
+            var model = await dbContext.FindAsync<ObjectDbModel>(Id);
+            if(model == null)
             {
-                var model = await dbContext.Set<ObjectDbModel>().FindAsync(Id);
-                if(model == null)
-                {
-                    this.logger.LogWarning("Attempting to delete a nonexistent object {Id}", Id);
-                    return;
-                }
-
-                dbContext.Remove(model);
-                await dbContext.SaveChangesAsync();
+                this.logger.LogWarning("Attempting to delete a nonexistent object {Id}", Id);
+                return;
             }
+
+            dbContext.Remove(model);
         }
     }
 }
