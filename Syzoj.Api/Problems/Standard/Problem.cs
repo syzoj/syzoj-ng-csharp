@@ -34,7 +34,7 @@ namespace Syzoj.Api.Problems.Standard
             return Task.FromResult(new ViewModel() {
                 Template = "standard-problem-view",
                 Content = new {
-                    statement = statement
+                    Statement = statement
                 }
             });
         }
@@ -54,18 +54,6 @@ namespace Syzoj.Api.Problems.Standard
         public Task RequestUpdateNotification(IProblemUpdateCallback callback)
         {
             throw new NotImplementedException();
-        }
-
-        public class Provider : DbModelObjectBase<Model.Problem>.Provider<Problem, Problem.Provider>
-        {
-            public Provider(IServiceProvider serviceProvider) : base(serviceProvider)
-            {
-            }
-
-            protected override Task<Problem> GetObjectImpl(ApplicationDbContext dbContext, Model.Problem model)
-            {
-                return Task.FromResult(new Problem(dbContext, model));
-            }
         }
     }
 }

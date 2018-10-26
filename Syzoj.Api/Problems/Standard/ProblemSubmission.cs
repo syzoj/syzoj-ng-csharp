@@ -34,17 +34,5 @@ namespace Syzoj.Api.Problems.Standard
         {
             throw new NotImplementedException();
         }
-
-        public class Provider : DbModelObjectBase<Model.ProblemSubmission>.Provider<ProblemSubmission, Provider>
-        {
-            public Provider(IServiceProvider serviceProvider) : base(serviceProvider)
-            {
-            }
-
-            protected override Task<ProblemSubmission> GetObjectImpl(ApplicationDbContext dbContext, Model.ProblemSubmission model)
-            {
-                return Task.FromResult(new ProblemSubmission(dbContext, model));
-            }
-        }
     }
 }
