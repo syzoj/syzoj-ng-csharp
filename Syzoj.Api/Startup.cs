@@ -38,6 +38,7 @@ namespace Syzoj.Api
         {
             services.AddMvc(options => {
                 options.ModelBinderProviders.Insert(0, new ObjectBinderProvider());
+                options.Filters.Add(new SaveChangesActionFitler());
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
