@@ -39,7 +39,7 @@ namespace Syzoj.Api
             services.AddMvc(options => {
                 options.ModelBinderProviders.Insert(0, new ObjectBinderProvider());
             })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
             services.Configure<ApiBehaviorOptions>(options => {
                 options.InvalidModelStateResponseFactory = context =>
