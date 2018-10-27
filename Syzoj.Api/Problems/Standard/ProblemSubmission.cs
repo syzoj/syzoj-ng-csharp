@@ -9,14 +9,14 @@ namespace Syzoj.Api.Problems.Standard
 {
     public class ProblemSubmission : DbModelObjectBase<Model.ProblemSubmission>, IProblemSubmission
     {
-        public ProblemSubmission(ApplicationDbContext dbContext, Model.ProblemSubmission model) : base(dbContext, model)
+        public ProblemSubmission(IServiceProvider serviceProvider, ApplicationDbContext dbContext, Model.ProblemSubmission model) : base(serviceProvider, dbContext, model)
         {
         }
 
         public async Task<IProblem> GetProblem()
         {
             var problemModel = await DbContext.FindAsync<Model.Problem>(Model.ProblemId);
-            return new Problem(DbContext, problemModel);
+            return new Problem(ServiceProvider, DbContext, problemModel);
         }
 
         public Task<ViewModel> GetSubmissionContent()

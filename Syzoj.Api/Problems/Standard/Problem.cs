@@ -14,7 +14,7 @@ namespace Syzoj.Api.Problems.Standard
     public class Problem : DbModelObjectBase<Model.Problem>, IProblem, IProblemContract
     {
         private ProblemStatement statement;
-        public Problem(ApplicationDbContext dbContext, Model.Problem model) : base(dbContext, model)
+        public Problem(IServiceProvider serviceProvider, ApplicationDbContext dbContext, Model.Problem model) : base(serviceProvider, dbContext, model)
         {
             this.statement = MessagePackSerializer.Deserialize<ProblemStatement>(model._Statement);
         }
@@ -39,20 +39,14 @@ namespace Syzoj.Api.Problems.Standard
             });
         }
 
-        public async Task<IProblemSubmission> GetProblemSubmission(string token)
-        {
-            var submissionModel = await DbContext.Set<Model.ProblemSubmission>()
-                .Where(ps => ps.ProblemId == Model.Id && ps.Token == token)
-                .FirstOrDefaultAsync();
-            if(submissionModel == null)
-                return null;
-            
-            var submission = new ProblemSubmission(DbContext, submissionModel);
-            return submission;
-        }
-
         public Task RequestUpdateNotification(IProblemUpdateCallback callback)
         {
+            throw new NotImplementedException();
+        }
+
+        public Task<IProblemSubmission> ClaimSubmission(string token)
+        {
+
             throw new NotImplementedException();
         }
     }

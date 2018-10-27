@@ -18,7 +18,7 @@ namespace Syzoj.Api.Problemsets.Standard
         }
 
         protected override Task<Problemset> GetObjectImpl(ApplicationDbContext dbContext, Model.Problemset model)
-            => Task.FromResult(new Problemset(dbContext, model, ObjectService, loggerFactory));
+            => Task.FromResult(new Problemset(ServiceProvider, dbContext, model));
 
         public Task<Problemset> CreateObject(ApplicationDbContext dbContext)
             => base.CreateObject<ProblemsetProvider>(dbContext, new Model.Problemset());

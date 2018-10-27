@@ -8,6 +8,7 @@ using Syzoj.Api.Problemsets.Standard.Model;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Syzoj.Api.Problemsets.Standard
 {
@@ -16,10 +17,10 @@ namespace Syzoj.Api.Problemsets.Standard
         private readonly IObjectService objectService;
         private readonly ILogger<Problemset> logger;
 
-        public Problemset(ApplicationDbContext dbContext, Model.Problemset model, IObjectService objectService, ILoggerFactory loggerFactory) : base(dbContext, model)
+        public Problemset(IServiceProvider serviceProvider, ApplicationDbContext dbContext, Model.Problemset model) : base(serviceProvider, dbContext, model)
         {
-            this.objectService = objectService;
-            this.logger = loggerFactory.CreateLogger<Problemset>();
+            this.objectService = serviceProvider.GetRequiredService<IObjectService>();
+            this.logger = serviceProvider.GetRequiredService<ILogger<Problemset>>();
         }
 
         public async Task<Guid> AddProblem(IProblem problem, string identifier)

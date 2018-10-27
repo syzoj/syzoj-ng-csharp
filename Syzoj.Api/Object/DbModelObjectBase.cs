@@ -10,9 +10,11 @@ namespace Syzoj.Api.Object
     {
         protected readonly ApplicationDbContext DbContext;
         protected readonly TDbModel Model;
+        protected readonly IServiceProvider ServiceProvider;
 
-        public DbModelObjectBase(ApplicationDbContext dbContext, TDbModel model)
+        public DbModelObjectBase(IServiceProvider serviceProvider, ApplicationDbContext dbContext, TDbModel model)
         {
+            this.ServiceProvider = serviceProvider;
             this.DbContext = dbContext;
             this.Model = model;
         }

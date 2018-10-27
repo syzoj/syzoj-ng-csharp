@@ -14,7 +14,7 @@ namespace Syzoj.Api.Problems.Standard
         }
 
         protected override Task<Problem> GetObjectImpl(ApplicationDbContext dbContext, Model.Problem model)
-            => Task.FromResult(new Problem(dbContext, model));
+            => Task.FromResult(new Problem(ServiceProvider, dbContext, model));
         
         public Task<Problem> CreateObject(ApplicationDbContext dbContext, Model.ProblemStatement Statement)
             => base.CreateObject<ProblemProvider>(dbContext, new Model.Problem() {
