@@ -73,6 +73,7 @@ namespace Syzoj.Api
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
+                c.CustomSchemaIds(t => t.FullName);
             });
 
             services.AddSingleton<IConnectionMultiplexer>(s => {

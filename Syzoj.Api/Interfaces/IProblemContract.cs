@@ -8,6 +8,6 @@ namespace Syzoj.Api.Interfaces
         Task<ViewModel> GetProblemContent();
         Task RequestUpdateNotification(IProblemUpdateCallback callback);
         Task CancelContract();
-        Task<IProblemSubmission> GetProblemSubmission(string token);
+        Task<IProblemSubmission> ClaimSubmission(string token);
     }
 }

@@ -64,14 +64,51 @@ namespace Syzoj.Api.Problemsets.Standard
             return new CustomPagedResponse<Problemset.ProblemSummary>(problems);
         }
 
+        public class ViewResponse
+        {
+            public Guid EntryId { get; set; }
+            public ViewModel Content { get; set; }
+        }
         [HttpGet("{problemsetId}/view/{id}")]
-        public async Task<ActionResult<CustomResponse<ViewModel>>> View(
+        public async Task<ActionResult<CustomResponse<ViewResponse>>> View(
             [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemset problemset,
             [FromRoute] string id
         )
         {
-            var content = await problemset.GetProblemContent(id);
-            return new CustomResponse<ViewModel>(content);
+            var entryId = await problemset.GetProblemEntryId(id);
+            if(!entryId.HasValue)
+            {
+                ModelState.AddModelError("id", "The specified id does not exist in the problemset.");
+                return BadRequest(ModelState);
+            }
+
+            var content = await problemset.GetProblemContent(entryId.Value);
+            return new CustomResponse<ViewResponse>(new ViewResponse() {
+                EntryId = entryId.Value,
+                Content = content
+            });
+        }
+
+        public class SubmitRequest
+        {
+            public Guid EntryId { get; set; }
+            public string Token { get; set; }
+        }
+        [HttpPost("{problemsetId}/submit")]
+        public async Task<ActionResult<CustomResponse<Guid>>> SubmitAsync(
+            [FromServices] IObjectService objectService,
+            [FromServices] ApplicationDbContext dbContext,
+            [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemset problemset,
+            [FromBody] SubmitRequest request
+        )
+        {
+            var id = await problemset.Submit(request.EntryId, request.Token);
+            if(!id.HasValue)
+            {
+                ModelState.AddModelError("", "Invalid EntryId or Token.");
+                return BadRequest(ModelState);
+            }
+            return new CustomResponse<Guid>(id.Value);
         }
     }
 }

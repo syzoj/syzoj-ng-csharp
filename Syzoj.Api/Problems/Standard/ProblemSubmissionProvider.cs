@@ -14,5 +14,12 @@ namespace Syzoj.Api.Problems.Standard
 
         protected override Task<ProblemSubmission> GetObjectImpl(ApplicationDbContext dbContext, Model.ProblemSubmission model)
             => Task.FromResult(new ProblemSubmission(ServiceProvider, dbContext, model));
+        
+        internal Task<ProblemSubmission> CreateObject(ApplicationDbContext dbContext, Guid problemId, string Language, string Code)
+            => base.CreateObject<ProblemSubmissionProvider>(dbContext, new Model.ProblemSubmission() {
+                ProblemId = problemId,
+                Language = Language,
+                Code = Code
+            });
     }
 }

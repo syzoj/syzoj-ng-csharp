@@ -10,8 +10,9 @@ namespace Syzoj.Api.Problems.Standard.Model
     {
         public Guid ProblemId { get; set; }
         public virtual Problem Problem { get; set; }
-        public string Token { get; set; }
         public string ViewToken { get; set; }
+        public string Language { get; set; }
+        public string Code { get; set; }
 
         public static void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,10 +20,6 @@ namespace Syzoj.Api.Problems.Standard.Model
                 .HasOne(ps => ps.Problem)
                 .WithMany()
                 .HasForeignKey(ps => ps.ProblemId);
-
-            modelBuilder.Entity<ProblemSubmission>()
-                .HasIndex(ps => ps.Token)
-                .IsUnique();
         }
     }
 }

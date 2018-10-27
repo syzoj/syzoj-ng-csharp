@@ -56,30 +56,53 @@ namespace Syzoj.Api.Problemsets.Standard
             return problems;
         }
 
-        public async Task<ViewModel> GetProblemContent(Guid entryId)
+        private async Task<IProblemContract> GetProblem(Guid entryId)
         {
             var model = await DbContext.FindAsync<Model.ProblemsetProblem>(entryId);
             if(model.ProblemsetId != Model.Id)
                 return null;
             
             var problemContract = await objectService.GetObject(DbContext, model.ProblemContractId) as IProblemContract;
+            return problemContract;
+        }
+
+        public async Task<Guid?> GetProblemEntryId(string identifier)
+        {
+            var model = await DbContext.Set<ProblemsetProblem>()
+                .Where(ps => ps.ProblemsetId == Model.Id && ps.Identifier == identifier)
+                .FirstOrDefaultAsync();
+            if(model == null)
+                return null;
+            
+            return model.Id;
+        }
+
+        public async Task<ViewModel> GetProblemContent(Guid entryId)
+        {
+            var problemContract = await GetProblem(entryId);
             if(problemContract == null)
                 return null;
             
             return await problemContract.GetProblemContent();
         }
 
-        public async Task<ViewModel> GetProblemContent(string identifier)
+        public async Task<Guid?> Submit(Guid entryId, string token)
         {
-            var model = await DbContext.Set<ProblemsetProblem>()
-                .Where(ps => ps.ProblemsetId == Model.Id && ps.Identifier == identifier)
-                .FirstOrDefaultAsync();
-            
-            var problemContract = await objectService.GetObject(DbContext, model.ProblemContractId) as IProblemContract;
+            var problemContract = await GetProblem(entryId);
             if(problemContract == null)
                 return null;
             
-            return await problemContract.GetProblemContent();
+            var submission = await problemContract.ClaimSubmission(token);
+            if(submission == null)
+                return null;
+            
+            var model = new ProblemsetSubmission() {
+                Id = Guid.NewGuid(),
+                ProblemsetId = Model.Id,
+                SubmissionContractId = submission.Id
+            };
+            DbContext.Add(model);
+            return model.Id;
         }
     }
 }
