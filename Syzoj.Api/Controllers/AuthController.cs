@@ -101,5 +101,32 @@ namespace Syzoj.Api.Controllers
                 }),
             };
         }
+
+        public class InfoResponse
+        {
+            public bool IsLoggedIn { get; set; }
+            public string UserName { get; set; }
+        }
+        /// <summary>
+        /// Gets the current user info.
+        /// </summary>
+        [HttpGet("info")]
+        public async Task<ActionResult<CustomResponse<InfoResponse>>> Info()
+        {
+            if(!User.Identity.IsAuthenticated)
+            {
+                return new CustomResponse<InfoResponse>(new InfoResponse() {
+                    IsLoggedIn = false
+                });
+            }
+            else
+            {
+                var user = await userManager.GetUserAsync(User);
+                return new CustomResponse<InfoResponse>(new InfoResponse() {
+                    IsLoggedIn = true,
+                    UserName = user.UserName
+                });
+            }
+        }
     }
 }
