@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { request } from '../util'
 import ViewModel from '../components/ViewModel'
 import config from '../config'
+import Redirect from 'react-router-dom/Redirect'
 
 export default class ProblemView extends Component {
     constructor(props) {
@@ -16,11 +17,17 @@ export default class ProblemView extends Component {
         request(`/api/problemset-standard/${config.defaultProblemsetId}/submit`, 'POST', {
             EntryId: this.state.data.EntryId,
             Token: token
-        }).then(id => alert(id))
+        }).then(id => this.redirectToSubmission(id))
+    }
+
+    redirectToSubmission(id) {
+        this.setState({redirect: `/submission/${id}`})
     }
 
     render() {
-        if(this.state.loading) {
+        if(this.state.redirect) {
+            return <Redirect to={this.state.redirect} />
+        } else if(this.state.loading) {
             return <p>Loading</p>
         } else {
             return <ViewModel model={this.state.data.Content} onSubmit={(token) => this.submit(token)} />

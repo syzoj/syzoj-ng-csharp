@@ -25,7 +25,9 @@ namespace Syzoj.Api.Problems.Standard
                 Template = "problem-standard-submission",
                 Content = new {
                     SubmissionId = Model.Id,
-                    ViewToken = Model.ViewToken
+                    ViewToken = Model.ViewToken,
+                    Code = Model.Code,
+                    Language = Model.Language
                 }
             });
         }

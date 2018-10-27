@@ -95,7 +95,7 @@ namespace Syzoj.Api.Problemsets.Standard
             public string Token { get; set; }
         }
         [HttpPost("{problemsetId}/submit")]
-        public async Task<ActionResult<CustomResponse<Guid>>> SubmitAsync(
+        public async Task<ActionResult<CustomResponse<Guid>>> Submit(
             [FromServices] IObjectService objectService,
             [FromServices] ApplicationDbContext dbContext,
             [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemset problemset,
@@ -109,6 +109,27 @@ namespace Syzoj.Api.Problemsets.Standard
                 return BadRequest(ModelState);
             }
             return new CustomResponse<Guid>(id.Value);
+        }
+
+        public class SubmissionViewResponse
+        {
+            public ViewModel Content { get; set; }
+        }
+        [HttpGet("{problemsetId}/submission/{entryId}/view")]
+        public async Task<ActionResult<CustomResponse<SubmissionViewResponse>>> SubmissionView(
+            [FromRoute] [BindRequired] [ModelBinder(Name = "problemsetId")] Problemset problemset,
+            [FromRoute] [BindRequired] Guid entryId
+        )
+        {
+            var content = await problemset.GetSubmissionContent(entryId);
+            if(content == null)
+            {
+                ModelState.AddModelError("entryId", "Submission with specified entryId does not exist.");
+                return BadRequest(ModelState);
+            }
+            return new CustomResponse<SubmissionViewResponse>(new SubmissionViewResponse() {
+                Content = content
+            });
         }
     }
 }

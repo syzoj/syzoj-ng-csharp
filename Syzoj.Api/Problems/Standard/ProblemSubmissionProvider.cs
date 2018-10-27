@@ -19,7 +19,8 @@ namespace Syzoj.Api.Problems.Standard
             => base.CreateObject<ProblemSubmissionProvider>(dbContext, new Model.ProblemSubmission() {
                 ProblemId = problemId,
                 Language = Language,
-                Code = Code
+                Code = Code,
+                ViewToken = Utils.GenerateToken(32)
             });
     }
 }

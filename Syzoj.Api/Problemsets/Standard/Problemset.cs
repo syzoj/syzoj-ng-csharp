@@ -104,5 +104,21 @@ namespace Syzoj.Api.Problemsets.Standard
             DbContext.Add(model);
             return model.Id;
         }
+
+        public async Task<ViewModel> GetSubmissionContent(Guid entryId)
+        {
+            var model = await DbContext.FindAsync<ProblemsetSubmission>(entryId);
+            if(model == null)
+                return null;
+
+            if(model.ProblemsetId != Model.Id)
+                return null;
+            
+            var contract = await objectService.GetObject(DbContext, model.SubmissionContractId) as IProblemSubmission;
+            if(contract == null)
+                return null;
+            
+            return await contract.GetSubmissionContent();
+        }
     }
 }
