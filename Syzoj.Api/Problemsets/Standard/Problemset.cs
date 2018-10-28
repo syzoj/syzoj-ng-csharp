@@ -102,6 +102,7 @@ namespace Syzoj.Api.Problemsets.Standard
                 SubmissionContractId = submission.Id
             };
             DbContext.Add(model);
+            await submission.PerformJudge();
             return model.Id;
         }
 

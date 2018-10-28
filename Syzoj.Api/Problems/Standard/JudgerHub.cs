@@ -26,8 +26,12 @@ namespace Syzoj.Api.Problems.Standard
             this.serviceProvider = serviceProvider;
         }
 
-        public Task Connect(Guid id, string token)
+        public Task<bool> Connect(string _id, string token)
         {
+            Guid id;
+            if(!Guid.TryParse(_id, out id))
+                return Task.FromResult(false);
+
             var data = (HubData) base.Context.Items["data"];
             return data.Connect(id, token);
         }
@@ -54,12 +58,13 @@ namespace Syzoj.Api.Problems.Standard
             private readonly ApplicationDbContext dbContext;
             private readonly IServiceProvider serviceProvider;
             private readonly IHubContext<JudgerHub, IJudger> hubContext;
+            private readonly ILogger<JudgerHub> logger;
             private readonly string connectionId;
 
             private bool isLoggedIn;
             private IModel rmqModel;
             private Guid judgerId;
-            private IDictionary<Guid, JudgeSession> sessions;
+            private IDictionary<Guid, JudgeSession> sessions = new Dictionary<Guid, JudgeSession>();
 
             public HubData(IServiceProvider serviceProvider, string connectionId)
             {
@@ -70,18 +75,21 @@ namespace Syzoj.Api.Problems.Standard
                 this.redis = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
                 this.dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
                 this.hubContext = serviceProvider.GetRequiredService<IHubContext<JudgerHub, IJudger>>();
+                this.logger = serviceProvider.GetRequiredService<ILogger<JudgerHub>>();
             }
 
             public async Task<bool> Connect(Guid id, string token)
             {
                 if(isLoggedIn)
                 {
+                    logger.LogWarning("{connectionId}: Rejecting connection request because it is already logged in as {judgerId}", connectionId, judgerId);
                     return false;
                 }
 
                 var model = await dbContext.FindAsync<Model.Judger>(id);
                 if(model == null || model.Token != token)
                 {
+                    logger.LogWarning("{connectionId}: Rejecting connection request because judger id or token is incorrect", connectionId);
                     return false;
                 }
 
@@ -89,8 +97,11 @@ namespace Syzoj.Api.Problems.Standard
                 var result = await redis.GetDatabase().StringSetAsync(key, RedisValue.EmptyString, TimeSpan.FromMinutes(5), When.NotExists);
                 if(!result)
                 {
+                    logger.LogWarning("{connectionId}: Rejecting connection request because {judgerId} is already logged in elsewhere", connectionId, id);
                     return false;
                 }
+                judgerId = id;
+                isLoggedIn = true;
 
                 rmqModel = rmqConnection.CreateModel();
                 rmqModel.QueueDeclare("standard-judge", true, false, false, new Dictionary<string, object>() {
@@ -98,8 +109,7 @@ namespace Syzoj.Api.Problems.Standard
                 });
                 rmqModel.BasicQos(0, 3, false);
                 rmqModel.BasicConsume(queue: "standard-judge", consumer: new QueueConsumer(this), autoAck: false);
-                isLoggedIn = true;
-                judgerId = id;
+                logger.LogDebug("Judger {Id} connected successfully", id);
                 return true;
             }
 
@@ -110,9 +120,16 @@ namespace Syzoj.Api.Problems.Standard
 
             public async Task OnDisconnectedAsync()
             {
-                rmqModel.Close();
-                var key = $"problem:standard:judger:{judgerId}";
-                await redis.GetDatabase().KeyDeleteAsync(key);
+                if(isLoggedIn)
+                {
+                    foreach(var kv in sessions)
+                    {
+                        await kv.Value.Abort();
+                    }
+                    rmqModel.Close();
+                    var key = $"problem:standard:judger:{judgerId}";
+                    await redis.GetDatabase().KeyDeleteAsync(key);
+                }
             }
 
             public Task OnConnectedAsync()
@@ -133,6 +150,7 @@ namespace Syzoj.Api.Problems.Standard
                     await base.HandleBasicDeliver(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body);
                     
                     var submissionId = new Guid(body);
+                    hubData.logger.LogDebug("Judger {judgerId} received task {submissionId}", hubData.judgerId, submissionId);
                     var database = hubData.redis.GetDatabase();
                     var status = await database.StringGetAsync($"problem:standard:submission-status:{submissionId}:status");
                     if(status == 2)
@@ -141,14 +159,29 @@ namespace Syzoj.Api.Problems.Standard
                             $"problem:standard:submission-status:{submissionId}:status",
                             $"problem:standard:submission-status:{submissionId}:data"
                         });
+                        hubData.logger.LogInformation("Skipping aborted submission {submissionId}", submissionId);
                         hubData.rmqModel.BasicNack(deliveryTag, false, false);
                         return;
                     }
+                    else if(status.IsNull)
+                    {
+                        hubData.logger.LogWarning("Skipping submission without status {submissionId}", submissionId);
+                        hubData.rmqModel.BasicNack(deliveryTag, false, false);
+                    }
                     
                     var sessionId = Guid.NewGuid();
-                    var session = new JudgeSession(hubData, submissionId, sessionId, deliveryTag);
+                    var session = new JudgeSession(hubData, sessionId, submissionId, deliveryTag);
                     hubData.sessions.Add(sessionId, session);
-                    await session.Start();
+                    try
+                    {
+                        await session.Start();
+                    }
+                    catch(Exception e)
+                    {
+                        hubData.logger.LogError(e, "Failed to start judge session");
+                        hubData.rmqModel.BasicNack(deliveryTag, false, true);
+                        throw;
+                    }
                 }
             }
 
@@ -176,12 +209,30 @@ namespace Syzoj.Api.Problems.Standard
                     var database = hubData.redis.GetDatabase();
                     await database.StringSetAsync($"problem:standard:submission-status:{submissionId}:status", 1);
 
-                    var _testData = await hubData.dbContext.Set<Model.ProblemSubmission>()
-                        .Where(ps => ps.Id == submissionId)
-                        .Select(ps => ps.Problem._TestData)
-                        .FirstOrDefaultAsync();
+                    var submissionModel = await hubData.dbContext.FindAsync<Model.ProblemSubmission>(submissionId);
+                    if(submissionModel == null)
+                    {
+                        logger.LogWarning("Submission {submissionId} does not have corresponding database entry", submissionId);
+                        hubData.rmqModel.BasicNack(deliveryTag, false, false);
+                        return;
+                    }
+
+                    var problemModel = await hubData.dbContext.FindAsync<Model.Problem>(submissionModel.ProblemId);
+                    var _testData = problemModel._TestData;
+                    if(_testData == null)
+                    {
+                        logger.LogWarning("Problem {problemId} does not have testdata", problemModel.Id);
+                        hubData.rmqModel.BasicNack(deliveryTag, false, false);
+                        return;
+                    }
+
                     var testData = MessagePackSerializer.Deserialize<Model.StandardTestData>(_testData);
                     await hubData.GetClient().OnSubmission(sessionId, testData);
+                }
+
+                public Task Abort()
+                {
+                    return Task.CompletedTask;
                 }
             }
         }

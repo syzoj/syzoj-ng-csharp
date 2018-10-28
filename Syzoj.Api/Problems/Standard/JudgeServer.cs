@@ -27,6 +27,7 @@ namespace Syzoj.Api.Problems.Standard
             this.redis = redis;
             this.logger = logger;
             this.scopeFactory = scopeFactory;
+            this.rmqModel = rmqConn.CreateModel();
         }
 
         public async Task SubmitJudge(Guid submissionId)

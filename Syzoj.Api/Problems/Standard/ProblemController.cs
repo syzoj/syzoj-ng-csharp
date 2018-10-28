@@ -68,5 +68,29 @@ namespace Syzoj.Api.Problems.Standard
                 Token = token
             });
         }
+
+        public class CreateJudgerResponse
+        {
+            public Guid Id { get; set; }
+            public string Token { get; set; }
+        }
+        [HttpPost("create-judger")]
+        public async Task<ActionResult<CustomResponse<CreateJudgerResponse>>> CreateJudger(
+            [FromServices] ApplicationDbContext dbContext
+        )
+        {
+            var id = Guid.NewGuid();
+            var token = Utils.GenerateToken(32);
+            var model = new Model.Judger()
+            {
+                Id = id,
+                Token = token
+            };
+            dbContext.Add(model);
+            return new CustomResponse<CreateJudgerResponse>(new CreateJudgerResponse() {
+                Id = id,
+                Token = token
+            });
+        }
     }
 }
