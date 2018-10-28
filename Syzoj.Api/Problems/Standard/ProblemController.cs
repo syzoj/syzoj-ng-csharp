@@ -49,7 +49,7 @@ namespace Syzoj.Api.Problems.Standard
             logger.LogDebug(Newtonsoft.Json.JsonConvert.SerializeObject(request));
 
             var database = redis.GetDatabase();
-            var key = $"problem:standard:submission:{token}";
+            var key = $"problem:standard:submission-temp:{token}";
             await Task.WhenAll(
                 database.HashSetAsync(
                     key,

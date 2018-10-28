@@ -8,5 +8,6 @@ namespace Syzoj.Api.Interfaces
         Task<ViewModel> GetSubmissionContent();
         Task<IProblem> GetProblem();
         Task RequestCompleteNotification(ISubmissionCompleteCallback callback);
+        Task PerformJudge();
     }
 }

@@ -35,5 +35,10 @@ namespace Syzoj.Api
             rng.GetBytes(data);
             return String.Concat(data.Select(b => b.ToString("X2")));
         }
+
+        public static bool IsTokenValid(string token)
+        {
+            return token.All(c => (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F'));
+        }
     }
 }

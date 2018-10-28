@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Syzoj.Api.Data;
 using Syzoj.Api.Interfaces;
 using Syzoj.Api.Object;
@@ -30,6 +31,13 @@ namespace Syzoj.Api.Problems.Standard
                     Language = Model.Language
                 }
             });
+        }
+
+        public async Task PerformJudge()
+        {
+            Model.Status = 1;
+            var judgeServer = ServiceProvider.GetRequiredService<JudgeServer>();
+            await judgeServer.SubmitJudge(Model.Id);
         }
 
         public Task RequestCompleteNotification(ISubmissionCompleteCallback callback)

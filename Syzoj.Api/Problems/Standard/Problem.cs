@@ -49,10 +49,13 @@ namespace Syzoj.Api.Problems.Standard
 
         public async Task<IProblemSubmission> ClaimSubmission(string token)
         {
+            if(!Utils.IsTokenValid(token))
+                return null;
+
             var redis = ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
 
             var transaction = redis.GetDatabase().CreateTransaction();
-            var key = $"problem:standard:submission:{token}";
+            var key = $"problem:standard:submission-temp:{token}";
             var entriesTask = transaction.HashGetAllAsync(key);
             transaction.KeyDeleteAsync(key);
             await transaction.ExecuteAsync();

@@ -21,6 +21,7 @@ using Syzoj.Api.Problems;
 using Syzoj.Api.Mvc;
 using System.Linq;
 using Syzoj.Api.Object;
+using Docker.DotNet;
 
 namespace Syzoj.Api
 {
@@ -138,7 +139,7 @@ namespace Syzoj.Api
                 }
             });
 
-            services.AddSingleton<Problems.Standard.StandardProblemJudger>();
+            services.AddSingleton<Problems.Standard.JudgeServer>();
 
             services.AddSingleton<IObjectService, ObjectService>();
             services.AddSingleton<Problems.Standard.ProblemProvider>();
@@ -168,9 +169,6 @@ namespace Syzoj.Api
 
             app.UseSession();
             app.UseAuthentication();
-            app.UseSignalR(route => {
-                route.MapHub<Problems.Standard.StandardJudgeHub>("/standard-judge");
-            });
             app.UseMvc();
 
             app.UseSpa(spa =>

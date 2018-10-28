@@ -13,6 +13,8 @@ namespace Syzoj.Api.Problems.Standard.Model
         public string ViewToken { get; set; }
         public string Language { get; set; }
         public string Code { get; set; }
+        // 0 is not judged, 1 is waiting, 2 is completed
+        public int Status { get; set; }
 
         public static void OnModelCreating(ModelBuilder modelBuilder)
         {
