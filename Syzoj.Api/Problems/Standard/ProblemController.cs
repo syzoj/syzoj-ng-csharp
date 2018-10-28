@@ -14,15 +14,20 @@ namespace Syzoj.Api.Problems.Standard
     [ApiController]
     public class ProblemController : CustomControllerBase
     {
+        public class CreateProblemRequest
+        {
+            public Model.ProblemStatement Statement { get; set; }
+            public Model.StandardTestData TestData { get; set; }
+        }
         [HttpPost("create")]
         public async Task<ActionResult<CustomResponse<Guid>>> CreateProblem(
             [FromServices] IObjectService objectService,
             [FromServices] ProblemProvider problemProvider,
             [FromServices] ApplicationDbContext dbContext,
-            [FromBody] Model.ProblemStatement statement
+            [FromBody] CreateProblemRequest request
         )
         {
-            var problem = await problemProvider.CreateObject(dbContext, statement);
+            var problem = await problemProvider.CreateObject(dbContext, request.Statement, request.TestData);
             return new CustomResponse<Guid>(problem.Id);
         }
 

@@ -16,9 +16,10 @@ namespace Syzoj.Api.Problems.Standard
         protected override Task<Problem> GetObjectImpl(ApplicationDbContext dbContext, Model.Problem model)
             => Task.FromResult(new Problem(ServiceProvider, dbContext, model));
         
-        public Task<Problem> CreateObject(ApplicationDbContext dbContext, Model.ProblemStatement Statement)
+        public Task<Problem> CreateObject(ApplicationDbContext dbContext, Model.ProblemStatement Statement, Model.StandardTestData TestData)
             => base.CreateObject<ProblemProvider>(dbContext, new Model.Problem() {
-                _Statement = MessagePackSerializer.Serialize(Statement)
+                _Statement = MessagePackSerializer.Serialize(Statement),
+                _TestData = MessagePackSerializer.Serialize(TestData)
             });
     }
 }
